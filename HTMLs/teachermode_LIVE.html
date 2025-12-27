@@ -177,7 +177,15 @@
     <div id="status-bar">
         <div><span id="s-light" class="status-light"></span> <span id="s-text"
                 style="letter-spacing: 2px;">VINTAGE_LINK_OFFLINE</span></div>
-        <div style="font-size: 0.7rem; opacity: 0.7;">TEACHER MODE // v59.3</div>
+        <div style="display:flex; gap:20px; align-items:center;">
+            <a href="projector.html" target="_blank"
+                style="color:var(--accent); font-size:0.6rem; text-decoration:none; border:1px solid var(--accent); padding:5px 10px; border-radius:3px;">ENTER
+                PROJECTOR MODE</a>
+            <button onclick="toggleLibrary()"
+                style="background:var(--accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; border-radius:3px; cursor:pointer; font-weight:bold; letter-spacing:1px;">📚
+                OPEN COMMUNITY HUB</button>
+            <div style="font-size: 0.7rem; opacity: 0.7;">TEACHER MODE // v62.5</div>
+        </div>
     </div>
     <h1 style="margin: 0 40px 30px 40px;">COMMAND CENTER // MISSION CONTROL</h1>
     <div class="grid" style="grid-template-columns: 1fr 1.5fr 1fr; padding: 0 40px;">
@@ -232,6 +240,21 @@
             </div>
         </div>
     </div>
+
+    <div id="library-hub"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:3000; padding:60px; overflow-y:auto;">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:20px; margin-bottom:40px;">
+            <h1 style="margin:0; color:var(--accent); letter-spacing:5px; border-bottom:none;">COMMUNITY ARCHIVE HUB
+            </h1>
+            <button onclick="toggleLibrary()"
+                style="background:transparent; border:1px solid #666; color:#666; padding:10px 20px; cursor:pointer; font-family:inherit;">[CLOSE_HUB]</button>
+        </div>
+        <div id="hub-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+            <div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5; color:#fff;">LOADING MISSION
+                CATALOG...</div>
+        </div>
+    </div>
     <script>
         let allProgress = [];
         const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
@@ -248,6 +271,45 @@
             c.scrollTop = c.scrollHeight;
         }
         function setStatus(s, t) { document.getElementById('s-light').className = "status-light " + s; document.getElementById('s-text').innerText = t; }
+
+        // COMMUNITY HUB LOGIC
+        const LIB_URL = "https://raw.githubusercontent.com/dwaugh-edsim/projectimages/main/capsule-library/index.json";
+        function toggleLibrary() {
+            const h = document.getElementById('library-hub');
+            const show = h.style.display === 'none';
+            h.style.display = show ? 'block' : 'none';
+            if (show) fetchLibrary();
+        }
+        async function fetchLibrary() {
+            try {
+                const res = await fetch(LIB_URL);
+                if (!res.ok) throw new Error("Catalog not found.");
+                const j = await res.json(); renderLibrary(j.capsules);
+            } catch (e) { document.getElementById('hub-grid').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red; padding:100px;">CONNECTION_ERROR: Failed to fetch Community Archive.</div>`; }
+        }
+        function renderLibrary(caps) {
+            let h = "";
+            caps.forEach(c => {
+                h += `<div class="panel" style="border-top-color:#666;">
+                    <div style="height:150px; background-image:url('${c.thumb}'); background-size:cover; background-position:center; margin-bottom:15px; border-radius:4px; border:1px solid #333;"></div>
+                    <h4 style="margin:0; letter-spacing:1px; font-size:0.85rem;">${c.title}</h4>
+                    <div style="font-size:0.6rem; color:#888; margin-bottom:15px; text-transform:uppercase;">AUTHOR: ${c.author}</div>
+                    <p style="font-size:0.7rem; height:45px; overflow:hidden; opacity:0.7; line-height:1.4;">${c.description}</p>
+                    <button class="btn" onclick="importMission('${c.downloadUrl}', '${c.id}', '${c.title}')" style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px; font-size:0.6rem; width:100%; margin-top:10px;">IMPORT TO ARCHIVE</button>
+                </div>`;
+            });
+            document.getElementById('hub-grid').innerHTML = h || "<div style='grid-column:1/-1; text-align:center; opacity:0.5; padding:100px; color:#fff;'>NO MISSIONS IN CATALOG.</div>";
+        }
+        async function importMission(url, id, name) {
+            log(`Syncing Remote Capsule [${id}]...`);
+            try {
+                const res = await fetch(url); const payload = await res.json();
+                const res2 = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: PIN, id: id, name: name, payload: payload }) });
+                const j = await res2.json();
+                if (j.status === "success") { log(`Remote Capsule [${id}] committed to local record.`, "success"); fetchMissions(); alert(`Mission [${name}] successfully imported!`); }
+                else log(j.message, "error");
+            } catch (e) { log(`Import failed: ${e.message}`, "error"); }
+        }
 
         async function fetchMissions() {
             log("Pinging Archive Server...");
@@ -289,9 +351,14 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    document.getElementById('m-id').value = data.missionId || "";
-                    document.getElementById('m-name').value = (data.metadata && data.metadata.title) ? data.metadata.title : "";
+                    // SCHEMA v1.0 SUPPORT
+                    const id = (data.metadata && data.metadata.id) ? data.metadata.id : data.missionId || "";
+                    const name = (data.metadata && data.metadata.title) ? data.metadata.title : (data.meta && data.meta.title) ? data.meta.title : "";
+
+                    document.getElementById('m-id').value = id;
+                    document.getElementById('m-name').value = name;
                     document.getElementById('json-input').value = e.target.result;
+
                     log(`Capsule [${file.name}] loaded into staging.`, "success");
                     document.getElementById('upload-zone').style.borderColor = "var(--success)";
                 } catch (ex) { log("INVALID CAPSULE: Not a valid .blob/JSON file.", "error"); }
@@ -329,20 +396,61 @@
             const filtered = filter === "ALL" ? allProgress : allProgress.filter(p => p.class === filter);
             let h = "";
             filtered.forEach(p => {
-                const missions = Object.keys(p.missionData);
+                const missions = Object.keys(p.missionData || {});
                 missions.forEach(mid => {
                     const st = p.missionData[mid]; if (!st) return;
                     const decs = st.dec ? Object.keys(st.dec).length : 0;
                     const pre = st.preDone ? "✓" : "×";
-                    h += `<div style="padding:10px; border-bottom:1px solid #eee; font-size:0.7rem;">
-                            <div style="display:flex; justify-content:space-between;">
+                    const feedback = st.aiFeedback ? "✓ AI FEEDBACK READY" : "";
+                    h += `<div style="padding:15px; border-bottom:1px solid #eee; font-size:0.75rem; background:${st.aiFeedback ? '#f9fff9' : 'none'}">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                                 <strong>${p.name}</strong> <span style="color:#888;">${p.class}</span>
                             </div>
-                            <div style="color:#666; margin-top:5px;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre}</div>
+                            <div style="color:#666;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre}</div>
+                            <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+                                <button class="btn" style="padding:5px 10px; font-size:0.55rem; width:auto; background:#444;" onclick="runAI('${p.id}', '${mid}')">ANALYZE WITH AI</button>
+                                <span style="font-size:0.55rem; color:var(--success); font-weight:bold;">${feedback}</span>
+                            </div>
                           </div>`;
                 });
             });
             document.getElementById('progress-list').innerHTML = h || "<p style='color:#ccc; padding:20px;'>No student data detected.</p>";
+        }
+
+        async function runAI(uid, mid) {
+            log(`Initiating AI Analysis for Archive [${uid}]...`);
+            // Find student data
+            const student = allProgress.find(p => p.id === uid); if (!student) return log("User not found", "error");
+            const mData = student.missionData[mid]; if (!mData) return log("Mission data not found", "error");
+
+            try {
+                const res = await fetch(URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'generate_ai_feedback',
+                        pin: PIN,
+                        rationales: mData.rat,
+                        context: { title: mid }
+                    })
+                });
+                const j = await res.json();
+                if (j.status === "success") {
+                    log("AI Feedback generated successfully.", "success");
+                    // Save feedback back to student state
+                    mData.aiFeedback = j.feedback;
+                    await fetch(URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'save_state',
+                            id: uid,
+                            missionId: mid,
+                            state: mData
+                        })
+                    });
+                    log("Feedback committed to student record.", "success");
+                    fetchProgress();
+                } else log(j.message, "error");
+            } catch (e) { log(e.message, "error"); }
         }
 
         async function deleteMission(id) {

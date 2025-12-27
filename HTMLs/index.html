@@ -134,11 +134,14 @@
             border-right: 1px solid #ddd;
         }
 
-        .exhibit-left img {
+        .exhibit-left img,
+        .exhibit-left iframe,
+        .exhibit-left embed {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+            border: 0;
         }
 
         .img-label {
@@ -338,22 +341,23 @@
         }
 
         #mission-title-big {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             text-transform: uppercase;
-            letter-spacing: 12px;
+            letter-spacing: 5px;
             font-weight: bold;
             color: #fff;
             text-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             text-align: center;
-            line-height: 1.1;
+            line-height: 1.2;
+            max-width: 800px;
         }
 
         #ref-title {
             color: var(--accent);
-            font-size: 1.2rem;
+            font-size: 1rem;
             text-transform: uppercase;
-            letter-spacing: 6px;
+            letter-spacing: 4px;
             margin-bottom: 30px;
             opacity: 0.9;
             font-weight: bold;
@@ -524,10 +528,18 @@
                     <p
                         style="font-size:0.6rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; text-align:center;">
                         Manual Capsule Injection</p>
-                    <input id="mission-code" placeholder="MISSION CODE"
-                        style="text-align:center; letter-spacing:5px;"><button class="btn"
-                        style="background:#fff; color:#000; width:100%;" onclick="joinMission()">INITIALIZE
-                        MISSION</button>
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <input id="mission-code" placeholder="MISSION CODE"
+                            style="flex:1; text-align:center; letter-spacing:5px; margin:0;">
+                        <button class="btn" style="background:#fff; color:#000; width:auto; padding:0 20px;"
+                            onclick="joinMission()">JOIN</button>
+                    </div>
+                    <div style="border:1px dashed #444; padding:10px; text-align:center; cursor:pointer;"
+                        onclick="document.getElementById('blob-input').click()">
+                        <span style="font-size:0.7rem; color:#888;">OR DROP .BLOB FILE HERE</span>
+                        <input type="file" id="blob-input" accept=".blob" style="display:none"
+                            onchange="ingest(this.files[0])">
+                    </div>
                 </div>
             </div>
 
@@ -564,7 +576,10 @@
         <div id="card-container" class="card-container"></div>
     </main>
     <footer class="footer">
-        <div id="f-left">SITUATION ROOM PROTOCOL | v60.4</div>
+        <div id="f-left">SITUATION ROOM PROTOCOL | v62.2</div>
+        <div id="f-outcomes"
+            style="font-size:0.55rem; opacity:0.5; flex:1; text-align:center; text-transform:uppercase; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+        </div>
         <div id="f-right">CLASSROOM SIM ARCHITECT | OPEN-SOURCE LICENSE</div>
     </footer>
 
@@ -604,47 +619,72 @@
 
         async function joinMission() { const code = document.getElementById('mission-code').value.trim().toUpperCase(); if (code) launch(code); }
 
+        function ingest(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const j = JSON.parse(e.target.result);
+                    processData(j);
+                } catch (ex) { alert("INVALID CAPSULE DATA."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function processData(j, idOverride) {
+            let data = j.data || j; // Handle wrapped or raw
+            // SCHEMA NORMALIZER v60.5
+            if (!data.metadata && data.meta) data.metadata = data.meta;
+            if (!data.metadata) data.metadata = {};
+            if (!data.metadata.id && idOverride) data.metadata.id = idOverride;
+            if (!data.metadata.id && data.missionId) data.metadata.id = data.missionId;
+
+            if (data.exhibits && !data.slides) data.slides = data.exhibits;
+            if (!data.reflections) data.reflections = { pre: [], post: [], pre_narrative: "MISSION BRIEFING DATA UNAVAILABLE.", post_narrative: "MISSION DEBRIEF DATA UNAVAILABLE." };
+
+            if (!data.theme) data.theme = {};
+            if (data.theme.primaryColor && !data.theme.accent) data.theme.accent = data.theme.primaryColor;
+            if (!data.theme.accent) data.theme.accent = "#00ffcc";
+            if (data.theme.font && !data.theme.fontH) data.theme.fontH = data.theme.font;
+            if (!data.theme.fontP) data.theme.fontP = "Georgia, serif";
+            if (!data.theme.fontH) data.theme.fontH = "Courier New, monospace";
+
+            if (data.slides) {
+                data.slides.forEach(s => {
+                    if (!s.shortTitle && s.title) s.shortTitle = s.title;
+                    if (!s.longTitle && s.shortTitle) s.longTitle = s.shortTitle;
+                    if (Array.isArray(s.tabs)) {
+                        const newTabs = {};
+                        s.tabs.forEach((t, idx) => {
+                            const labels = ['primary', 'legal', 'intel'];
+                            const key = t.label ? t.label.split(":")[0].trim().toLowerCase() : labels[idx] || `tab_${idx}`;
+                            newTabs[key] = { body: t.content || t.body, image: t.imageURL || t.image, credit: t.credit || 'FIELD RECORD' };
+                        });
+                        s.tabs = newTabs;
+                    }
+                });
+            }
+
+            window.DATA = data;
+            currentMission = data.metadata.id || idOverride || "LOCAL_INJECT";
+            user.state = user.missions[currentMission] || { last: 0, ans: {}, dec: {}, rat: {} };
+            applyTheme(); initParticles(); renderGlossary();
+            if (!user.state.preDone) startRef("pre"); else { document.getElementById('splash').style.display = 'none'; init(); }
+        }
+
         async function launch(id) {
             document.getElementById('loading-screen').style.display = 'flex';
             try {
                 const r = await fetch(API_URL + "?action=fetch_content&id=" + id); const j = await r.json();
                 if (j.status === "error") throw new Error(j.message);
-
-                // SCHEMA NORMALIZER v60.4
-                let data = j.data;
-                if (data.exhibits && !data.slides) data.slides = data.exhibits;
-                if (data.meta && !data.metadata) data.metadata = data.meta;
-                if (data.theme && data.theme.primaryColor && !data.theme.accent) data.theme.accent = data.theme.primaryColor;
-                if (data.theme && data.theme.font && !data.theme.fontH) data.theme.fontH = data.theme.font;
-
-                // TAB & TITLE NORMALIZER
-                if (data.slides) {
-                    data.slides.forEach(s => {
-                        if (!s.shortTitle && s.title) s.shortTitle = s.title;
-                        if (!s.longTitle && s.shortTitle) s.longTitle = s.shortTitle;
-                        if (Array.isArray(s.tabs)) {
-                            const newTabs = {};
-                            s.tabs.forEach((t, idx) => {
-                                const labels = ['primary', 'legal', 'intel'];
-                                const key = t.label ? t.label.split(":")[0].trim().toLowerCase() : labels[idx] || `tab_${idx}`;
-                                newTabs[key] = { body: t.content || t.body, image: t.imageURL || t.image, credit: t.credit || 'FIELD RECORD' };
-                            });
-                            s.tabs = newTabs;
-                        }
-                    });
-                }
-
-                window.DATA = data; currentMission = id; user.state = user.missions[id] || { last: 0, ans: {}, dec: {}, rat: {} };
-                applyTheme(); initParticles(); renderGlossary();
+                processData(j, id);
                 document.getElementById('loading-screen').style.display = 'none';
-                if (!user.state.preDone) startRef("pre"); else { document.getElementById('splash').style.display = 'none'; init(); }
             } catch (e) { console.error(e); alert(e.message); document.getElementById('loading-screen').style.display = 'none'; }
         }
 
         function applyTheme() {
             const t = window.DATA.theme; document.documentElement.style.setProperty('--accent', t.accent);
-            document.documentElement.style.setProperty('--font-p', t.fontP || 'Georgia, serif');
-            document.documentElement.style.setProperty('--font-h', t.fontH || 'Courier New, monospace');
+            document.documentElement.style.setProperty('--font-p', t.fontP); document.documentElement.style.setProperty('--font-h', t.fontH);
             if (t.splashHeroURL) {
                 const s = document.getElementById('splash'); s.style.backgroundImage = `url('${t.splashHeroURL}')`;
                 s.style.backgroundSize = "cover"; s.style.backgroundPosition = "center";
@@ -652,6 +692,9 @@
             const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
             document.getElementById('f-left').innerText = `${m.title || currentMission} | ${m.author || 'FIELD COMMAND'}`;
+
+            const outcomes = m.learningOutcomes || m.outcomes || [];
+            document.getElementById('f-outcomes').innerText = outcomes.length > 0 ? "OBJECTIVES: " + outcomes.join(" | ") : "";
         }
 
         function renderGlossary() {
@@ -670,6 +713,7 @@
 
         function startRef(m) { refMode = m; refIdx = 0; document.getElementById('lobby-step').style.display = 'none'; document.getElementById('ref-modal').style.display = 'flex'; renderRef(); }
         function renderRef() {
+            if (refMode === 'epilogue') { renderEpilogue(); return; }
             const qs = window.DATA.reflections[refMode] || [];
             const narrative = window.DATA.reflections[refMode + "_narrative"] || "NO BRIEFING DATA RECORDED.";
             const mTitle = (window.DATA.metadata && window.DATA.metadata.title) ? window.DATA.metadata.title : currentMission;
@@ -702,6 +746,25 @@
             document.getElementById('ref-a').value = (user.state.ans && user.state.ans[refMode + "_" + refIdx]) || "";
         }
 
+        function renderEpilogue() {
+            const epi = window.DATA.epilogue || {};
+            const whatIfs = epi.whatIf || [];
+            document.getElementById('ref-title').innerText = 'HISTORICAL COUNTERFACTUALS';
+            document.getElementById('ref-q').style.display = 'none';
+            document.getElementById('ref-a').style.display = 'none';
+            document.getElementById('debrief-panel').style.display = 'none';
+            document.getElementById('ref-btn').innerText = 'FINALIZE MISSION';
+
+            let h = `<div style="margin-bottom:20px; opacity:0.8; font-style:italic; font-size:0.9rem;">Historical outcomes are often balanced on a knife-edge. Review these counterfactual assessments based on divergent decisions:</div>`;
+            whatIfs.forEach(wi => {
+                h += `<div style="background:rgba(210,180,140,0.05); border:1px solid rgba(210,180,140,0.1); padding:20px; margin-bottom:15px; border-radius:4px;">
+                        <h4 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:1px; text-transform:uppercase;">${wi.scenario}</h4>
+                        <div style="font-family:var(--font-p); font-size:0.95rem; line-height:1.5; opacity:0.9;">${parseMD(wi.outcome)}</div>
+                      </div>`;
+            });
+            document.getElementById('ref-narrative').innerHTML = h;
+        }
+
         function renderDebrief() {
             const d = document.getElementById('debrief-panel'); d.style.display = 'block';
             let h = `<h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">INTERNAL LOG SUMMARY</h3>`;
@@ -711,9 +774,19 @@
 
         async function nextRef() {
             if (refMode === 'post') {
-                const a = document.getElementById('ref-a').value; if (!a) return alert("Response required.");
-                user.state.ans[refMode + "_" + refIdx] = a; refIdx++;
-                if (refIdx >= window.DATA.reflections[refMode].length) { alert("Log finalized."); } else { renderRef(); save(); }
+                const qs = window.DATA.reflections[refMode] || [];
+                const a = document.getElementById('ref-a').value;
+                if (qs.length > 0 && refIdx < qs.length) {
+                    if (!a) return alert("Response required.");
+                    user.state.ans[refMode + "_" + refIdx] = a;
+                }
+                refIdx++;
+                if (refIdx < qs.length) { renderRef(); save(); }
+                else if (window.DATA.epilogue && window.DATA.epilogue.whatIf && window.DATA.epilogue.whatIf.length > 0) { startRef('epilogue'); }
+                else { alert("Log finalized."); document.getElementById('ref-modal').style.display = 'none'; document.getElementById('lobby-step').style.display = 'block'; save(); }
+            } else if (refMode === 'epilogue') {
+                alert("Mission Complete. Log Archived.");
+                document.getElementById('ref-modal').style.display = 'none'; document.getElementById('lobby-step').style.display = 'block';
             } else {
                 user.state.preDone = true; document.getElementById('splash').style.display = 'none'; save(); init();
             }
@@ -742,7 +815,7 @@
                 b.className = "btn" + (isLocked ? " locked" : "");
                 b.style.marginBottom = "10px"; b.style.width = "100%"; b.style.textAlign = "left"; b.style.padding = "15px";
                 if (user.state.dec && user.state.dec[i]) b.style.borderLeft = "5px solid var(--accent)";
-                b.innerHTML = `<span style="opacity:0.4; font-size:0.6em; text-transform:uppercase; letter-spacing:1px;">EXHIBIT 0${i + 1}</span><br>${s.shortTitle || 'UNTITLED'}`;
+                b.innerHTML = `<span style="opacity:0.4; font-size:0.6em; text-transform:uppercase; letter-spacing:1px;">EXHIBIT 0${i + 1}</span><br><span style="white-space: normal; line-height: 1.3; display: block; margin-top: 5px;">${s.shortTitle || 'UNTITLED'}</span>`;
                 if (!isLocked) b.onclick = () => go(i); c.appendChild(b); b.id = `btn-${i}`;
             });
         }
@@ -787,10 +860,19 @@
         function tab(el, tName) {
             document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active');
             const s = window.DATA.slides[user.state.last]; const c = s.tabs[tName];
-            let img = c.image || ""; let credit = c.credit || 'UNREDACTED RECORD';
-            if (img.includes(",")) { const p = img.split(","); img = p[0].trim(); credit = p[1].trim(); }
+            let url = c.image || c.mediaURL || "";
+            let type = c.mediaType || (url ? "image" : "none");
+            let credit = c.credit || 'FIELD RECORD';
+            if (url.includes(",")) { const p = url.split(","); url = p[0].trim(); credit = p[1].trim(); }
 
-            document.getElementById('exhibit-left').innerHTML = img ? `<img src="${img}"><div class="img-label">${credit}</div>` : `<div style="padding:40px; color:#333;">NO IMAGE DATA</div>`;
+            let h = "";
+            if (type === "pdf") h = `<embed src="${url}" type="application/pdf" style="width:100%;height:100%;">`;
+            else if (type === "video") h = `<iframe src="${url}" allowfullscreen></iframe>`;
+            else if (type === "audio") h = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;"><audio controls src="${url}"></audio></div>`;
+            else if (url) h = `<img src="${url}">`;
+            else h = `<div style="padding:40px; color:#333; text-align:center;">NO MEDIA DATA</div>`;
+
+            document.getElementById('exhibit-left').innerHTML = h + (url ? `<div class="img-label">${credit}</div>` : "");
             document.getElementById('tab-scroll').innerHTML = `<h2>${tName.toUpperCase()} ANALYSIS</h2><div>${parseMD(c.body)}</div>`;
             document.getElementById('tab-scroll').scrollTop = 0;
         }

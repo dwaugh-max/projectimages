@@ -289,9 +289,14 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    document.getElementById('m-id').value = data.missionId || "";
-                    document.getElementById('m-name').value = (data.metadata && data.metadata.title) ? data.metadata.title : "";
+                    // SCHEMA v1.0 SUPPORT
+                    const id = (data.metadata && data.metadata.id) ? data.metadata.id : data.missionId || "";
+                    const name = (data.metadata && data.metadata.title) ? data.metadata.title : (data.meta && data.meta.title) ? data.meta.title : "";
+
+                    document.getElementById('m-id').value = id;
+                    document.getElementById('m-name').value = name;
                     document.getElementById('json-input').value = e.target.result;
+
                     log(`Capsule [${file.name}] loaded into staging.`, "success");
                     document.getElementById('upload-zone').style.borderColor = "var(--success)";
                 } catch (ex) { log("INVALID CAPSULE: Not a valid .blob/JSON file.", "error"); }

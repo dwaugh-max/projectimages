@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SITUATION ROOM // CLASS PROGRESS</title>
+    <script>
+        const URL = "[[INJECT_URL_NOW]]";
+        const PIN = "8812";
+    </script>
+    <style>
+        :root {
+            --bg: #050505;
+            --accent: #d2b48c;
+            --card-bg: #111;
+            --border: #333;
+            --text: #eee;
+            --success: #0f0;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px;
+            overflow-x: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            margin: 0;
+            letter-spacing: 8px;
+            font-size: 2rem;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .sync-status {
+            font-size: 0.8rem;
+            color: #666;
+            letter-spacing: 2px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 25px;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .card.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(210, 180, 140, 0.1);
+        }
+
+        .student-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .class-code {
+            font-size: 0.8rem;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+
+        .stat-label {
+            opacity: 0.5;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #222;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 1s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>COMMAND PROGRESS BOARD</h1>
+        <div id="sync" class="sync-status">[SYNCING_RECORDS]</div>
+    </header>
+    <div id="board" class="grid"></div>
+
+    <script>
+        async function fetchProgress() {
+            document.getElementById('sync').innerText = "[SYNC_BUSY]";
+            try {
+                const res = await fetch(URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'fetch_progress', pin: PIN })
+                });
+                const j = await res.json();
+                if (j.status === "success") {
+                    renderBoard(j.progress);
+                    document.getElementById('sync').innerText = "[LOG_ACTIVE]";
+                }
+            } catch (e) {
+                document.getElementById('sync').innerText = "[SYNC_ERR]";
+            }
+        }
+
+        function renderBoard(data) {
+            const board = document.getElementById('board');
+            let h = "";
+
+            // Flatten and filter only active mission entries
+            const entries = [];
+            data.forEach(p => {
+                Object.keys(p.missionData).forEach(mid => {
+                    const st = p.missionData[mid];
+                    if (st) {
+                        entries.push({
+                            name: p.name,
+                            class: p.class,
+                            mission: mid,
+                            steps: st.dec ? Object.keys(st.dec).length : 0,
+                            brief: st.preDone ? "READY" : "BRIEFING"
+                        });
+                    }
+                });
+            });
+
+            // Sort by class then name
+            entries.sort((a, b) => (a.class > b.class) ? 1 : (a.name > b.name) ? 1 : -1);
+
+            entries.forEach(e => {
+                const totalExhibits = 18; // Default expectation
+                const pct = (e.steps / totalExhibits) * 100;
+                h += `
+                <div class="card ${e.steps > 0 ? 'active' : ''}">
+                    <div class="student-name">${e.name}</div>
+                    <div class="class-code">${e.class} // ${e.mission}</div>
+                    <div class="stats">
+                        <div>
+                            <div class="stat-label">Exhibit</div>
+                            <div class="stat-value">0${e.steps}</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">Briefing</div>
+                            <div class="stat-value" style="color:${e.brief === 'READY' ? 'var(--success)' : '#666'}">${e.brief}</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${pct}%"></div>
+                    </div>
+                </div>`;
+            });
+            board.innerHTML = h || "<div style='grid-column:1/-1; text-align:center; opacity:0.3; padding:100px;'>WAITING FOR FIELD AGENTS...</div>";
+        }
+
+        window.onload = () => {
+            fetchProgress();
+            setInterval(fetchProgress, 10000);
+        };
+    </script>
+</body>
+
+</html>
