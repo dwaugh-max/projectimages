@@ -1,4 +1,4 @@
-const SHEET_ID = ""; const TEACHER_PIN = "1234";
+const SHEET_ID = ""; const TEACHER_PIN = "8812";
  
 function doGet(e) { 
   if (e.parameter.action === 'fetch_content') {
