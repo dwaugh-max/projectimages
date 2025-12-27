@@ -84,13 +84,14 @@
 
         .mission-header {
             font-family: var(--font-h);
-            color: var(--accent);
-            font-size: 1.4rem;
+            color: #fff;
+            font-size: 1.1rem;
             text-transform: uppercase;
-            margin-bottom: 10px;
-            letter-spacing: 3px;
-            border-bottom: 1px solid var(--accent);
-            padding-bottom: 5px;
+            margin-bottom: 5px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+            line-height: 1.2;
+            letter-spacing: 2px;
         }
 
         .card-container {
@@ -98,7 +99,7 @@
             max-width: 1100px;
             display: flex;
             flex-direction: column;
-            margin: auto 0;
+            margin: 0;
         }
 
         .card {
@@ -119,8 +120,8 @@
             background: var(--card);
             color: #000;
             border-radius: 4px;
-            min-height: 550px;
-            max-height: 650px;
+            min-height: 450px;
+            max-height: 500px;
             overflow: hidden;
             border: 1px solid #999;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
@@ -170,14 +171,15 @@
 
         .tab {
             flex: 1;
-            padding: 15px;
+            padding: 12px;
             cursor: pointer;
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             border-right: 1px solid #ddd;
             color: #999;
             font-weight: bold;
             transition: 0.2s;
+            letter-spacing: 1px;
         }
 
         .tab.active {
@@ -194,24 +196,24 @@
         .tab-content-scroll {
             flex: 1;
             overflow-y: auto;
-            padding: 30px 30px 60px 30px;
-            line-height: 1.7;
+            padding: 25px;
+            line-height: 1.6;
             font-family: var(--font-p);
             text-align: justify;
             color: #333;
-            font-size: 1.05rem;
+            font-size: 0.95rem;
         }
 
         .tab-content-scroll h2 {
             font-family: var(--font-h);
-            font-size: 1rem;
+            font-size: 0.8rem;
             margin-top: 0;
-            color: #555;
+            color: #888;
             text-transform: uppercase;
             letter-spacing: 2px;
             border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
         }
 
         /* INTERACTION AREA */
@@ -219,30 +221,30 @@
             background: #222;
             color: #fff;
             border-top: 4px solid var(--accent);
-            padding: 30px;
-            margin-top: 20px;
+            padding: 20px;
+            margin-top: 10px;
             border-radius: 4px;
         }
 
         .interaction-prompt {
             font-style: italic;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             color: var(--accent);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             line-height: 1.4;
             border-left: 3px solid var(--accent);
-            padding-left: 20px;
+            padding-left: 15px;
         }
 
         .btn {
             background: #333;
             color: #fff;
             border: 1px solid #555;
-            padding: 15px;
+            padding: 12px;
             cursor: pointer;
             font-family: inherit;
             transition: 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -381,23 +383,23 @@
             background: #111;
             color: #fff;
             border: 1px solid #444;
-            padding: 20px;
+            padding: 15px;
             width: 100%;
             font-family: inherit;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             box-sizing: border-box;
             outline: none;
-            font-size: 1rem;
-            height: 120px;
+            font-size: 0.9rem;
+            height: 80px;
             line-height: 1.5;
         }
 
         .word-count {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             color: #666;
             text-align: right;
-            margin-top: -10px;
-            margin-bottom: 20px;
+            margin-top: -5px;
+            margin-bottom: 15px;
         }
 
         .mission-item {
@@ -575,7 +577,7 @@
         <div id="card-container" class="card-container"></div>
     </main>
     <footer class="footer">
-        <div id="f-left">SITUATION ROOM PROTOCOL | v60.2</div>
+        <div id="f-left">SITUATION ROOM PROTOCOL | v60.3</div>
         <div id="f-right">CLASSROOM SIM ARCHITECT | OPEN-SOURCE LICENSE</div>
     </footer>
 

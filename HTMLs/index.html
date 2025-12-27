@@ -1,170 +1,609 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8"><title>SITUATION ROOM</title>
+    <meta charset="UTF-8">
+    <title>SITUATION ROOM</title>
     <script>const API_URL = "[[INJECT_URL_NOW]]";</script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
     <style>
-        :root { --bg: #0c0c0c; --accent: #d2b48c; --text: #e0e0e0; --card: #ffffff; --font-p: 'Georgia', serif; --font-h: 'Courier New', monospace; }
-        body { margin:0; min-height:100vh; display:flex; font-family:var(--font-h); background:var(--bg); color:var(--text); overflow-x:hidden; }
-        .sidebar { width:260px; background:#000; padding:15px; display:flex; flex-direction:column; border-right:1px solid #333; }
-        .nav-container { flex:1; overflow-y:auto; margin-top:20px; }
-        .nav-container::-webkit-scrollbar { width:4px; }
-        .nav-container::-webkit-scrollbar-thumb { background:var(--accent); }
-        
-        .main { flex:1; display:flex; flex-direction:column; align-items:center; background:#111; perspective:1000px; padding:20px; position:relative; min-height:100vh; overflow-y:auto; scroll-behavior: smooth; }
-        .footer { position:fixed; bottom:0; left:0; right:0; background:rgba(0,0,0,0.95); border-top:1px solid #333; padding:10px 20px; display:flex; justify-content:space-between; font-size:0.6rem; color:#666; z-index:100; pointer-events:none; backdrop-filter:blur(5px); }
-        .mission-header { font-family:var(--font-h); color:var(--accent); font-size:1.4rem; text-transform:uppercase; margin-bottom:10px; letter-spacing:3px; border-bottom:1px solid var(--accent); padding-bottom:5px; }
-        
-        .card-container { width:100%; max-width:1100px; display:flex; flex-direction:column; margin: auto 0; }
-        .card { background:transparent; display:none; flex-direction:column; animation: fadeIn 0.5s ease; width:100%; }
-        .card.active { display:flex; }
-        
+        :root {
+            --bg: #0c0c0c;
+            --accent: #d2b48c;
+            --text: #e0e0e0;
+            --card: #ffffff;
+            --font-p: 'Georgia', serif;
+            --font-h: 'Courier New', monospace;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            font-family: var(--font-h);
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #000;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #333;
+        }
+
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .nav-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .nav-container::-webkit-scrollbar-thumb {
+            background: var(--accent);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #111;
+            perspective: 1000px;
+            padding: 20px;
+            position: relative;
+            min-height: 100vh;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 1px solid #333;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.6rem;
+            color: #666;
+            z-index: 100;
+            pointer-events: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .mission-header {
+            font-family: var(--font-h);
+            color: #fff;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+            line-height: 1.2;
+            letter-spacing: 2px;
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+
+        .card {
+            background: transparent;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease;
+            width: 100%;
+        }
+
+        .card.active {
+            display: flex;
+        }
+
         /* SPLIT VIEW EXHIBIT */
-        .exhibit-frame { display:flex; background:var(--card); color:#000; border-radius:4px; min-height:550px; max-height:650px; overflow:hidden; border:1px solid #999; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .exhibit-left { flex:1.1; background:#000; position:relative; border-right:1px solid #ddd; }
-        .exhibit-left img { width:100%; height:100%; object-fit:cover; display:block; }
-        .img-label { position:absolute; bottom:15px; left:15px; background:rgba(0,0,0,0.8); color:var(--accent); padding:6px 10px; font-size:0.55rem; text-transform:uppercase; border:1px solid var(--accent); letter-spacing:1px; z-index:10; }
-        
-        .exhibit-right { flex:1; display:flex; flex-direction:column; background:#fff; overflow:hidden; }
-        .tab-bar { display:flex; background:#f4f4f4; border-bottom:1px solid #ddd; }
-        .tab { flex:1; padding:15px; cursor:pointer; text-align:center; font-size:0.75rem; border-right:1px solid #ddd; color:#999; font-weight:bold; transition:0.2s; }
-        .tab.active { background:#fff; color:#000; opacity:1; }
-        .tab:hover:not(.active) { background:#eee; color:#666; }
-        .tab-content-scroll { flex:1; overflow-y:auto; padding:30px 30px 60px 30px; line-height:1.7; font-family:var(--font-p); text-align:justify; color:#333; font-size:1.05rem; }
-        .tab-content-scroll h2 { font-family:var(--font-h); font-size:1rem; margin-top:0; color:#555; text-transform:uppercase; letter-spacing:2px; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:20px; }
+        .exhibit-frame {
+            display: flex;
+            background: var(--card);
+            color: #000;
+            border-radius: 4px;
+            min-height: 450px;
+            max-height: 500px;
+            overflow: hidden;
+            border: 1px solid #999;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .exhibit-left {
+            flex: 1.1;
+            background: #000;
+            position: relative;
+            border-right: 1px solid #ddd;
+        }
+
+        .exhibit-left img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .img-label {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--accent);
+            padding: 6px 10px;
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            border: 1px solid var(--accent);
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+
+        .exhibit-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .tab-bar {
+            display: flex;
+            background: #f4f4f4;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.65rem;
+            border-right: 1px solid #ddd;
+            color: #999;
+            font-weight: bold;
+            transition: 0.2s;
+            letter-spacing: 1px;
+        }
+
+        .tab.active {
+            background: #fff;
+            color: #000;
+            opacity: 1;
+        }
+
+        .tab:hover:not(.active) {
+            background: #eee;
+            color: #666;
+        }
+
+        .tab-content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            line-height: 1.6;
+            font-family: var(--font-p);
+            text-align: justify;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .tab-content-scroll h2 {
+            font-family: var(--font-h);
+            font-size: 0.8rem;
+            margin-top: 0;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
 
         /* INTERACTION AREA */
-        .interaction-block { background:#222; color:#fff; border-top:4px solid var(--accent); padding:30px; margin-top:20px; border-radius:4px; }
-        .interaction-prompt { font-style:italic; font-size:1.1rem; color:var(--accent); margin-bottom:20px; line-height:1.4; border-left:3px solid var(--accent); padding-left:20px; }
-        .btn { background:#333; color:#fff; border:1px solid #555; padding:15px; cursor:pointer; font-family:inherit; transition:0.2s; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; }
-        .btn:hover { background:#444; border-color:var(--accent); }
-        .btn.active { background:var(--accent) !important; color:#000 !important; font-weight:bold; border-color:var(--accent); }
-        .btn.locked { opacity:0.3; cursor:not-allowed; }
-        .choice-row { display:flex; gap:10px; margin-top:15px; }
-        .choice-row .btn { flex:1; text-align:center; }
-        
-        #tsparticles { position:fixed; inset:0; z-index:-1; pointer-events:none; }
-        
-        /* SCROLLABLE SPLASH */
-        #splash { position:fixed; inset:0; background:#000; background-size:cover; background-position:center; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:100px 20px 100px 20px; overflow-y:auto; }
-        #splash-overlay { position:fixed; inset:0; background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)); z-index:-1; }
-        .splash-inner { width:100%; max-width:1200px; display:flex; flex-direction:column; align-items:center; z-index:10; position:relative; }
-        
-        .briefing-dossier { 
-            width:100%; max-width:400px; background:rgba(0,0,0,0.85); border:1px solid #333; border-top:5px solid var(--accent); 
-            padding:30px; margin-top:20px; max-height:45vh; overflow-y:auto; scrollbar-width: thin; 
-            box-shadow: 0 20px 60px rgba(0,0,0,1); color:#eee; font-family:var(--font-p); line-height:1.7; text-align:justify;
+        .interaction-block {
+            background: #222;
+            color: #fff;
+            border-top: 4px solid var(--accent);
+            padding: 20px;
+            margin-top: 10px;
+            border-radius: 4px;
         }
-        .briefing-dossier::-webkit-scrollbar { width:4px; }
-        .briefing-dossier::-webkit-scrollbar-thumb { background:var(--accent); }
-        
-        #ref-modal { display:none; flex-direction:column; align-items:center; width:100%; }
-        #ref-title { color:var(--accent); font-size:0.7rem; text-transform:uppercase; letter-spacing:8px; margin-bottom:20px; opacity:0.8; font-weight:bold; }
-        #mission-title-big { font-size: 4rem; text-transform:uppercase; letter-spacing:15px; font-weight:bold; color:#fff; text-shadow:0 0 40px rgba(0,0,0,0.9); margin-bottom:30px; text-align:center; line-height:1.1; }
-        
-        #ref-q { margin:20px 0; font-size:1.1rem; color:var(--accent); font-weight:bold; }
-        textarea { background:#111; color:#fff; border:1px solid #444; padding:20px; width:100%; font-family:inherit; margin-bottom:15px; box-sizing:border-box; outline:none; font-size:1rem; height:120px; line-height:1.5; }
-        .word-count { font-size: 0.7rem; color: #666; text-align: right; margin-top:-10px; margin-bottom:20px; }
-        
-        .mission-item { display:flex; align-items:center; background:#111; border:1px solid #333; padding:15px; margin-bottom:10px; cursor:pointer; width:100%; box-sizing:border-box; transition:0.2s; }
-        .mission-item:hover { border-color:var(--accent); background:#1a1a1a; }
-        .mission-thumb { width:52px; height:52px; border-radius:4px; background-size:cover; background-position:center; border:1px solid #333; margin-right:20px; box-shadow:0 0 10px rgba(0,0,0,0.5); }
-        .mission-item:hover .mission-thumb { border-color:var(--accent); }
-        
-        #glossary-panel { display:none; position:fixed; top:20px; right:20px; width:350px; max-height:85vh; background:#000; border:1px solid var(--accent); z-index:2000; padding:25px; overflow-y:auto; box-shadow:0 0 30px rgba(0,0,0,1); }
-        .glossary-term { color:var(--accent); font-weight:bold; display:block; margin-bottom:5px; text-transform:uppercase; font-size:0.8rem; }
-        .glossary-def { font-family:var(--font-p); font-size:0.9rem; color:#ccc; display:block; margin-bottom:15px; line-height:1.4; }
-        
-        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-        .watermark { position:fixed; bottom:40px; left:20px; font-size:0.5rem; color:var(--accent); opacity:0.3; letter-spacing:2px; z-index:100; pointer-events:none; }
+
+        .interaction-prompt {
+            font-style: italic;
+            font-size: 0.9rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+            line-height: 1.4;
+            border-left: 3px solid var(--accent);
+            padding-left: 15px;
+        }
+
+        .btn {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: #444;
+            border-color: var(--accent);
+        }
+
+        .btn.active {
+            background: var(--accent) !important;
+            color: #000 !important;
+            font-weight: bold;
+            border-color: var(--accent);
+        }
+
+        .btn.locked {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .choice-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .choice-row .btn {
+            flex: 1;
+            text-align: center;
+        }
+
+        #tsparticles {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* SCROLLABLE SPLASH */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            background-size: cover;
+            background-position: center;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 100px 20px 100px 20px;
+            overflow-y: auto;
+        }
+
+        #splash-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.9));
+            z-index: -1;
+        }
+
+        .splash-inner {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        .briefing-dossier {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #333;
+            border-top: 5px solid var(--accent);
+            padding: 30px;
+            margin-top: 20px;
+            max-height: 45vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 1);
+            color: #eee;
+            font-family: var(--font-p);
+            line-height: 1.7;
+            text-align: justify;
+        }
+
+        .briefing-dossier::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .briefing-dossier::-webkit-scrollbar-thumb {
+            background: var(--accent);
+        }
+
+        #ref-modal {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #ref-title {
+            color: var(--accent);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            font-weight: bold;
+        }
+
+        #mission-title-big {
+            font-size: 4rem;
+            text-transform: uppercase;
+            letter-spacing: 15px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        #ref-q {
+            margin: 20px 0;
+            font-size: 1.1rem;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        textarea {
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 15px;
+            width: 100%;
+            font-family: inherit;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            outline: none;
+            font-size: 0.9rem;
+            height: 80px;
+            line-height: 1.5;
+        }
+
+        .word-count {
+            font-size: 0.6rem;
+            color: #666;
+            text-align: right;
+            margin-top: -5px;
+            margin-bottom: 15px;
+        }
+
+        .mission-item {
+            display: flex;
+            align-items: center;
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+
+        .mission-item:hover {
+            border-color: var(--accent);
+            background: #1a1a1a;
+        }
+
+        .mission-thumb {
+            width: 52px;
+            height: 52px;
+            border-radius: 4px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #333;
+            margin-right: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .mission-item:hover .mission-thumb {
+            border-color: var(--accent);
+        }
+
+        #glossary-panel {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 85vh;
+            background: #000;
+            border: 1px solid var(--accent);
+            z-index: 2000;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+        }
+
+        .glossary-term {
+            color: var(--accent);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .glossary-def {
+            font-family: var(--font-p);
+            font-size: 0.9rem;
+            color: #ccc;
+            display: block;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .watermark {
+            position: fixed;
+            bottom: 40px;
+            left: 20px;
+            font-size: 0.5rem;
+            color: var(--accent);
+            opacity: 0.3;
+            letter-spacing: 2px;
+            z-index: 100;
+            pointer-events: none;
+        }
     </style>
 </head>
+
 <body>
     <div class="watermark">SECURE CONNECTION // ENCRYPTED LINK Active</div>
     <div id="tsparticles"></div>
-    <div id="loading-screen" style="position:fixed; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; color:var(--accent); z-index:1001; font-weight:bold; letter-spacing:5px;">SYNCHRONIZING ARCHIVES...</div>
-    
+    <div id="loading-screen"
+        style="position:fixed; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; color:var(--accent); z-index:1001; font-weight:bold; letter-spacing:5px;">
+        SYNCHRONIZING ARCHIVES...</div>
+
     <div id="glossary-panel">
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
-            <span style="color:var(--accent); font-size:0.9rem; font-weight:bold; letter-spacing:2px;">INTELLIGENCE GLOSSARY</span>
+        <div
+            style="display:flex; justify-content:space-between; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
+            <span style="color:var(--accent); font-size:0.9rem; font-weight:bold; letter-spacing:2px;">INTELLIGENCE
+                GLOSSARY</span>
             <span onclick="toggleGlossary()" style="cursor:pointer; opacity:0.5;">[CLOSE]</span>
         </div>
         <div id="glossary-content"></div>
     </div>
- 
+
     <div id="splash">
         <div id="splash-overlay"></div>
         <div class="splash-inner">
             <div id="login-step" style="width:380px; text-align:center;">
-                <h1 style="color:var(--accent); letter-spacing:8px; font-size:2.2rem; margin-bottom:40px;">SITUATION ROOM</h1>
-                <p style="font-size:0.7rem; opacity:0.5; margin-bottom:30px; text-transform:uppercase; letter-spacing:2px;">Credential Verification Required</p>
-                <input id="username" placeholder="NAME / CODENAME"><input id="pin" type="password" placeholder="ACCESS PIN">
+                <h1 style="color:var(--accent); letter-spacing:8px; font-size:2.2rem; margin-bottom:40px;">SITUATION
+                    ROOM</h1>
+                <p
+                    style="font-size:0.7rem; opacity:0.5; margin-bottom:30px; text-transform:uppercase; letter-spacing:2px;">
+                    Credential Verification Required</p>
+                <input id="username" placeholder="NAME / CODENAME"><input id="pin" type="password"
+                    placeholder="ACCESS PIN">
                 <input id="class-code" placeholder="CLASS CODE (e.g. PER-01)">
-                <button class="btn" style="text-align:center; background:var(--accent); color:#000; font-weight:bold; width:100%; margin-top:20px;" onclick="login()">AUTHORIZE ACCESS</button>
+                <button class="btn"
+                    style="text-align:center; background:var(--accent); color:#000; font-weight:bold; width:100%; margin-top:20px;"
+                    onclick="login()">AUTHORIZE ACCESS</button>
             </div>
-            
+
             <div id="lobby-step" style="width:420px; display:none; text-align:left;">
-                <h3 style="color:var(--accent); letter-spacing:3px; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:20px;">ACTIVE DOSSIERS</h3>
+                <h3
+                    style="color:var(--accent); letter-spacing:3px; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:20px;">
+                    ACTIVE DOSSIERS</h3>
                 <div id="mission-list"></div>
                 <div style="margin-top:30px; padding:25px; background:rgba(0,0,0,0.5); border:1px solid #333;">
-                    <p style="font-size:0.6rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; text-align:center;">Manual Capsule Injection</p>
-                    <input id="mission-code" placeholder="MISSION CODE" style="text-align:center; letter-spacing:5px;"><button class="btn" style="background:#fff; color:#000; width:100%;" onclick="joinMission()">INITIALIZE MISSION</button>
+                    <p
+                        style="font-size:0.6rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; text-align:center;">
+                        Manual Capsule Injection</p>
+                    <input id="mission-code" placeholder="MISSION CODE"
+                        style="text-align:center; letter-spacing:5px;"><button class="btn"
+                        style="background:#fff; color:#000; width:100%;" onclick="joinMission()">INITIALIZE
+                        MISSION</button>
                 </div>
             </div>
- 
+
             <div id="ref-modal">
                 <div id="ref-title">MISSION BRIEFING</div>
                 <div id="mission-title-big">MISSION_ID</div>
                 <div class="briefing-dossier">
-                    <div id="debrief-panel" style="display:none; background:#000; padding:20px; border-left:4px solid var(--accent); margin-bottom:20px; font-size:0.8rem;"></div>
+                    <div id="debrief-panel"
+                        style="display:none; background:#000; padding:20px; border-left:4px solid var(--accent); margin-bottom:20px; font-size:0.8rem;">
+                    </div>
                     <div id="ref-narrative"></div>
                     <div id="ref-q" style="margin-top:20px; border-top:1px solid #333; padding-top:20px;"></div>
                     <textarea id="ref-a" style="margin-top:10px;"></textarea>
                     <div id="ref-wc" class="word-count"></div>
                 </div>
-                <button id="ref-btn" class="btn" style="background:var(--accent); color:#000; text-align:center; width:100%; max-width:400px; font-weight:bold; margin-top:30px; padding:20px; box-shadow:0 0 30px rgba(0,0,0,0.5);" onclick="nextRef()">CONFIRM AND LAUNCH</button>
+                <button id="ref-btn" class="btn"
+                    style="background:var(--accent); color:#000; text-align:center; width:100%; max-width:400px; font-weight:bold; margin-top:30px; padding:20px; box-shadow:0 0 30px rgba(0,0,0,0.5);"
+                    onclick="nextRef()">CONFIRM AND LAUNCH</button>
             </div>
         </div>
     </div>
- 
+
     <nav class="sidebar">
         <div id="m-header" class="mission-header">ARCHIVE LOG</div>
-        <div id="p-tracker" style="font-size:0.6rem; opacity:0.7; color:var(--accent); letter-spacing:1px; margin-bottom:20px;">0/18 EVIDENCE POINTS</div>
+        <div id="p-tracker"
+            style="font-size:0.6rem; opacity:0.7; color:var(--accent); letter-spacing:1px; margin-bottom:20px;">0/18
+            EVIDENCE POINTS</div>
         <div id="nav-container" class="nav-container"></div>
-        <button class="btn" onclick="toggleGlossary()" style="margin-top:20px; border-color:var(--accent); font-size:0.7rem; text-align:center; background:transparent;">OPEN INTELLIGENCE GLOSSARY</button>
+        <button class="btn" onclick="toggleGlossary()"
+            style="margin-top:20px; border-color:var(--accent); font-size:0.7rem; text-align:center; background:transparent;">OPEN
+            INTELLIGENCE GLOSSARY</button>
     </nav>
-    <main class="main"><div id="card-container" class="card-container"></div></main>
+    <main class="main">
+        <div id="card-container" class="card-container"></div>
+    </main>
     <footer class="footer">
-        <div id="f-left">SITUATION ROOM PROTOCOL | v60.2</div>
+        <div id="f-left">SITUATION ROOM PROTOCOL | v60.3</div>
         <div id="f-right">CLASSROOM SIM ARCHITECT | OPEN-SOURCE LICENSE</div>
     </footer>
- 
+
     <script>
-        window.DATA = null; let user = { id:null, name:null, pin:null, missions:{} };
+        window.DATA = null; let user = { id: null, name: null, pin: null, missions: {} };
         let currentMission = null; let refMode = "pre"; let refIdx = 0; let missionsAvailable = [];
- 
+
         async function login() {
-            const name = document.getElementById('username').value.trim(); 
+            const name = document.getElementById('username').value.trim();
             const pin = document.getElementById('pin').value.trim();
             const classCode = document.getElementById('class-code').value.trim().toUpperCase() || "DEFAULT";
-            if(!name || !pin) return;
-            document.getElementById('loading-screen').style.display='flex';
-            const res = await fetch(API_URL, { method:'POST', body:JSON.stringify({ action:'fetch_user', name:name, pin:pin, classCode:classCode }) });
+            if (!name || !pin) return;
+            document.getElementById('loading-screen').style.display = 'flex';
+            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_user', name: name, pin: pin, classCode: classCode }) });
             const j = await res.json();
-            if(j.status === "success") { 
-                user = { id:j.id, name:name, pin:pin, missions:j.missions }; 
+            if (j.status === "success") {
+                user = { id: j.id, name: name, pin: pin, missions: j.missions };
                 const mRes = await fetch(API_URL + "?action=list_missions");
-                const mData = await mRes.json();missionsAvailable = mData.missions;
+                const mData = await mRes.json(); missionsAvailable = mData.missions;
                 showLobby();
             } else alert(j.message);
-            document.getElementById('loading-screen').style.display='none';
+            document.getElementById('loading-screen').style.display = 'none';
         }
- 
+
         function showLobby() {
-            document.getElementById('login-step').style.display='none'; document.getElementById('lobby-step').style.display='block';
+            document.getElementById('login-step').style.display = 'none'; document.getElementById('lobby-step').style.display = 'block';
             let h = "";
             missionsAvailable.forEach(m => {
                 const thumb = m.thumb || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop";
@@ -175,27 +614,27 @@
             });
             document.getElementById('mission-list').innerHTML = h || "<p style='color:#444; font-size:0.7rem;'>No dossiers found.</p>";
         }
- 
-        async function joinMission() { const code = document.getElementById('mission-code').value.trim().toUpperCase(); if(code) launch(code); }
- 
+
+        async function joinMission() { const code = document.getElementById('mission-code').value.trim().toUpperCase(); if (code) launch(code); }
+
         async function launch(id) {
-            document.getElementById('loading-screen').style.display='flex';
+            document.getElementById('loading-screen').style.display = 'flex';
             try {
                 const r = await fetch(API_URL + "?action=fetch_content&id=" + id); const j = await r.json();
-                if(j.status === "error") throw new Error(j.message);
-                
+                if (j.status === "error") throw new Error(j.message);
+
                 // SCHEMA NORMALIZER v59.5
                 let data = j.data;
-                if(data.exhibits && !data.slides) data.slides = data.exhibits;
-                if(data.meta && !data.metadata) data.metadata = data.meta;
-                if(data.theme && data.theme.primaryColor && !data.theme.accent) data.theme.accent = data.theme.primaryColor;
-                
+                if (data.exhibits && !data.slides) data.slides = data.exhibits;
+                if (data.meta && !data.metadata) data.metadata = data.meta;
+                if (data.theme && data.theme.primaryColor && !data.theme.accent) data.theme.accent = data.theme.primaryColor;
+
                 // TAB & TITLE NORMALIZER
-                if(data.slides) {
+                if (data.slides) {
                     data.slides.forEach(s => {
-                        if(!s.shortTitle && s.title) s.shortTitle = s.title;
-                        if(!s.longTitle && s.shortTitle) s.longTitle = s.shortTitle;
-                        if(Array.isArray(s.tabs)) {
+                        if (!s.shortTitle && s.title) s.shortTitle = s.title;
+                        if (!s.longTitle && s.shortTitle) s.longTitle = s.shortTitle;
+                        if (Array.isArray(s.tabs)) {
                             const newTabs = {};
                             s.tabs.forEach((t, idx) => {
                                 const labels = ['primary', 'legal', 'intel'];
@@ -206,28 +645,28 @@
                         }
                     });
                 }
- 
-                window.DATA = data; currentMission = id; user.state = user.missions[id] || { last:0, ans:{}, dec:{}, rat:{} };
+
+                window.DATA = data; currentMission = id; user.state = user.missions[id] || { last: 0, ans: {}, dec: {}, rat: {} };
                 applyTheme(); initParticles(); renderGlossary();
-                document.getElementById('loading-screen').style.display='none';
-                if(!user.state.preDone) startRef("pre"); else { document.getElementById('splash').style.display='none'; init(); }
-            } catch(e) { console.error(e); alert(e.message); document.getElementById('loading-screen').style.display='none'; }
+                document.getElementById('loading-screen').style.display = 'none';
+                if (!user.state.preDone) startRef("pre"); else { document.getElementById('splash').style.display = 'none'; init(); }
+            } catch (e) { console.error(e); alert(e.message); document.getElementById('loading-screen').style.display = 'none'; }
         }
- 
+
         function applyTheme() {
             const t = window.DATA.theme; document.documentElement.style.setProperty('--accent', t.accent);
             document.documentElement.style.setProperty('--font-p', t.fontP); document.documentElement.style.setProperty('--font-h', t.fontH);
-            if(t.splashHeroURL) { 
-                const s = document.getElementById('splash'); s.style.backgroundImage = `url('${t.splashHeroURL}')`; 
+            if (t.splashHeroURL) {
+                const s = document.getElementById('splash'); s.style.backgroundImage = `url('${t.splashHeroURL}')`;
                 s.style.backgroundSize = "cover"; s.style.backgroundPosition = "center";
             }
             const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
             document.getElementById('f-left').innerText = `${m.title || currentMission} | ${m.author || 'FIELD COMMAND'}`;
         }
- 
+
         function renderGlossary() {
-            const g = window.DATA.intelligenceGlossary || window.DATA.glossary || []; 
+            const g = window.DATA.intelligenceGlossary || window.DATA.glossary || [];
             let h = "";
             const defaultTerms = [
                 { term: "SIGINT", definition: "Signals Intelligence; information derived from electronic signals and systems." },
@@ -239,30 +678,30 @@
             document.getElementById('glossary-content').innerHTML = h;
         }
         function toggleGlossary() { const p = document.getElementById('glossary-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
- 
-        function startRef(m) { refMode = m; refIdx = 0; document.getElementById('lobby-step').style.display='none'; document.getElementById('ref-modal').style.display='flex'; renderRef(); }
+
+        function startRef(m) { refMode = m; refIdx = 0; document.getElementById('lobby-step').style.display = 'none'; document.getElementById('ref-modal').style.display = 'flex'; renderRef(); }
         function renderRef() {
-            const qs = window.DATA.reflections[refMode] || []; 
+            const qs = window.DATA.reflections[refMode] || [];
             const narrative = window.DATA.reflections[refMode + "_narrative"] || "NO BRIEFING DATA RECORDED.";
             const mTitle = (window.DATA.metadata && window.DATA.metadata.title) ? window.DATA.metadata.title : currentMission;
-            
+
             document.getElementById('ref-title').innerText = refMode === 'pre' ? 'INITIAL BRIEFING' : 'MISSION DEBRIEF';
             document.getElementById('mission-title-big').innerText = mTitle;
-            
-            if(refMode === 'pre') { 
+
+            if (refMode === 'pre') {
                 document.getElementById('ref-q').style.display = 'none';
                 document.getElementById('ref-a').style.display = 'none';
                 document.getElementById('ref-btn').innerText = 'INITIALIZE MISSION';
-            } else { 
+            } else {
                 document.getElementById('ref-q').style.display = 'block';
                 document.getElementById('ref-a').style.display = 'block';
                 document.getElementById('ref-btn').innerText = 'SUBMIT TO RECORD';
             }
-            
+
             document.getElementById('ref-narrative').innerHTML = parseMD(narrative);
-            if(refMode === 'post' && refIdx === 0) renderDebrief(); else document.getElementById('debrief-panel').style.display='none';
-            
-            if(qs.length > 0 && qs[refIdx]) {
+            if (refMode === 'post' && refIdx === 0) renderDebrief(); else document.getElementById('debrief-panel').style.display = 'none';
+
+            if (qs.length > 0 && qs[refIdx]) {
                 document.getElementById('ref-q').innerText = qs[refIdx];
                 document.getElementById('ref-q').style.display = 'block';
             } else if (refMode === 'pre') {
@@ -271,60 +710,60 @@
                 document.getElementById('ref-q').innerText = "END OF LOG. No further questions required.";
                 document.getElementById('ref-a').style.display = 'none';
             }
-            document.getElementById('ref-a').value = (user.state.ans && user.state.ans[refMode+"_"+refIdx]) || "";
+            document.getElementById('ref-a').value = (user.state.ans && user.state.ans[refMode + "_" + refIdx]) || "";
         }
-        
+
         function renderDebrief() {
-            const d = document.getElementById('debrief-panel'); d.style.display='block';
+            const d = document.getElementById('debrief-panel'); d.style.display = 'block';
             let h = `<h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">INTERNAL LOG SUMMARY</h3>`;
-            window.DATA.slides.forEach((s,i) => { h += `<div style="margin-bottom:8px;"><strong>${i+1}</strong>: ${user.state.dec[i] || 'PENDING'}</div>`; });
+            window.DATA.slides.forEach((s, i) => { h += `<div style="margin-bottom:8px;"><strong>${i + 1}</strong>: ${user.state.dec[i] || 'PENDING'}</div>`; });
             d.innerHTML = h;
         }
- 
+
         async function nextRef() {
-            if(refMode === 'post') {
-                const a = document.getElementById('ref-a').value; if(!a) return alert("Response required.");
-                user.state.ans[refMode+"_"+refIdx] = a; refIdx++;
-                if(refIdx >= window.DATA.reflections[refMode].length) { alert("Log finalized."); } else { renderRef(); save(); }
+            if (refMode === 'post') {
+                const a = document.getElementById('ref-a').value; if (!a) return alert("Response required.");
+                user.state.ans[refMode + "_" + refIdx] = a; refIdx++;
+                if (refIdx >= window.DATA.reflections[refMode].length) { alert("Log finalized."); } else { renderRef(); save(); }
             } else {
-                user.state.preDone = true; document.getElementById('splash').style.display='none'; save(); init();
+                user.state.preDone = true; document.getElementById('splash').style.display = 'none'; save(); init();
             }
         }
- 
-        function init() { 
-            if(!window.DATA || !window.DATA.slides) {
+
+        function init() {
+            if (!window.DATA || !window.DATA.slides) {
                 document.getElementById('card-container').innerHTML = "<div style='padding:50px; text-align:center; color:var(--accent); letter-spacing:2px;'>[ERROR] MISSION DATA CORRUPTED OR INCOMPATIBLE.</div>";
                 return;
             }
-            renderNav(); updateProgress(); 
-            let idx = user.state.last || 0; 
-            go(idx); 
+            renderNav(); updateProgress();
+            let idx = user.state.last || 0;
+            go(idx);
         }
         function updateProgress() {
-            if(!window.DATA || !window.DATA.slides) return;
-            let filed = 0; window.DATA.slides.forEach((_,i) => { if(user.state.dec[i]) filed++; });
+            if (!window.DATA || !window.DATA.slides) return;
+            let filed = 0; window.DATA.slides.forEach((_, i) => { if (user.state.dec[i]) filed++; });
             document.getElementById('p-tracker').innerText = `${filed}/${window.DATA.slides.length} EVIDENCE POINTS FILED`;
         }
         function renderNav() {
-            const c = document.getElementById('nav-container'); c.innerHTML="";
-            if(!window.DATA || !window.DATA.slides) return;
-            window.DATA.slides.forEach((s,i)=>{
-                const isLocked = i > 0 && (!user.state.dec || !user.state.dec[i-1]);
-                const b=document.createElement('button'); 
-                b.className="btn" + (isLocked ? " locked" : ""); 
-                b.style.marginBottom="10px"; b.style.width="100%"; b.style.textAlign="left"; b.style.padding="15px";
-                if(user.state.dec && user.state.dec[i]) b.style.borderLeft = "5px solid var(--accent)";
-                b.innerHTML=`<span style="opacity:0.4; font-size:0.6em; text-transform:uppercase; letter-spacing:1px;">EXHIBIT 0${i+1}</span><br>${s.shortTitle || 'UNTITLED'}`;
-                if(!isLocked) b.onclick=()=>go(i); c.appendChild(b); b.id=`btn-${i}`;
+            const c = document.getElementById('nav-container'); c.innerHTML = "";
+            if (!window.DATA || !window.DATA.slides) return;
+            window.DATA.slides.forEach((s, i) => {
+                const isLocked = i > 0 && (!user.state.dec || !user.state.dec[i - 1]);
+                const b = document.createElement('button');
+                b.className = "btn" + (isLocked ? " locked" : "");
+                b.style.marginBottom = "10px"; b.style.width = "100%"; b.style.textAlign = "left"; b.style.padding = "15px";
+                if (user.state.dec && user.state.dec[i]) b.style.borderLeft = "5px solid var(--accent)";
+                b.innerHTML = `<span style="opacity:0.4; font-size:0.6em; text-transform:uppercase; letter-spacing:1px;">EXHIBIT 0${i + 1}</span><br>${s.shortTitle || 'UNTITLED'}`;
+                if (!isLocked) b.onclick = () => go(i); c.appendChild(b); b.id = `btn-${i}`;
             });
         }
- 
+
         function go(i) {
-            if(!window.DATA || !window.DATA.slides || !window.DATA.slides[i]) return;
+            if (!window.DATA || !window.DATA.slides || !window.DATA.slides[i]) return;
             const s = window.DATA.slides[i]; user.state.last = i; updateProgress();
-            document.querySelectorAll('.sidebar .btn').forEach(b=>b.classList.remove('active'));
-            if(document.getElementById(`btn-${i}`)) document.getElementById(`btn-${i}`).classList.add('active');
-            
+            document.querySelectorAll('.sidebar .btn').forEach(b => b.classList.remove('active'));
+            if (document.getElementById(`btn-${i}`)) document.getElementById(`btn-${i}`).classList.add('active');
+
             document.getElementById('card-container').innerHTML = `
                 <div class="card active">
                     <div class="exhibit-frame">
@@ -341,13 +780,13 @@
                     <div id="interaction-z" class="interaction-block"></div>
                 </div>`;
             tab(document.querySelector('.tab'), 'primary');
-            renderInteraction(s,i);
+            renderInteraction(s, i);
             save();
-            window.scrollTo({top:0, behavior:'smooth'});
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
- 
+
         function parseMD(text) {
-            if(!text) return "";
+            if (!text) return "";
             return text
                 .replace(/^## (.*$)/gm, '<h2>$1</h2>')
                 .replace(/^### (.*$)/gm, '<h3>$1</h3>')
@@ -355,22 +794,22 @@
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
                 .replace(/\n/g, '<br>');
         }
- 
+
         function tab(el, tName) {
-            document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); el.classList.add('active');
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active');
             const s = window.DATA.slides[user.state.last]; const c = s.tabs[tName];
             let img = c.image || ""; let credit = c.credit || 'UNREDACTED RECORD';
-            if(img.includes(",")) { const p = img.split(","); img = p[0].trim(); credit = p[1].trim(); }
-            
+            if (img.includes(",")) { const p = img.split(","); img = p[0].trim(); credit = p[1].trim(); }
+
             document.getElementById('exhibit-left').innerHTML = img ? `<img src="${img}"><div class="img-label">${credit}</div>` : `<div style="padding:40px; color:#333;">NO IMAGE DATA</div>`;
             document.getElementById('tab-scroll').innerHTML = `<h2>${tName.toUpperCase()} ANALYSIS</h2><div>${parseMD(c.body)}</div>`;
             document.getElementById('tab-scroll').scrollTop = 0;
         }
- 
-        function renderInteraction(s,i) {
+
+        function renderInteraction(s, i) {
             const dec = user.state.dec[i], rat = user.state.rat[i];
-            let h = `<h3>EXHIBIT 0${i+1} COMMAND PROTOCOL</h3><div class="interaction-prompt">${s.interactionPrompt}</div>`;
-            if(rat) {
+            let h = `<h3>EXHIBIT 0${i + 1} COMMAND PROTOCOL</h3><div class="interaction-prompt">${s.interactionPrompt}</div>`;
+            if (rat) {
                 h += `<div style="background:rgba(255,255,255,0.05); padding:20px; border-left:4px solid var(--accent); margin-bottom:20px;">
                         <strong style="color:var(--accent); font-size:0.7rem; text-transform:uppercase;">COMMAND LOG DATA</strong><br>
                         <p style="margin-top:10px; font-size:1rem; opacity:0.8; font-family:var(--font-p);">${rat}</p>
@@ -381,24 +820,25 @@
                       <div id="wc-i" class="word-count">0 / 50 words</div>`;
             }
             h += `<div class="choice-row">`;
-            s.options.forEach(o => { 
-                const sel = dec === o; 
-                h += `<button class="btn ${sel?'active':''}" ${dec?'disabled':''} onclick="decide(${i},'${o}')">${o}</button>`; 
+            s.options.forEach(o => {
+                const sel = dec === o;
+                h += `<button class="btn ${sel ? 'active' : ''}" ${dec ? 'disabled' : ''} onclick="decide(${i},'${o}')">${o}</button>`;
             });
             h += `</div>`;
             document.getElementById('interaction-z').innerHTML = h;
         }
- 
-        function decide(i,l) {
-            const r = document.getElementById('rat-i')?.value; 
-            if(!r || r.trim().split(/\s+/).length < 50) return alert("Formal analysis (min 50 words) required before decision.");
-            user.state.rat[i] = r; user.state.dec[i] = l; 
+
+        function decide(i, l) {
+            const r = document.getElementById('rat-i')?.value;
+            if (!r || r.trim().split(/\s+/).length < 50) return alert("Formal analysis (min 50 words) required before decision.");
+            user.state.rat[i] = r; user.state.dec[i] = l;
             save(); renderNav(); go(i);
-            if(i === window.DATA.slides.length-1) setTimeout(() => startRef("post"), 1000);
+            if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 1000);
         }
- 
-        async function save() { if(user.id && currentMission) await fetch(API_URL, { method:'POST', body:JSON.stringify({ action:'save_state', id:user.id, missionId:currentMission, state:user.state }) }); }
+
+        async function save() { if (user.id && currentMission) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save_state', id: user.id, missionId: currentMission, state: user.state }) }); }
         async function initParticles() { await tsParticles.load("tsparticles", { particles: { number: { value: 30 }, size: { value: 2 }, move: { speed: 0.5 }, opacity: { value: 0.3 } } }); }
     </script>
 </body>
+
 </html>
