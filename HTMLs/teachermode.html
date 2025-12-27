@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>MISSION CONTROL // TEACHER MODE</title>
+    <script>const URL = "[[INJECT_URL_NOW]]"; const PIN = "[[INJECT_PIN_NOW]]";</script>
+    <style>
+        :root {
+            --bg: #f4f4f4;
+            --accent: #222;
+            --success: #28a745;
+            --err: #dc3545;
+            --terminal: #000;
+            --term-txt: #0f0;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 40px;
+            background: var(--bg);
+            color: #333;
+            margin: 0;
+        }
+
+        #status-bar {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 5px solid var(--accent);
+        }
+
+        .status-light {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            background: #666;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .status-light.online {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .status-light.offline {
+            background: var(--err);
+            box-shadow: 0 0 10px var(--err);
+        }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+
+        #console {
+            background: var(--terminal);
+            color: var(--term-txt);
+            padding: 15px;
+            height: 180px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            border: 1px solid #333;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: #fff;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-top: 5px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 30px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #444;
+        }
+
+        .btn-del {
+            color: var(--err);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.6rem;
+            text-decoration: underline;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .btn-del:hover {
+            color: #8b0000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 0.75rem;
+            vertical-align: middle;
+        }
+
+        th {
+            background: var(--accent);
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+        }
+
+        .thumb {
+            width: 46px;
+            height: 46px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-size: 0.6rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="status-bar">
+        <div><span id="s-light" class="status-light"></span> <span id="s-text"
+                style="letter-spacing: 2px;">VINTAGE_LINK_OFFLINE</span></div>
+        <div style="font-size: 0.7rem; opacity: 0.7;">TEACHER MODE // v59.3</div>
+    </div>
+    <h1 style="margin: 0 40px 30px 40px;">COMMAND CENTER // MISSION CONTROL</h1>
+    <div class="grid" style="grid-template-columns: 1fr 1.5fr 1fr; padding: 0 40px;">
+        <div class="panel">
+            <h3
+                style="margin-top:0; letter-spacing:2px; font-size:0.8rem; border-bottom:1px solid #ddd; padding-bottom:10px;">
+                CAPSULE INJECTION</h3>
+            <div id="upload-zone"
+                style="border:2px dashed #ccc; padding:20px; text-align:center; margin-bottom:20px; cursor:pointer;"
+                onclick="document.getElementById('file-input').click()">
+                <div style="font-size:1.5rem; margin-bottom:5px;">📁</div>
+                <div style="font-size:0.5rem; color:#666; font-weight:bold;">LOAD .BLOB CAPSULE</div>
+                <input type="file" id="file-input" accept=".blob" style="display:none"
+                    onchange="handleFile(this.files[0])">
+            </div>
+            <label>Mission ID</label><input id="m-id" placeholder="e.g. CUBA62">
+            <label>Public Name</label><input id="m-name" placeholder="Operation Anadyr">
+            <label>Raw Payload</label><textarea id="json-input" style="height: 60px; font-size:0.6rem;"
+                placeholder="..."></textarea>
+            <button class="btn" style="padding:10px; font-size:0.75rem;" onclick="upload()">INITIALIZE ARCHIVE</button>
+        </div>
+
+        <div class="panel">
+            <div
+                style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:20px;">
+                <h3 style="margin:0; letter-spacing:2px; font-size:0.8rem;">LIVE PROGRESS BOARD</h3>
+                <div id="sync-tick" style="font-size:0.55rem; color:#888;">[SYNC_IDLE]</div>
+            </div>
+            <div style="margin-bottom:15px; display:flex; gap:10px;">
+                <select id="class-filter" style="flex:1; padding:8px; font-family:inherit; font-size:0.75rem;"
+                    onchange="renderProgress()">
+                    <option value="ALL">ALL CLASSES</option>
+                </select>
+                <button class="btn" style="width:auto; padding:0 15px; font-size:0.6rem;"
+                    onclick="fetchProgress()">REFRESH</button>
+            </div>
+            <div id="progress-list" style="max-height:500px; overflow-y:auto; border:1px solid #eee;"></div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            <div class="panel" style="padding:20px; background:var(--terminal); border-top:none;">
+                <h3 style="margin-top:0; color:#fff; font-size:0.6rem; letter-spacing:1px; opacity:0.6;">SYSTEM LOG</h3>
+                <div id="console" style="height:150px; overflow-y:auto; font-size:0.65rem; color:var(--term-txt);">
+                </div>
+            </div>
+            <div class="panel" style="flex:1;">
+                <h3
+                    style="margin-top:0; letter-spacing:2px; font-size:0.8rem; border-bottom:1px solid #ddd; padding-bottom:10px;">
+                    LIVE DIRECTORY</h3>
+                <div id="lib-log" style="font-size: 0.55rem; color: #888; margin-bottom: 10px;">Scanning...</div>
+                <div id="library-list"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let allProgress = [];
+        const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            const response = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(id); return response;
+        };
+
+        function log(m, t = "info") {
+            const c = document.getElementById('console'); const color = t === "success" ? "lime" : t === "error" ? "red" : "#0f0";
+            if (!c) return;
+            c.innerHTML += `<div style="color:${color}">[${new Date().toLocaleTimeString()}] ${m}</div>`;
+            c.scrollTop = c.scrollHeight;
+        }
+        function setStatus(s, t) { document.getElementById('s-light').className = "status-light " + s; document.getElementById('s-text').innerText = t; }
+
+        async function fetchMissions() {
+            log("Pinging Archive Server...");
+            try {
+                const res = await fetchWithTimeout(URL + "?action=list_missions");
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                const j = await res.json();
+                if (j.status === "success") {
+                    setStatus("online", "ENCRYPTED_LINK_ACTIVE");
+                    renderMissions(j.missions); fetchProgress();
+                    log("Handshake successful. Directory synchronized.", "success");
+                } else { throw new Error(j.message || "Unknown server error"); }
+            } catch (e) {
+                setStatus("offline", "CONNECTION_FAILURE");
+                log(`CRITICAL: ${e.message}`, "error");
+                log("HINT: Ensure the Apps Script URL and TEACHER_PIN are correctly configured.");
+                renderMissions([]); // Show empty table so UI isn't empty
+            }
+        }
+
+        async function upload() {
+            const id = document.getElementById('m-id').value.toUpperCase().replace(/\s/g, ''), name = document.getElementById('m-name').value, raw = document.getElementById('json-input').value;
+            if (!id || !name || !raw) return log("ABORTED: Missing required parameters.", "error");
+            log(`Opening stream for Capsule [${id}]...`);
+            try {
+                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: PIN, id: id, name: name, payload: JSON.parse(raw) }) });
+                const j = await res.json();
+                if (j.status === "success") {
+                    log("CAPSULE COMMITTED TO RECORD.", "success");
+                    document.getElementById('m-id').value = ""; document.getElementById('m-name').value = ""; document.getElementById('json-input').value = "";
+                    fetchMissions();
+                } else log(j.message, "error");
+            } catch (e) { log(e.message, "error"); }
+        }
+
+        function handleFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    document.getElementById('m-id').value = data.missionId || "";
+                    document.getElementById('m-name').value = (data.metadata && data.metadata.title) ? data.metadata.title : "";
+                    document.getElementById('json-input').value = e.target.result;
+                    log(`Capsule [${file.name}] loaded into staging.`, "success");
+                    document.getElementById('upload-zone').style.borderColor = "var(--success)";
+                } catch (ex) { log("INVALID CAPSULE: Not a valid .blob/JSON file.", "error"); }
+            };
+            reader.readAsText(file);
+        }
+
+        async function fetchProgress() {
+            document.getElementById('sync-tick').innerText = "[SYNC_BUSY]";
+            try {
+                const res = await fetchWithTimeout(URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_progress', pin: PIN }) });
+                const j = await res.json();
+                if (j.status === "success") {
+                    allProgress = j.progress;
+                    updateClassFilter(); renderProgress();
+                    document.getElementById('sync-tick').innerText = "[SYNC_OK]";
+                    setTimeout(() => document.getElementById('sync-tick').innerText = "[SYNC_IDLE]", 3000);
+                }
+            } catch (e) {
+                log("Progress sync failed: " + e.message, "error");
+                document.getElementById('sync-tick').innerText = "[SYNC_FAIL]";
+            }
+        }
+
+        function updateClassFilter() {
+            const f = document.getElementById('class-filter'); const val = f.value;
+            const classes = [...new Set(allProgress.map(p => p.class))].sort();
+            let h = `<option value="ALL">ALL CLASSES</option>`;
+            classes.forEach(c => { h += `<option value="${c}">${c}</option>`; });
+            f.innerHTML = h; if (f.innerHTML.includes(val)) f.value = val;
+        }
+
+        function renderProgress() {
+            const filter = document.getElementById('class-filter').value;
+            const filtered = filter === "ALL" ? allProgress : allProgress.filter(p => p.class === filter);
+            let h = "";
+            filtered.forEach(p => {
+                const missions = Object.keys(p.missionData);
+                missions.forEach(mid => {
+                    const st = p.missionData[mid]; if (!st) return;
+                    const decs = st.dec ? Object.keys(st.dec).length : 0;
+                    const pre = st.preDone ? "✓" : "×";
+                    h += `<div style="padding:10px; border-bottom:1px solid #eee; font-size:0.7rem;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <strong>${p.name}</strong> <span style="color:#888;">${p.class}</span>
+                            </div>
+                            <div style="color:#666; margin-top:5px;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre}</div>
+                          </div>`;
+                });
+            });
+            document.getElementById('progress-list').innerHTML = h || "<p style='color:#ccc; padding:20px;'>No student data detected.</p>";
+        }
+
+        async function deleteMission(id) {
+            if (!confirm(`PERMANENT DELETION: Are you sure you want to scrub mission [${id}] from the record?`)) return;
+            log(`DELETING CAPSULE [${id}]...`);
+            try {
+                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'delete_content', pin: PIN, id: id }) });
+                const j = await res.json();
+                if (j.status === "success") { log("CAPSULE DELETED.", "success"); fetchMissions(); } else log(j.message, "error");
+            } catch (e) { log(e.message, "error"); }
+        }
+
+        function renderMissions(ms) {
+            document.getElementById('lib-log').innerText = `${ms.length} Capsules Detected.`;
+            let h = "<table><tr><th>Visual</th><th>Dossier Name</th><th>ID</th><th>Action</th></tr>";
+            ms.forEach(m => {
+                const thumb = m.thumb || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop";
+                h += `<tr>
+                        <td><div class="thumb" style="background-image:url('${thumb}')"></div></td>
+                        <td><strong>${m.name}</strong></td>
+                        <td><code>${m.id}</code></td>
+                        <td><button class="btn-del" onclick="deleteMission('${m.id}')">SCRUB RECORD</button></td>
+                      </tr>`;
+            });
+            document.getElementById('library-list').innerHTML = (ms.length > 0) ? h + "</table>" : "<p style='color:#ccc; padding:20px;'>No missions found.</p>";
+        }
+
+        // FAILSAFE: Ensure UI renders even if handshake is slow
+        window.onload = () => {
+            log("BOOT SEQUENCE INITIATED...");
+            fetchMissions();
+            setInterval(fetchProgress, 30000);
+        };
+    </script>
+</body>
+
+</html>
