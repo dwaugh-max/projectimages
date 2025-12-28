@@ -590,7 +590,7 @@
         <div id="card-container" class="card-container"></div>
     </main>
     <footer class="footer">
-        <div id="f-left">SITUATION ROOM PROTOCOL | v63.8</div>
+        <div id="f-left">SITUATION ROOM PROTOCOL | v63.9</div>
         <div id="f-outcomes"
             style="font-size:0.55rem; opacity:0.5; flex:1; text-align:center; text-transform:uppercase; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
         </div>
@@ -924,7 +924,7 @@ Provide a concise assessment (150 words). Format with markdown.`;
                 b.className = "btn" + (isLocked ? " locked" : "");
                 b.style.marginBottom = "8px"; b.style.width = "100%"; b.style.textAlign = "left"; b.style.padding = "10px"; b.style.fontSize = "0.65rem";
                 if (user.state.dec && user.state.dec[i]) b.style.borderLeft = "4px solid var(--accent)";
-                b.innerHTML = `<span style="opacity:0.4; font-size:0.55em; text-transform:uppercase; letter-spacing:1px;">EXHIBIT 0${i + 1}</span><br><span style="white-space: normal; line-height: 1.2; display: block; margin-top: 3px; font-size: 0.7rem;">${s.shortTitle || 'UNTITLED'}</span>`;
+                b.innerHTML = `<span style="color:var(--accent); opacity:0.8; font-size:0.6em; text-transform:uppercase; letter-spacing:1px;">EXHIBIT 0${i + 1}</span><br><span style="white-space: normal; line-height: 1.2; display: block; margin-top: 3px; font-size: 0.7rem;">${s.shortTitle || 'UNTITLED'}</span>`;
                 if (!isLocked) b.onclick = () => go(i); c.appendChild(b); b.id = `btn-${i}`;
             });
         }
