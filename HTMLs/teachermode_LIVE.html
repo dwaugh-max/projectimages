@@ -283,7 +283,7 @@
         <button onclick="toggleLibrary()"
             style="background:var(--accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; border-radius:3px; cursor:pointer; font-weight:bold; letter-spacing:1px;">📚
             OPEN COMMUNITY HUB</button>
-        <div style="font-size: 0.7rem; opacity: 0.7;">TEACHER MODE // v63.4</div>
+        <div style="font-size: 0.7rem; opacity: 0.7;">TEACHER MODE // v63.5</div>
     </div>
 </div>
 <h1 style="margin: 0 40px 30px 40px;">COMMAND CENTER // MISSION CONTROL</h1>
@@ -582,7 +582,8 @@
 
         let h = `<table style="width:100%; font-size:0.65rem; border-collapse:collapse;">
                     <thead><tr style="border-bottom:1px solid #ddd; text-align:left;">
-                        <th style="padding:8px;">MISSION ID</th>
+                        <th style="padding:8px; width:50px;">VISUAL</th>
+                        <th style="padding:8px;">ID</th>
                         <th style="padding:8px;">NAME</th>
                         <th style="padding:8px; text-align:center;">AI</th>
                         <th style="padding:8px; text-align:center;">ACTION</th>
@@ -591,7 +592,12 @@
         missions.forEach(m => {
             const aiStatus = m.aiEnabled ? 'ON' : 'OFF';
             const aiColor = m.aiEnabled ? 'green' : '#888';
+            const thumb = m.thumb || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=200&auto=format&fit=crop";
+
             h += `<tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:8px;">
+                        <div style="width:40px; height:25px; background-image:url('${thumb}'); background-size:cover; background-position:center; border-radius:2px; border:1px solid #ccc;"></div>
+                    </td>
                     <td style="padding:8px; font-weight:bold;">${m.id}</td>
                     <td style="padding:8px;">${m.name}</td>
                     <td style="padding:8px; text-align:center;">
