@@ -112,6 +112,17 @@ function doPost(e) {
          }
          return createJSON({ status: "success", enabled: false }); // Default to false if not found
       }
+      if (data.action === "delete_student") {
+        if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
+        var sheet = getStudentSheet(); var rows = sheet.getDataRange().getValues();
+        for(var i=1; i<rows.length; i++) { 
+          if(rows[i][0] == data.id) { 
+            sheet.deleteRow(i+1); 
+            return createJSON({ status: "success", message: "Student deleted" }); 
+          } 
+        }
+        return createJSON({ status: "error", message: "Student not found" });
+      }
     } catch (err) { return createJSON({status:"error", message:err.toString()}); } finally { lock.releaseLock(); }
   }
   
