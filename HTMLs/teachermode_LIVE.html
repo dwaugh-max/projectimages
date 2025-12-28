@@ -501,15 +501,13 @@
                 const st = p.missionData[mid]; if (!st) return;
                 const decs = st.dec ? Object.keys(st.dec).length : 0;
                 const pre = st.preDone ? "✓" : "×";
-                const aiFeedback = st.aiFeedback ? "✓ AI FEEDBACK READY" : "";
 
-                h += `<div style="padding:8px 12px; border-bottom:1px solid #eee; font-size:0.65rem; display:flex; justify-content:space-between; align-items:center;">
-                        <div style="flex:1;">
-                            <strong style="font-size:0.75rem;">${p.name}</strong> 
-                            <span style="color:#888; margin-left:8px;">${p.class}</span>
-                            <div style="color:#666; margin-top:3px; font-size:0.6rem;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre} ${aiFeedback ? `| <span style="color:green;">${aiFeedback}</span>` : ""}</div>
+                h += `<div style="padding:6px 10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:0.7rem; font-weight:bold;">${p.name} <span style="color:#888; font-weight:normal; font-size:0.65rem;">${p.class}</span></div>
+                            <div style="color:#666; font-size:0.6rem; margin-top:2px;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre}</div>
                         </div>
-                        <button class="btn" style="padding:4px 8px; font-size:0.55rem; background:#c00; color:#fff;" onclick="deleteStudent('${p.id}', '${p.name}')">DELETE</button>
+                        <button class="btn" style="padding:5px 10px; font-size:0.6rem; background:#c00; color:#fff; white-space:nowrap; flex-shrink:0;" onclick="deleteStudent('${p.id}', '${p.name}')">DELETE</button>
                       </div>`;
             });
         });
