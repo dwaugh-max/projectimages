@@ -590,13 +590,37 @@
         <div id="card-container" class="card-container"></div>
     </main>
     <footer class="footer">
-        <div id="f-left">SITUATION ROOM PROTOCOL | v65.0</div>
-        <div id="f-outcomes"
-            style="font-size:0.55rem; opacity:0.5; flex:1; text-align:center; text-transform:uppercase; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-        </div>
-        <div id="f-right"><span style="cursor:pointer;" onclick="showDebugInfo()">CLASSROOM SIM ARCHITECT</span> |
-            OPEN-SOURCE LICENSE</div>
+        <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
+            PROTOCOL | v65.1</div>
+        <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
+            onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
+        <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
     </footer>
+
+    <!-- OUTCOMES PANEL -->
+    <div id="outcomes-panel"
+        style="display:none; position:fixed; bottom:50px; left:50%; transform:translateX(-50%); width:90%; max-width:600px; max-height:40vh; overflow-y:auto; background:rgba(0,0,0,0.95); border:1px solid var(--accent); padding:20px; z-index:999;">
+        <div
+            style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+            <span id="outcomes-title"
+                style="color:var(--accent); font-size:0.8rem; font-weight:bold; letter-spacing:2px;">LEARNING
+                OUTCOMES</span>
+            <span onclick="toggleOutcomes()" style="cursor:pointer; opacity:0.5;">[CLOSE]</span>
+        </div>
+        <div id="outcomes-content" style="font-size:0.85rem; color:#ccc; line-height:1.6;"></div>
+    </div>
+
+    <!-- VERSION INFO PANEL -->
+    <div id="version-panel"
+        style="display:none; position:fixed; bottom:50px; left:20px; width:300px; background:rgba(0,0,0,0.95); border:1px solid var(--accent); padding:20px; z-index:999;">
+        <div
+            style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+            <span style="color:var(--accent); font-size:0.8rem; font-weight:bold; letter-spacing:2px;">VERSION
+                INFO</span>
+            <span onclick="toggleVersionPanel()" style="cursor:pointer; opacity:0.5;">[CLOSE]</span>
+        </div>
+        <div id="version-content" style="font-size:0.75rem; color:#ccc; line-height:1.8;"></div>
+    </div>
 
     <script>
         window.DATA = null; let user = { id: null, name: null, pin: null, missions: {} };
@@ -757,10 +781,10 @@
             }
             const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerText = `${m.title || currentMission} | ${m.author || 'FIELD COMMAND'}`;
+            document.getElementById('f-left').innerText = `${m.title || currentMission}`;
 
-            const outcomes = m.learningOutcomes || m.outcomes || [];
-            document.getElementById('f-outcomes').innerText = outcomes.length > 0 ? "OBJECTIVES: " + outcomes.join(" | ") : "";
+            // Populate the outcomes panel (popup) instead of inline text
+            populateOutcomes();
 
             // APPLY LAYOUT PRESET
             const layoutName = (t.layout || "compact").toLowerCase();
@@ -789,6 +813,46 @@
             document.getElementById('glossary-content').innerHTML = h;
         }
         function toggleGlossary() { const p = document.getElementById('glossary-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
+
+        // OUTCOMES PANEL
+        function toggleOutcomes() {
+            const p = document.getElementById('outcomes-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        }
+        function populateOutcomes() {
+            const m = window.DATA.metadata || {};
+            const outcomes = m.learningOutcomes || m.outcomes || [];
+            const title = m.title || 'MISSION';
+            document.getElementById('outcomes-title').innerText = title.toUpperCase() + ' OUTCOMES';
+            let h = '';
+            if (outcomes.length > 0) {
+                outcomes.forEach((o, i) => { h += `<div style="margin-bottom:10px; padding-left:15px; border-left:2px solid var(--accent);">${i + 1}. ${o}</div>`; });
+            } else {
+                h = '<div style="opacity:0.5;">No learning outcomes defined for this mission.</div>';
+            }
+            document.getElementById('outcomes-content').innerHTML = h;
+        }
+
+        // VERSION INFO PANEL
+        function toggleVersionPanel() {
+            const p = document.getElementById('version-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        }
+        function showVersionInfo() {
+            const m = window.DATA ? window.DATA.metadata : {};
+            const blobVersion = m.version || 'Unknown';
+            const blobAuthor = m.author || 'Unknown';
+            const simVersion = 'v65.1';
+            let h = `
+                <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
+                <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
+                <div><strong style="color:var(--accent);">CAPSULE AUTHOR:</strong> ${blobAuthor}</div>
+                <div style="margin-top:10px; opacity:0.5; font-size:0.65rem;">code.gs: Managed by Classroom Sim Architect</div>
+            `;
+            document.getElementById('version-content').innerHTML = h;
+            toggleVersionPanel();
+        }
+
 
         function startRef(m) { refMode = m; refIdx = 0; document.getElementById('splash').style.display = 'flex'; document.getElementById('lobby-step').style.display = 'none'; document.getElementById('ref-modal').style.display = 'flex'; renderRef(); }
         function renderRef() {
