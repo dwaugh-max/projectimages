@@ -75,68 +75,46 @@ function doPost(e) {
        }
        return createJSON({status: "error", message: "User not found"});
     }
-    if (data.action === "generate_ai_feedback") {
-       if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
-       const feedback = callGemini(data.rationales, data.context);
-       return createJSON({status: "success", feedback: feedback});
-    }
-     if (data.action === "update_content") {
+    if (data.action === "update_content") {
+         if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
+         var sheet = getContentSheet(); var rows = sheet.getDataRange().getValues(); var found = false;
+         for(var i=1; i<rows.length; i++) { if(rows[i][0] == data.id) { sheet.getRange(i+1, 3).setValue(JSON.stringify(data.payload)); sheet.getRange(i+1, 2).setValue(data.name); found = true; break; } }
+         if(!found) sheet.appendRow([data.id, data.name, JSON.stringify(data.payload)]);
+         return createJSON({ status: "success" });
+      }
+      if (data.action === "delete_content") {
         if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
-        var sheet = getContentSheet(); var rows = sheet.getDataRange().getValues(); var found = false;
-        for(var i=1; i<rows.length; i++) { if(rows[i][0] == data.id) { sheet.getRange(i+1, 3).setValue(JSON.stringify(data.payload)); sheet.getRange(i+1, 2).setValue(data.name); found = true; break; } }
-        if(!found) sheet.appendRow([data.id, data.name, JSON.stringify(data.payload)]);
-        return createJSON({ status: "success" });
-     }
-     if (data.action === "delete_content") {
-       if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
-       var sheet = getContentSheet(); var rows = sheet.getDataRange().getValues();
-       for(var i=1; i<rows.length; i++) { if(rows[i][0] == data.id) { sheet.deleteRow(i+1); return createJSON({ status: "success" }); } }
-       return createJSON({ status: "error", message: "ID not found" });
-     }
-     if (data.action === "toggle_ai") {
-       if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
-       var sheet = getContentSheet(); var rows = sheet.getDataRange().getValues();
-       for(var i=1; i<rows.length; i++) { 
-         if(rows[i][0] == data.id) { 
-           var payload = JSON.parse(rows[i][2]);
-           if(!payload.metadata) payload.metadata = {};
-           payload.metadata.enableAIFeedback = data.enabled;
-           sheet.getRange(i+1, 3).setValue(JSON.stringify(payload));
-           return createJSON({ status: "success", enabled: data.enabled }); 
-         } 
-       }
-       return createJSON({ status: "error", message: "ID not found" });
-     }
-     if (data.action === "check_ai_status") {
+        var sheet = getContentSheet(); var rows = sheet.getDataRange().getValues();
+        for(var i=1; i<rows.length; i++) { if(rows[i][0] == data.id) { sheet.deleteRow(i+1); return createJSON({ status: "success" }); } }
+        return createJSON({ status: "error", message: "ID not found" });
+      }
+      if (data.action === "toggle_ai") {
+        if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
         var sheet = getContentSheet(); var rows = sheet.getDataRange().getValues();
         for(var i=1; i<rows.length; i++) { 
-          if(rows[i][0] == data.id) {
-             var payload = JSON.parse(rows[i][2]);
-             return createJSON({ status: "success", enabled: (payload.metadata && payload.metadata.enableAIFeedback) });
-          }
+          if(rows[i][0] == data.id) { 
+            var payload = JSON.parse(rows[i][2]);
+            if(!payload.metadata) payload.metadata = {};
+            payload.metadata.enableAIFeedback = data.enabled;
+            sheet.getRange(i+1, 3).setValue(JSON.stringify(payload));
+            return createJSON({ status: "success", enabled: data.enabled }); 
+          } 
         }
-        return createJSON({ status: "success", enabled: false }); // Default to false if not found
-     }
-   } catch (err) { return createJSON({status:"error", message:err.toString()}); } finally { lock.releaseLock(); }
- }
- 
-function callGemini(rationales, context) {
-  const API_KEY = "[[INJECT_GEMINI_KEY]]";
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-  const prompt = "You are a professional history educator evaluating a student's performance in a " + context.title + " simulation.\n  Student Rationales: " + JSON.stringify(rationales) + "\n  Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking.\n  Provide a concise assessment (150 words). Format with markdown.";
+        return createJSON({ status: "error", message: "ID not found" });
+      }
+      if (data.action === "check_ai_status") {
+         var sheet = getContentSheet(); var rows = sheet.getDataRange().getValues();
+         for(var i=1; i<rows.length; i++) { 
+           if(rows[i][0] == data.id) {
+              var payload = JSON.parse(rows[i][2]);
+              return createJSON({ status: "success", enabled: (payload.metadata && payload.metadata.enableAIFeedback) });
+           }
+         }
+         return createJSON({ status: "success", enabled: false }); // Default to false if not found
+      }
+    } catch (err) { return createJSON({status:"error", message:err.toString()}); } finally { lock.releaseLock(); }
+  }
   
-  try {
-    const options = {
-      method: "post",
-      contentType: "application/json",
-      headers: { "x-goog-api-key": API_KEY },
-      payload: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    };
-    const res = UrlFetchApp.fetch(url, options);
-    return JSON.parse(res.getContentText()).candidates[0].content.parts[0].text;
-  } catch(e) { return "AI Feedback failed: " + e.message; }
-}
-
 function getStudentSheet() { 
   var doc = SpreadsheetApp.getActiveSpreadsheet(); var sheet = doc.getSheetByName("Students"); 
   if (!sheet) { sheet = doc.insertSheet("Students"); sheet.appendRow(["ID","Name","PIN","MISSION_DATA","Class"]); } 
@@ -149,24 +127,3 @@ function getContentSheet() {
   return sheet;
 }
 function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
-
-function testConnection() {
-  const API_KEY = "[[INJECT_GEMINI_KEY]]"; // Replace with your key for testing if needed
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-  const prompt = "Hello, can you hear me?";
-  
-  Logger.log("Attempting to connect to Gemini 2.5 Flash...");
-  
-  try {
-    const options = {
-      method: "post",
-      contentType: "application/json",
-      headers: { "x-goog-api-key": API_KEY },
-      payload: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    };
-    const res = UrlFetchApp.fetch(url, options);
-    Logger.log("Success! Response source: " + res.getContentText());
-  } catch(e) {
-    Logger.log("Connection Failed: " + e.toString());
-  }
-}
