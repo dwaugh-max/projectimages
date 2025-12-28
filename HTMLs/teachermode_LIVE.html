@@ -501,20 +501,32 @@
                 const st = p.missionData[mid]; if (!st) return;
                 const decs = st.dec ? Object.keys(st.dec).length : 0;
                 const pre = st.preDone ? "✓" : "×";
-                const feedback = st.aiFeedback ? "✓ AI FEEDBACK READY" : "";
-                h += `<div style="padding:15px; border-bottom:1px solid #eee; font-size:0.75rem; background:${st.aiFeedback ? '#f9fff9' : 'none'}">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                                <strong>${p.name}</strong> <span style="color:#888;">${p.class}</span>
-                            </div>
-                            <div style="color:#666;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre}</div>
-                            <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
-                                <button class="btn" style="padding:5px 10px; font-size:0.55rem; width:auto; background:#444;" onclick="runAI('${p.id}', '${mid}')">ANALYZE WITH AI</button>
-                                <span style="font-size:0.55rem; color:var(--success); font-weight:bold;">${feedback}</span>
-                            </div>
-                          </div>`;
+                const aiFeedback = st.aiFeedback ? "✓ AI FEEDBACK READY" : "";
+
+                h += `<div style="padding:8px 12px; border-bottom:1px solid #eee; font-size:0.65rem; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="flex:1;">
+                            <strong style="font-size:0.75rem;">${p.name}</strong> 
+                            <span style="color:#888; margin-left:8px;">${p.class}</span>
+                            <div style="color:#666; margin-top:3px; font-size:0.6rem;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre} ${aiFeedback ? `| <span style="color:green;">${aiFeedback}</span>` : ""}</div>
+                        </div>
+                        <button class="btn" style="padding:4px 8px; font-size:0.55rem; background:#c00; color:#fff;" onclick="deleteStudent('${p.id}', '${p.name}')">DELETE</button>
+                      </div>`;
             });
         });
-        document.getElementById('progress-list').innerHTML = h || "<p style='color:#ccc; padding:20px;'>No student data detected.</p>";
+        document.getElementById('progress-list').innerHTML = h || "<p style='color:#ccc; padding:20px; font-size:0.65rem;'>No student data detected.</p>";
+    }
+
+    async function deleteStudent(id, name) {
+        if (!confirm(`DELETE STUDENT: ${name}?\n\nThis will permanently remove all progress data. This action cannot be undone.`)) return;
+        log(`Deleting student [${name}]...`);
+        try {
+            const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'delete_student', pin: PIN, id: id }) });
+            const j = await res.json();
+            if (j.status === "success") {
+                log(`Student [${name}] deleted.`, "success");
+                fetchProgress();
+            } else log(j.message, "error");
+        } catch (e) { log(e.message, "error"); }
     }
 
     async function runAI(uid, mid) {
