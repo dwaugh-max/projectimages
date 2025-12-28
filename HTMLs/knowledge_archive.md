@@ -1,11 +1,11 @@
-# Classroom Sim Architect: Knowledge Archive (v57.0 Gold Standard Split-Screen)
+# Classroom Sim Architect: Knowledge Archive (v62.6 AI-Powered Debrief)
 
 This document contains the universal HTML/JS shells used by the Classroom Sim Architect.
 
 ### **TEMPLATE A: Code.gs (The Archive Brain)**
 ```javascript
-const SHEET_ID = ""; const TEACHER_PIN = "1234";
-
+const SHEET_ID = ""; const TEACHER_PIN = "8812";
+ 
 function doGet(e) { 
   if (e.parameter.action === 'fetch_content') {
     const sheet = getContentSheet(); const data = sheet.getDataRange().getValues();
@@ -25,7 +25,7 @@ function doGet(e) {
   }
   return ContentService.createTextOutput("Archive Server Online."); 
 }
-
+ 
 function doPost(e) {
   var lock = LockService.getScriptLock();
   try { lock.waitLock(30000); } catch (e) { return createJSON({status:"error", message:"Busy"}); }
@@ -51,9 +51,24 @@ function doPost(e) {
       var sheet = getStudentSheet(); var rows = sheet.getDataRange().getValues();
       var progress = rows.slice(1).map(r => { 
         var mData = "{}"; try { mData = r[3] || "{}"; } catch(e){}
-        return { name: r[1], missionData: JSON.parse(mData), class: r[4] || "UNASSIGNED" }; 
+        return { id: r[0], name: r[1], missionData: JSON.parse(mData), class: r[4] || "UNASSIGNED" }; 
       });
       return createJSON({status: "success", progress: progress });
+    }
+    if (data.action === "save_state") {
+       var sheet = getStudentSheet(); var rows = sheet.getDataRange().getValues();
+       for(var i=1; i<rows.length; i++) { 
+         if(rows[i][0] == data.id) {
+           var mData = JSON.parse(rows[i][3] || "{}"); mData[data.missionId] = data.state;
+           sheet.getRange(i+1, 4).setValue(JSON.stringify(mData)); return createJSON({status: "success"});
+         }
+       }
+       return createJSON({status: "error", message: "User not found"});
+    }
+    if (data.action === "generate_ai_feedback") {
+       if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
+       const feedback = callGemini(data.rationales, data.context);
+       return createJSON({status: "success", feedback: feedback});
     }
      if (data.action === "update_content") {
         if(data.pin != TEACHER_PIN) return createJSON({status: "error", message: "Invalid PIN"});
@@ -70,13 +85,26 @@ function doPost(e) {
      }
    } catch (err) { return createJSON({status:"error", message:err.toString()}); } finally { lock.releaseLock(); }
  }
+ 
+function callGemini(rationales, context) {
+  const API_KEY = "[[INJECT_GEMINI_KEY]]";
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+  const prompt = `You are a professional history educator evaluating a student's performance in a ${context.title} simulation.
+  Student Rationales: ${JSON.stringify(rationales)}
+  Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking. 
+  Provide a concise assessment (150 words). Format with markdown.`;
+  try {
+    const res = UrlFetchApp.fetch(url, { method: "post", contentType: "application/json", payload: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+    return JSON.parse(res.getContentText()).candidates[0].content.parts[0].text;
+  } catch(e) { return "AI Feedback failed: " + e.message; }
+}
 
 function getStudentSheet() { 
   var doc = SpreadsheetApp.getActiveSpreadsheet(); var sheet = doc.getSheetByName("Students"); 
   if (!sheet) { sheet = doc.insertSheet("Students"); sheet.appendRow(["ID","Name","PIN","MISSION_DATA","Class"]); } 
   return sheet; 
 } 
-
+ 
 function getContentSheet() {
   var doc = SpreadsheetApp.getActiveSpreadsheet(); var sheet = doc.getSheetByName("Content");
   if (!sheet) { sheet = doc.insertSheet("Content"); sheet.appendRow(["MissionID", "MissionName", "JSON_DATA"]); }
