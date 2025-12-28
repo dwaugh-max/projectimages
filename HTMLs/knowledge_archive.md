@@ -89,10 +89,7 @@ function doPost(e) {
 function callGemini(rationales, context) {
   const API_KEY = "[[INJECT_GEMINI_KEY]]";
   const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
-  const prompt = `You are a professional history educator evaluating a student's performance in a ${context.title} simulation.
-  Student Rationales: ${JSON.stringify(rationales)}
-  Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking. 
-  Provide a concise assessment (150 words). Format with markdown.`;
+  const prompt = "You are a professional history educator evaluating a student's performance in a " + context.title + " simulation.\n  Student Rationales: " + JSON.stringify(rationales) + "\n  Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking.\n  Provide a concise assessment (150 words). Format with markdown.";
   try {
     const res = UrlFetchApp.fetch(url, { method: "post", contentType: "application/json", payload: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
     return JSON.parse(res.getContentText()).candidates[0].content.parts[0].text;
