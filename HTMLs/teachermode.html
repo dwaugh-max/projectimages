@@ -360,15 +360,46 @@
             } catch (e) { log(e.message, "error"); }
         }
 
+        async function toggleAI(id, currentState) {
+            const newState = !currentState;
+            log(`Updating AI Permissions for [${id}] to ${newState ? "ENABLED" : "DISABLED"}...`);
+            try {
+                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'toggle_ai', pin: PIN, id: id, enabled: newState }) });
+                const j = await res.json();
+                if (j.status === "success") {
+                    log(`AI Status for [${id}] updated: ${j.enabled ? "LIVE" : "OFFLINE"}`, "success");
+                    fetchMissions(); // Refresh to update UI
+                } else log(j.message, "error");
+            } catch (e) { log(e.message, "error"); }
+        }
+
         function renderMissions(ms) {
             document.getElementById('lib-log').innerText = `${ms.length} Capsules Detected.`;
-            let h = "<table><tr><th>Visual</th><th>Dossier Name</th><th>ID</th><th>Action</th></tr>";
+            let h = "<table><tr><th>Visual</th><th>Dossier Name</th><th>ID</th><th>AI Status</th><th>Action</th></tr>";
             ms.forEach(m => {
+                // Determine if AI is enabled (requires fetching full payload really, but list_missions might need to return it)
+                // Assuming list_missions is updated to return metadata soon, but for now we might need to parse it client side or update list_missions
+                // Wait, list_missions only returns id/name/thumb. We need to update list_missions in code.gs to return metadata or AI status.
+                // Let's assume list_missions returns aiEnabled. I will need to update code.gs for this or fetch it.
+                // Actually, let's keep it simple: We need to see the status. 
+                // Updating list_missions in code.gs is cleaner. 
+                // For now, I'll add the UI and I will update code.gs in the next step to return the ai info.
+
+                // TEMP FIX: We will just toggle blindly for now, but ideally we show state.
+                // Let's check m.aiEnabled if I add it to code.gs
+                const aiState = m.aiEnabled ? "🟢 LIVE" : "🔴 OFF";
+                const btnColor = m.aiEnabled ? "#dc3545" : "#28a745";
+                const btnText = m.aiEnabled ? "DISABLE AI" : "ENABLE AI";
+
                 const thumb = m.thumb || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop";
                 h += `<tr>
                         <td><div class="thumb" style="background-image:url('${thumb}')"></div></td>
                         <td><strong>${m.name}</strong></td>
                         <td><code>${m.id}</code></td>
+                        <td>
+                           <div style="font-size:0.6rem; font-weight:bold; margin-bottom:5px;">${aiState}</div>
+                           <button class="btn" style="padding:5px; font-size:0.55rem; width:auto; background:${btnColor}" onclick="toggleAI('${m.id}', ${m.aiEnabled})">${btnText}</button>
+                        </td>
                         <td><button class="btn-del" onclick="deleteMission('${m.id}')">SCRUB RECORD</button></td>
                       </tr>`;
             });
