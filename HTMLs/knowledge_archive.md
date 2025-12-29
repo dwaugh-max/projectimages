@@ -705,7 +705,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.1</div>
+            PROTOCOL | v65.24</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -984,7 +984,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.1';
+            const simVersion = 'v65.24';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
