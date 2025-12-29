@@ -1,4 +1,4 @@
-﻿# Classroom Sim Architect: Knowledge Archive (v65.32 - synced with codebase)
+﻿# Classroom Sim Architect: Knowledge Archive (v65.33 - synced with codebase)
 
 This document contains the universal HTML/JS shells used by the Classroom Sim Architect.
 
@@ -438,8 +438,10 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
         .briefing-dossier {
             width: 100%;
             max-width: 800px;
-            background: rgba(0, 0, 0, 0.85);
-            border: 1px solid #333;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-top: 5px solid var(--accent);
             padding: 30px;
             margin-top: 20px;
@@ -705,7 +707,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.32</div>
+            PROTOCOL | v65.33</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -923,7 +925,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             }
             const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.32`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.33`;
 
             // Populate the outcomes panel (popup) instead of inline text
             populateOutcomes();
@@ -984,7 +986,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.32';
+            const simVersion = 'v65.33';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -1197,7 +1199,7 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
                         <strong>ERROR:</strong> ${err.message}<br>
                         <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
                         <strong>PROTOCOL:</strong> ${location.protocol}<br>
-                        <strong>VER:</strong> v65.32<br>
+                        <strong>VER:</strong> v65.33<br>
                         <strong>STEPS:</strong> 1. UI Loaded. 2. Fetch Triggered. 3. ${err.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR'}.
                     </div>`;
             }
