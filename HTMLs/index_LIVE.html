@@ -591,7 +591,7 @@
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.29</div>
+            PROTOCOL | v65.30</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -809,7 +809,7 @@
             }
             const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.29`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.30`;
 
             // Populate the outcomes panel (popup) instead of inline text
             populateOutcomes();
@@ -870,7 +870,7 @@
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.29';
+            const simVersion = 'v65.30';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -903,7 +903,7 @@
                 document.getElementById('ref-btn').innerText = 'SUBMIT TO RECORD';
             }
 
-            if (narrative === "NO BRIEFING DATA RECORDED.") {
+            if (narrative === "NO BRIEFING DATA RECORDED." || (refMode === 'post' && user.state.aiFeedback)) {
                 document.getElementById('ref-narrative').style.display = 'none';
             } else {
                 document.getElementById('ref-narrative').style.display = 'block';
@@ -913,12 +913,20 @@
 
             if (qs.length > 0 && qs[refIdx]) {
                 document.getElementById('ref-q').innerText = qs[refIdx];
-                document.getElementById('ref-q').style.display = 'block';
+                document.getElementById('ref-q').style.display = (refMode === 'post' && user.state.aiFeedback) ? 'none' : 'block';
             } else if (refMode === 'pre') {
                 document.getElementById('ref-q').style.display = 'none';
             } else {
                 document.getElementById('ref-q').innerText = "END OF LOG. No further questions required.";
+                document.getElementById('ref-q').style.display = (refMode === 'post' && user.state.aiFeedback) ? 'none' : 'block';
                 document.getElementById('ref-a').style.display = 'none';
+            }
+
+            // Hide fallback text box if AI exists
+            if (refMode === 'post' && user.state.aiFeedback) {
+                document.getElementById('ref-a').style.display = 'none';
+            } else if (refMode !== 'pre' && !(qs.length > 0 && refIdx >= qs.length)) {
+                document.getElementById('ref-a').style.display = 'block';
             }
             document.getElementById('ref-a').value = (user.state.ans && user.state.ans[refMode + "_" + refIdx]) || "";
         }
@@ -944,8 +952,8 @@
 
         async function renderDebrief() {
             const d = document.getElementById('debrief-panel'); d.style.display = 'block';
-            let h = `<h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">INTERNAL LOG SUMMARY</h3>`;
-            window.DATA.slides.forEach((s, i) => { h += `<div style="margin-bottom:8px; border-bottom:1px solid #111; padding-bottom:5px;"><strong>${i + 1}</strong>: ${user.state.dec[i] || 'PENDING'}</div>`; });
+            let h = `<h3 style="color:var(--accent); margin-top:0; font-size:0.6rem; letter-spacing:2px; opacity:0.6;">INTERNAL LOG SUMMARY</h3>`;
+            window.DATA.slides.forEach((s, i) => { h += `<div style="margin-bottom:5px; border-bottom:1px solid #111; padding-bottom:3px; font-size:0.7rem; opacity:0.8;"><strong>${i + 1}</strong>: ${user.state.dec[i] || 'PENDING'}</div>`; });
 
             const staticContent = (window.DATA.epilogue && window.DATA.epilogue.staticDebrief)
                 ? window.DATA.epilogue.staticDebrief
@@ -954,24 +962,44 @@
             const aiEnabled = window.DATA.metadata && window.DATA.metadata.enableAIFeedback;
 
             if (user.state.aiFeedback && user.state.aiFeedback.toUpperCase().includes("OFFLINE") && location.protocol !== 'file:') {
-                console.warn("Aggressive Purge: Clearing stale AI data from HTTPS session.");
                 user.state.aiFeedback = null; user.state.aiRequested = false; save();
             }
 
             if (user.state.aiFeedback) {
-                h += `<div style="margin-top:20px; border-top:2px solid var(--accent); padding-top:20px;">
-                        <h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">AI COMMAND ANALYSIS</h3>
-                        <div style="font-family:var(--font-p); font-size:0.95rem; line-height:1.6; color:#99ff99; opacity:0.9;">${parseMD(user.state.aiFeedback)}</div>
+                const parts = user.state.aiFeedback.split("[QUESTIONS]");
+                const analysis = parts[0] || "";
+                const questionsRaw = parts[1] || "";
+
+                h += `<div style="margin-top:15px; border-top:2px solid var(--accent); padding-top:15px;">
+                        <h3 style="color:var(--accent); margin-top:0; font-size:0.65rem; letter-spacing:2px;">AI COMMAND ANALYSIS</h3>
+                        <div style="font-family:var(--font-p); font-size:0.85rem; line-height:1.5; color:#99ff99; opacity:0.9;">${parseMD(analysis)}</div>
                       </div>`;
+
+                if (questionsRaw) {
+                    const qList = questionsRaw.split("\n").filter(line => line.trim().length > 5);
+                    h += `<div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+                            <h3 style="color:var(--accent); margin-top:0; font-size:0.65rem; letter-spacing:2px;">FOLLOW-UP INTERROGATION</h3>`;
+                    qList.forEach((q, idx) => {
+                        const cleanQ = q.replace(/^\d+\.\s*/, "").trim();
+                        const savedAns = (user.state.ans && user.state.ans['ai_q_' + idx]) || "";
+                        h += `<div style="margin-bottom:20px;">
+                                <div style="font-size:0.75rem; color:var(--accent); margin-bottom:8px; line-height:1.4;">${idx + 1}. ${cleanQ}</div>
+                                <textarea oninput="user.state.ans['ai_q_${idx}']=this.value; save();" 
+                                          style="width:100%; height:80px; background:#111; border:1px solid #333; color:#eee; padding:10px; font-family:var(--font-p); font-size:0.8rem;"
+                                          placeholder="Enter response to record...">${savedAns}</textarea>
+                              </div>`;
+                    });
+                    h += `</div>`;
+                }
             } else if (aiEnabled) {
-                h += `<div id="ai-container" style="margin-top:20px; border-top:1px solid #333; padding-top:20px; opacity:0.8; font-size:0.85rem;">
+                h += `<div id="ai-container" style="margin-top:20px; border-top:1px solid #333; padding-top:20px; opacity:0.8; font-size:0.75rem;">
                         <div id="ai-status" style="text-align:center; color:var(--accent); animation: blink 1s infinite;">ENCRYPTING TRANSMISSION TO ANALYST...</div>
                       </div>`;
                 if (!user.state.aiRequested) setTimeout(() => requestAIFeedback(staticContent), 100);
             } else {
                 h += `<div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
-                        <h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">COMMAND DEBRIEF</h3>
-                        <div style="font-family:var(--font-p); font-size:0.95rem; line-height:1.6; opacity:0.9;">${parseMD(staticContent)}</div>
+                        <h3 style="color:var(--accent); margin-top:0; font-size:0.65rem; letter-spacing:2px;">COMMAND DEBRIEF</h3>
+                        <div style="font-family:var(--font-p); font-size:0.85rem; line-height:1.5; opacity:0.9;">${parseMD(staticContent)}</div>
                       </div>`;
             }
             d.innerHTML = h;
@@ -986,10 +1014,12 @@
                 postQs.forEach((q, i) => { rationales.push({ question: q, answer: user.state.ans['post_' + i] }); });
                 if (rationales.length === 0) rationales.push({ question: "General Performance", answer: "Student provided no specific text rationales." });
 
-                const fullPrompt = `You are a professional history educator evaluating a student's performance in a ${window.DATA.metadata.title} simulation. Speak directly to the student in the SECOND PERSON (using "You").
-Student Rationales: ${JSON.stringify(rationales)}
+                const fullPrompt = `You are a professional history educator evaluating a 15-year-old student's performance in a ${window.DATA.metadata.title} simulation. 
+Speak directly to the student in the SECOND PERSON (using "You"). Use language clear and engaging for a high schooler.
+Student Rationales (including questions): ${JSON.stringify(rationales)}
 Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking.
-Provide a concise assessment (150 words) using markdown. At the end of your analysis, generate TWO specific, open-ended follow-up questions to challenge the student further.`;
+Provide a concise assessment (150 words) using markdown. 
+CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then generate TWO specific, short, open-ended follow-up questions (one per line) to challenge the student further.`;
 
                 const TARGET_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
                 let res;
@@ -1049,7 +1079,7 @@ Provide a concise assessment (150 words) using markdown. At the end of your anal
                         <strong>ERROR:</strong> ${err.message}<br>
                         <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
                         <strong>PROTOCOL:</strong> ${location.protocol}<br>
-                        <strong>VER:</strong> v65.29<br>
+                        <strong>VER:</strong> v65.30<br>
                         <strong>STEPS:</strong> 1. UI Loaded. 2. Fetch Triggered. 3. ${err.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR'}.
                     </div>`;
             }
