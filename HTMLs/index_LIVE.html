@@ -1050,6 +1050,7 @@ Provide a concise assessment (150 words). Format with markdown.`;
                                 <strong>ERROR:</strong> ${err.message}<br>
                                 <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
                                 <strong>PROTOCOL:</strong> ${location.protocol}<br>
+                                <strong>VER:</strong> v65.24<br>
                                 <strong>STEPS:</strong> 1. Direct fetch failed. 2. Proxy fetch failed (or internal error).
                               </div>`;
                     }
@@ -1301,7 +1302,7 @@ Provide a concise assessment (150 words). Format with markdown.`;
 
         async function showDebugInfo() {
             document.getElementById('debug-modal').style.display = 'flex';
-            document.getElementById('dbg-engine').innerText = "v63.1 (Failsafe + Hardening)";
+            document.getElementById('dbg-engine').innerText = "v65.24 (AI Debug Build)";
             document.getElementById('dbg-blob').innerText = (window.DATA && window.DATA.metadata && window.DATA.metadata.version) ? "v" + window.DATA.metadata.version : "NOT LOADED";
 
             document.getElementById('dbg-backend').innerText = "PINGING...";
