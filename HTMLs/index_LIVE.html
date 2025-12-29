@@ -622,6 +622,21 @@
         <div id="version-content" style="font-size:0.75rem; color:#ccc; line-height:1.8;"></div>
     </div>
 
+    <!-- HISTORICAL REVEAL PANEL -->
+    <div id="historical-panel"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; max-width:700px; background:rgba(0,0,0,0.98); border:2px solid var(--accent); padding:30px; z-index:2000; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+        <div
+            style="color:var(--accent); font-size:1rem; font-weight:bold; letter-spacing:3px; margin-bottom:20px; text-align:center; text-transform:uppercase;">
+            Historical Outcome
+        </div>
+        <div id="historical-content"
+            style="font-size:1rem; color:#eee; line-height:1.6; margin-bottom:30px; font-family:var(--font-p);"></div>
+        <div style="text-align:center;">
+            <button class="btn" onclick="toggleHistoricalPanel(false)"
+                style="background:var(--accent); color:#000; font-weight:bold; padding:10px 30px;">PROCEED</button>
+        </div>
+    </div>
+
     <script>
         window.DATA = null; let user = { id: null, name: null, pin: null, missions: {} };
         let currentMission = null; let refMode = "pre"; let refIdx = 0; let missionsAvailable = [];
@@ -1091,26 +1106,69 @@ Provide a concise assessment (150 words). Format with markdown.`;
         }
 
         function tab(el, tName) {
-            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active');
-            const s = window.DATA.slides[user.state.last]; const c = s.tabs[tName];
-            let url = c.image || c.mediaURL || "";
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            if (!window.DATA || !window.DATA.slides) return;
+            const s = window.DATA.slides[user.state.last];
+            if (!s || !s.tabs) return;
+
+            const c = s.tabs[tName];
+            if (!c) {
+                document.getElementById('exhibit-left').innerHTML = `<div style="padding:40px; color:#333; text-align:center;">TAB DATA MISSING</div>`;
+                document.getElementById('tab-scroll').innerHTML = `<div>[DATA REDACTED]</div>`;
+                return;
+            }
+
+            // Expanded key support for maximum compatibility
+            let url = (c.image || c.mediaURL || c.media_url || c.videoURL || c.media || "").trim();
             let type = c.mediaType || (url ? "image" : "none");
             let credit = c.credit || 'FIELD RECORD';
-            if (url.includes(",")) { const p = url.split(","); url = p[0].trim(); credit = p[1].trim(); }
+
+            // Handle comma-separated credits (Legacy support)
+            if (url.includes(",")) {
+                const p = url.split(",");
+                url = p[0].trim();
+                if (p[1]) credit = p[1].trim();
+            }
 
             let h = "";
-            if (type === "pdf") h = `<embed src="${url}" type="application/pdf" style="width:100%;height:100%;">`;
-            else if (type === "video") h = `<iframe src="${url}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
-            else if (type === "audio") h = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;"><audio controls src="${url}"></audio></div>`;
-            else if (url) h = `<img src="${url}">`;
-            else h = `<div style="padding:40px; color:#333; text-align:center;">NO MEDIA DATA</div>`;
+            const lowerUrl = url.toLowerCase();
+            const isYouTube = lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be");
+
+            if (isYouTube) {
+                // Extract Video ID using robust regex to handle shorts, watch, embed, etc.
+                let vidId = "";
+                const watchMatch = url.match(/(?:\?v=|\/embed\/|\/watch\?v=|\?feature=player_embedded&v=|&v=)([a-zA-Z0-9_-]{11})/);
+                const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+                const shortsMatch = url.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
+
+                vidId = (watchMatch && watchMatch[1]) || (shortMatch && shortMatch[1]) || (shortsMatch && shortsMatch[1]) || "";
+
+                if (vidId) {
+                    h = `<iframe src="https://www.youtube.com/embed/${vidId}?rel=0" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+                } else {
+                    // Fallback to original URL but as iframe since it's YouTube
+                    h = `<iframe src="${url}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+                }
+            } else if (type === "pdf" || lowerUrl.endsWith(".pdf")) {
+                h = `<embed src="${url}" type="application/pdf" style="width:100%;height:100%;">`;
+            } else if (type === "video" || lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".webm") || lowerUrl.endsWith(".mov")) {
+                h = `<iframe src="${url}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+            } else if (type === "audio" || lowerUrl.endsWith(".mp3") || lowerUrl.endsWith(".wav")) {
+                h = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;"><audio controls src="${url}"></audio></div>`;
+            } else if (url) {
+                h = `<img src="${url}">`;
+            } else {
+                h = `<div style="padding:40px; color:#333; text-align:center;">NO MEDIA DATA</div>`;
+            }
 
             document.getElementById('exhibit-left').innerHTML = h + (url ? `<div class="img-label">${credit}</div>` : "");
 
-            // FAILSAFE RENDERER v63.1
+            // FAILSAFE RENDERER
             let rawTxt = c.body || c.content || "";
             let finalHtml = parseMD(rawTxt);
-            if (!finalHtml && rawTxt) finalHtml = `<div style="white-space:pre-wrap; font-family:var(--font-p);">${rawTxt}</div>`; // Fallback if MD fails
+            if (!finalHtml && rawTxt) finalHtml = `<div style="white-space:pre-wrap; font-family:var(--font-p);">${rawTxt}</div>`;
             if (!finalHtml) finalHtml = `<div style="padding:20px; opacity:0.5;">[DATA REDACTED]</div>`;
 
             document.getElementById('tab-scroll').innerHTML = `<h2>${tName.toUpperCase()} ANALYSIS</h2><div>${finalHtml}</div>`;
@@ -1122,10 +1180,10 @@ Provide a concise assessment (150 words). Format with markdown.`;
             const prompt = s.interactionPrompt || "[NO COMMAND PROTOCOL SPECIFIED]";
             const options = s.options || ["PROCEED"];
 
-            let h = `<h3>EXHIBIT 0${i + 1} COMMAND PROTOCOL</h3><div class="interaction-prompt">${prompt}</div>`;
+            let h = `<h3>EXHIBIT 0${i + 1} RECOMMENDATION PROTOCOL</h3><div class="interaction-prompt">${prompt}</div>`;
             if (rat) {
                 h += `<div style="background:rgba(255,255,255,0.05); padding:20px; border-left:4px solid var(--accent); margin-bottom:20px;">
-                        <strong style="color:var(--accent); font-size:0.7rem; text-transform:uppercase;">COMMAND LOG DATA</strong><br>
+                        <strong style="color:var(--accent); font-size:0.7rem; text-transform:uppercase;">RECOMMENDATION LOG</strong><br>
                         <p style="margin-top:10px; font-size:1rem; opacity:0.8; font-family:var(--font-p);">${rat}</p>
                       </div>`;
             } else {
@@ -1154,7 +1212,27 @@ Provide a concise assessment (150 words). Format with markdown.`;
             if (!r || r.trim().split(/\s+/).length < 50) return alert("Formal analysis (min 50 words) required before decision.");
             user.state.rat[i] = r; user.state.dec[i] = l;
             save(); renderNav(); go(i);
-            if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 1000);
+
+            // HISTORICAL REVEAL LOGIC
+            const s = window.DATA.slides[i];
+            if (s.historicalOutcome) {
+                toggleHistoricalPanel(true, parseMD(s.historicalOutcome));
+            }
+
+            if (i === window.DATA.slides.length - 1 && !s.historicalOutcome) setTimeout(() => startRef("post"), 1000);
+        }
+
+        function toggleHistoricalPanel(show, content) {
+            const p = document.getElementById('historical-panel');
+            if (show && content) {
+                document.getElementById('historical-content').innerHTML = content;
+                p.style.display = 'block';
+            } else {
+                p.style.display = 'none';
+                // Check if this was the last slide to trigger debrief
+                const i = user.state.last;
+                if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 500);
+            }
         }
 
         async function save() { if (user.id && currentMission) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save_state', id: user.id, missionId: currentMission, state: user.state }) }); }
