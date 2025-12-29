@@ -1,4 +1,4 @@
-﻿# Classroom Sim Architect: Knowledge Archive (v65.19 - synced with codebase)
+﻿# Classroom Sim Architect: Knowledge Archive (v65.20 - synced with codebase)
 
 This document contains the universal HTML/JS shells used by the Classroom Sim Architect.
 
@@ -1101,11 +1101,27 @@ Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinki
 Provide a concise assessment (150 words). Format with markdown.`;
 
                         // Call Vercel Proxy (Direct User Endpoint)
-                        const res = await fetch('https://nextjs-boilerplate-delta-olive-29.vercel.app/api/ask', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ prompt: fullPrompt })
-                        });
+                        let res;
+                        try {
+                            // ATTEMPT 1: Direct Connection
+                            res = await fetch('https://nextjs-boilerplate-delta-olive-29.vercel.app/api/ask', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ prompt: fullPrompt })
+                            });
+                        } catch (directErr) {
+                            console.log("Direct AI Connection Failed (likely CORS). Attempting Proxy...");
+                            // ATTEMPT 2: CORS Proxy (Bypass Browser Security)
+                            try {
+                                res = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://nextjs-boilerplate-delta-olive-29.vercel.app/api/ask'), {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ prompt: fullPrompt })
+                                });
+                            } catch (proxyErr) {
+                                throw new Error(`Connection Failed: ${directErr.message} / Proxy: ${proxyErr.message}`);
+                            }
+                        }
 
                         const data = await res.json();
 
