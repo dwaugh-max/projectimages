@@ -1,4 +1,4 @@
-﻿# Classroom Sim Architect: Knowledge Archive (v65.27 - synced with codebase)
+﻿# Classroom Sim Architect: Knowledge Archive (v65.28 - synced with codebase)
 
 This document contains the universal HTML/JS shells used by the Classroom Sim Architect.
 
@@ -705,7 +705,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.27</div>
+            PROTOCOL | v65.28</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -923,7 +923,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             }
             const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.27`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.28`;
 
             // Populate the outcomes panel (popup) instead of inline text
             populateOutcomes();
@@ -984,7 +984,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.27';
+            const simVersion = 'v65.28';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -1056,22 +1056,15 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             let h = `<h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">INTERNAL LOG SUMMARY</h3>`;
             window.DATA.slides.forEach((s, i) => { h += `<div style="margin-bottom:8px; border-bottom:1px solid #111; padding-bottom:5px;"><strong>${i + 1}</strong>: ${user.state.dec[i] || 'PENDING'}</div>`; });
 
-            // Failsafe Content (Static Fallback)
             const staticContent = (window.DATA.epilogue && window.DATA.epilogue.staticDebrief)
                 ? window.DATA.epilogue.staticDebrief
                 : "Mission analysis complete. Review your command log above.";
 
-            // AI Feedback Logic
-            // CHECK 1: Is AI enabled by the teacher? (Default: FALSE)
-            // CHECK 2: Has it already been requested? (One-shot limit)
             const aiEnabled = window.DATA.metadata && window.DATA.metadata.enableAIFeedback;
 
-            // PURGE STALE SIMULATION DATA: If we are on HTTPS but have an old offline simulation string, clear it to force a fresh fetch
             if (user.state.aiFeedback && user.state.aiFeedback.toUpperCase().includes("OFFLINE") && location.protocol !== 'file:') {
                 console.warn("Aggressive Purge: Clearing stale AI data from HTTPS session.");
-                user.state.aiFeedback = null;
-                user.state.aiRequested = false;
-                save(); // Force backend sync to clear the 'bad' data
+                user.state.aiFeedback = null; user.state.aiRequested = false; save();
             }
 
             if (user.state.aiFeedback) {
@@ -1080,112 +1073,95 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
                         <div style="font-family:var(--font-p); font-size:0.95rem; line-height:1.6; color:#99ff99; opacity:0.9;">${parseMD(user.state.aiFeedback)}</div>
                       </div>`;
             } else if (aiEnabled) {
-                // If AI is enabled but not yet present, show loading state and attempt fetch
                 h += `<div id="ai-container" style="margin-top:20px; border-top:1px solid #333; padding-top:20px; opacity:0.8; font-size:0.85rem;">
                         <div id="ai-status" style="text-align:center; color:var(--accent); animation: blink 1s infinite;">ENCRYPTING TRANSMISSION TO ANALYST...</div>
                       </div>`;
-
-                // Attempt to fetch AI feedback via Vercel Proxy
-                // Rate limited & Failsafe protected
-                if (!user.state.aiRequested) {
-                    user.state.aiRequested = true; // prevent double-tap
-                    try {
-                        const rationales = window.DATA.reflections['pre'].map((q, i) => ({ question: q, answer: user.state.ans['pre_' + i] }));
-                        const postQs = window.DATA.reflections['post'] || [];
-                        postQs.forEach((q, i) => { rationales.push({ question: q, answer: user.state.ans['post_' + i] }); });
-
-                        // FIX: Ensure rationales is never empty
-                        if (rationales.length === 0) rationales.push({ question: "General Performance", answer: "Student provided no specific text rationales." });
-
-                        // LIVE CHECK: Ping Archive to see if AI is currently enabled for this mission
-                        // DISABLED FOR LOCAL TESTING
-                        // const statusRes = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'check_ai_status', id: window.DATA.metadata.id }) });
-                        // const statusJson = await statusRes.json();
-                        // if (!statusJson.enabled) throw new Error("AI Disabled by Teacher (Live Override)");
-
-                        // Construct Prompt
-                        const fullPrompt = `You are a professional history educator evaluating a student's performance in a ${window.DATA.metadata.title} simulation.
-Student Rationales: ${JSON.stringify(rationales)}
-Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking.
-Provide a concise assessment (150 words). Format with markdown.`;
-
-                        // Call Vercel Proxy (Direct User Endpoint)
-                        const TARGET_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
-                        let res;
-                        try {
-                            // ATTEMPT 1: Direct Connection
-                            res = await fetch(TARGET_URL, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ message: fullPrompt })
-                            });
-                        } catch (directErr) {
-                            console.log("Direct AI Connection Failed (likely CORS). Attempting Proxy...");
-                            // ATTEMPT 2: CORS Proxy (Bypass Browser Security)
-                            try {
-                                res = await fetch('https://corsproxy.io/?' + encodeURIComponent(TARGET_URL), {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ message: fullPrompt })
-                                });
-                            } catch (proxyErr) {
-                                throw new Error(`Connection Failed: ${directErr.message} / Proxy: ${proxyErr.message}`);
-                            }
-                        }
-
-                        const data = await res.json();
-
-                        // Handle OpenRouter / Proxy response structure
-                        const reply = data.choices ? (data.choices[0]?.message?.content) : data.reply;
-
-                        if (reply) {
-                            user.state.aiFeedback = reply;
-                            save();
-                            renderDebrief(); // Re-render with feedback
-                        } else {
-                            // LOG DEBUG INFO
-                            console.warn("AI Structure Error:", data);
-                            throw new Error("No feedback returned (Invalid structure). See log.");
-                        }
-                    } catch (err) {
-                        console.log("AI Service Unavailable.", err);
-
-                        // LOCAL DEV BYPASS: Only trigger if running from a local file (file:///)
-                        if (location.protocol === 'file:' && err.message.includes("Failed to fetch")) {
-                            user.state.aiFeedback = "***[OFFLINE SIMULATION]***\n\n" + staticContent + "\n\n*(Note: Live AI unavailable in local file mode.)*";
-                            user.state.aiRequested = true;
-                            save();
-                            renderDebrief();
-                            return;
-                        }
-
-                        // Real Failure (Server Down / CORS / Structure Error)
-                        user.state.aiRequested = false;
-                        save();
-
-                        h += `<div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
-                                <h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">COMMAND DEBRIEF (SYSTEM OFFLINE)</h3>
-                                <div style="font-family:var(--font-p); font-size:0.95rem; line-height:1.6; opacity:0.9;">${parseMD(staticContent)}</div>
-                              </div>
-                              
-                              <div style="background:#200; padding:15px; font-family:monospace; font-size:0.7rem; color:#ff9999; margin-top:20px; border:1px solid #500; border-radius:4px;">
-                                <div style="margin-bottom:5px; border-bottom:1px solid #500; padding-bottom:5px; font-weight:bold;">NETWORK_DEBUG_LOG</div>
-                                <strong>ERROR:</strong> ${err.message}<br>
-                                <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
-                                <strong>PROTOCOL:</strong> ${location.protocol}<br>
-                                <strong>VER:</strong> v65.27<br>
-                                <strong>STEPS:</strong> 1. Direct fetch failed. 2. Proxy fetch failed (or internal error).
-                              </div>`;
-                    }
-                }
+                if (!user.state.aiRequested) setTimeout(() => requestAIFeedback(staticContent), 100);
             } else {
-                // AI DISABLED: Show Static Debrief immediately
                 h += `<div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
                         <h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">COMMAND DEBRIEF</h3>
                         <div style="font-family:var(--font-p); font-size:0.95rem; line-height:1.6; opacity:0.9;">${parseMD(staticContent)}</div>
                       </div>`;
             }
             d.innerHTML = h;
+        }
+
+        async function requestAIFeedback(staticContent) {
+            if (user.state.aiRequested) return;
+            user.state.aiRequested = true;
+            try {
+                const rationales = window.DATA.reflections['pre'].map((q, i) => ({ question: q, answer: user.state.ans['pre_' + i] }));
+                const postQs = window.DATA.reflections['post'] || [];
+                postQs.forEach((q, i) => { rationales.push({ question: q, answer: user.state.ans['post_' + i] }); });
+                if (rationales.length === 0) rationales.push({ question: "General Performance", answer: "Student provided no specific text rationales." });
+
+                const fullPrompt = `You are a professional history educator evaluating a student's performance in a ${window.DATA.metadata.title} simulation.
+Student Rationales: ${JSON.stringify(rationales)}
+Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking.
+Provide a concise assessment (150 words). Format with markdown.`;
+
+                const TARGET_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
+                let res;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                try {
+                    res = await fetch(TARGET_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: fullPrompt }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                } catch (directErr) {
+                    clearTimeout(timeoutId);
+                    console.log("Direct AI Connection Failed. Attempting Proxy...");
+                    const proxyController = new AbortController();
+                    const ptId = setTimeout(() => proxyController.abort(), 15000);
+                    try {
+                        res = await fetch('https://corsproxy.io/?' + encodeURIComponent(TARGET_URL), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: fullPrompt }),
+                            signal: proxyController.signal
+                        });
+                        clearTimeout(ptId);
+                    } catch (proxyErr) {
+                        clearTimeout(ptId);
+                        throw new Error(`Connection Failed: ${directErr.message} / Proxy: ${proxyErr.message}`);
+                    }
+                }
+
+                const data = await res.json();
+                const reply = data.choices ? (data.choices[0]?.message?.content) : data.reply;
+
+                if (reply) {
+                    user.state.aiFeedback = reply; save(); renderDebrief();
+                } else {
+                    throw new Error("No feedback returned (Invalid structure). See log.");
+                }
+            } catch (err) {
+                console.log("AI Service Unavailable.", err);
+                const d = document.getElementById('debrief-panel');
+                if (location.protocol === 'file:' && err.message.includes("Failed to fetch")) {
+                    user.state.aiFeedback = "***[OFFLINE SIMULATION]***\n\n" + staticContent + "\n\n*(Note: Live AI unavailable in local file mode.)*";
+                    save(); renderDebrief(); return;
+                }
+                user.state.aiRequested = false; save();
+                d.innerHTML += `
+                    <div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+                        <h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">COMMAND DEBRIEF (SYSTEM OFFLINE)</h3>
+                        <div style="font-family:var(--font-p); font-size:0.95rem; line-height:1.6; opacity:0.9;">${parseMD(staticContent)}</div>
+                    </div>
+                    <div style="background:#200; padding:15px; font-family:monospace; font-size:0.7rem; color:#ff9999; margin-top:20px; border:1px solid #500; border-radius:4px;">
+                        <div style="margin-bottom:5px; border-bottom:1px solid #500; padding-bottom:5px; font-weight:bold;">NETWORK_DEBUG_LOG</div>
+                        <strong>ERROR:</strong> ${err.message}<br>
+                        <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
+                        <strong>PROTOCOL:</strong> ${location.protocol}<br>
+                        <strong>VER:</strong> v65.28<br>
+                        <strong>STEPS:</strong> 1. UI Loaded. 2. Fetch Triggered. 3. ${err.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR'}.
+                    </div>`;
+            }
         }
 
         async function nextRef() {
