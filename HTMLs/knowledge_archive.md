@@ -1,4 +1,4 @@
-﻿# Classroom Sim Architect: Knowledge Archive (v65.4 - synced with codebase)
+﻿# Classroom Sim Architect: Knowledge Archive (v65.5 - synced with codebase)
 
 This document contains the universal HTML/JS shells used by the Classroom Sim Architect.
 
@@ -1235,7 +1235,7 @@ Provide a concise assessment (150 words). Format with markdown.`;
             }
 
             // Expanded key support for maximum compatibility
-            let url = (c.image || c.mediaURL || c.media_url || c.videoURL || c.media || "").trim();
+            let url = (c.image || c.mediaURL || c.media_url || c.videoURL || c.video || c.media || "").trim();
             let type = c.mediaType || (url ? "image" : "none");
             let credit = c.credit || 'FIELD RECORD';
 
