@@ -1,4 +1,4 @@
-﻿# Classroom Sim Architect: Knowledge Archive (v65.25 - synced with codebase)
+﻿# Classroom Sim Architect: Knowledge Archive (v65.26 - synced with codebase)
 
 This document contains the universal HTML/JS shells used by the Classroom Sim Architect.
 
@@ -705,7 +705,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.25</div>
+            PROTOCOL | v65.26</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -984,7 +984,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.25';
+            const simVersion = 'v65.26';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -1066,10 +1066,11 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             const aiEnabled = window.DATA.metadata && window.DATA.metadata.enableAIFeedback;
 
             // PURGE STALE SIMULATION DATA: If we are on HTTPS but have an old offline simulation string, clear it to force a fresh fetch
-            if (user.state.aiFeedback && user.state.aiFeedback.includes("[OFFLINE SIMULATION]") && location.protocol !== 'file:') {
-                console.log("Purging stale offline simulation data for live environment...");
+            if (user.state.aiFeedback && user.state.aiFeedback.toUpperCase().includes("OFFLINE") && location.protocol !== 'file:') {
+                console.warn("Aggressive Purge: Clearing stale AI data from HTTPS session.");
                 user.state.aiFeedback = null;
                 user.state.aiRequested = false;
+                save(); // Force backend sync to clear the 'bad' data
             }
 
             if (user.state.aiFeedback) {
@@ -1171,7 +1172,7 @@ Provide a concise assessment (150 words). Format with markdown.`;
                                 <strong>ERROR:</strong> ${err.message}<br>
                                 <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
                                 <strong>PROTOCOL:</strong> ${location.protocol}<br>
-                                <strong>VER:</strong> v65.25<br>
+                                <strong>VER:</strong> v65.26<br>
                                 <strong>STEPS:</strong> 1. Direct fetch failed. 2. Proxy fetch failed (or internal error).
                               </div>`;
                     }
@@ -1423,7 +1424,7 @@ Provide a concise assessment (150 words). Format with markdown.`;
 
         async function showDebugInfo() {
             document.getElementById('debug-modal').style.display = 'flex';
-            document.getElementById('dbg-engine').innerText = "v65.25 (AI Debug Build)";
+            document.getElementById('dbg-engine').innerText = "v65.26 (AI Debug Build)";
             document.getElementById('dbg-blob').innerText = (window.DATA && window.DATA.metadata && window.DATA.metadata.version) ? "v" + window.DATA.metadata.version : "NOT LOADED";
 
             document.getElementById('dbg-backend').innerText = "PINGING...";
@@ -1433,6 +1434,14 @@ Provide a concise assessment (150 words). Format with markdown.`;
                 // Extract version if present, otherwise just show status
                 document.getElementById('dbg-backend').innerText = txt.replace("Archive Server Online.", "").trim() || "v63.0 (Legacy)";
             } catch (e) { document.getElementById('dbg-backend').innerText = "OFFLINE/ERROR"; }
+        }
+
+        function resetAICache() {
+            if (!confirm("CLEAR AI FEEDBACK? This will force a fresh fetch from the server.")) return;
+            user.state.aiFeedback = null;
+            user.state.aiRequested = false;
+            save();
+            location.reload();
         }
     </script>
 
@@ -1450,7 +1459,10 @@ Provide a concise assessment (150 words). Format with markdown.`;
                 <div><strong>BACKEND (Script):</strong> <span id="dbg-backend"
                         style="float:right; color:var(--accent);">...</span></div>
             </div>
-            <button class="btn" onclick="document.getElementById('debug-modal').style.display='none'">CLOSE
+            <button class="btn" style="background:#400; color:#fff; border-color:#800; margin-bottom:10px; width:100%;"
+                onclick="resetAICache()">RESET AI CACHE</button>
+            <button class="btn" style="width:100%;"
+                onclick="document.getElementById('debug-modal').style.display='none'">CLOSE
                 DIAGNOSTICS</button>
         </div>
     </div>
