@@ -1167,7 +1167,9 @@ Provide a concise assessment (150 words). Format with markdown.`;
             } else if (type === "pdf" || lowerUrl.endsWith(".pdf")) {
                 h = `<embed src="${url}" type="application/pdf" style="width:100%;height:100%;">`;
             } else if (type === "video" || lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".webm") || lowerUrl.endsWith(".mov")) {
-                h = `<iframe src="${url}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+                h = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;">
+                        <video controls src="${url}" style="width:100%;height:100%;outline:none;border:none;"></video>
+                     </div>`;
             } else if (type === "audio" || lowerUrl.endsWith(".mp3") || lowerUrl.endsWith(".wav")) {
                 h = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;"><audio controls src="${url}"></audio></div>`;
             } else if (url) {

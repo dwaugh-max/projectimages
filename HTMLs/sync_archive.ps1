@@ -4,8 +4,8 @@ $tm = 'c:\Github Repos\projectimages\HTMLs\teachermode_LIVE.html'
 $brain = 'C:\Users\dwaug\.gemini\antigravity\brain\48e268bc-65b2-4585-9e81-43a9af3646b6\knowledge_archive.md'
 
 $head = Get-Content $ka -TotalCount 113
-# Bump version in Header from v65.8 to v65.9
-$head[0] = $head[0] -replace 'v65.8', 'v65.9'
+# Bump version in Header from v65.9 to v65.10
+$head[0] = $head[0] -replace 'v65.9', 'v65.10'
 
 $idxContent = Get-Content $ix -Raw
 $idxContent = $idxContent -replace 'const API_URL = "https://script\.google\.com/[^"]+";', 'const API_URL = "[[INJECT_URL_NOW]]";'
@@ -25,4 +25,4 @@ $final += '```'
 
 $final | Set-Content $ka -Encoding UTF8
 Copy-Item $ka $brain -Force
-Write-Host "Sync Complete (v65.9)"
+Write-Host "Sync Complete (v65.10)"
