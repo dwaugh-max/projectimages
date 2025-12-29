@@ -1,4 +1,4 @@
-﻿# Classroom Sim Architect: Knowledge Archive (v65.28 - synced with codebase)
+﻿# Classroom Sim Architect: Knowledge Archive (v65.29 - synced with codebase)
 
 This document contains the universal HTML/JS shells used by the Classroom Sim Architect.
 
@@ -705,7 +705,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.28</div>
+            PROTOCOL | v65.29</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -923,7 +923,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             }
             const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.28`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.29`;
 
             // Populate the outcomes panel (popup) instead of inline text
             populateOutcomes();
@@ -984,7 +984,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.28';
+            const simVersion = 'v65.29';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -1017,7 +1017,12 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
                 document.getElementById('ref-btn').innerText = 'SUBMIT TO RECORD';
             }
 
-            document.getElementById('ref-narrative').innerHTML = parseMD(narrative);
+            if (narrative === "NO BRIEFING DATA RECORDED.") {
+                document.getElementById('ref-narrative').style.display = 'none';
+            } else {
+                document.getElementById('ref-narrative').style.display = 'block';
+                document.getElementById('ref-narrative').innerHTML = parseMD(narrative);
+            }
             if (refMode === 'post' && refIdx === 0) renderDebrief(); else document.getElementById('debrief-panel').style.display = 'none';
 
             if (qs.length > 0 && qs[refIdx]) {
@@ -1095,10 +1100,10 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
                 postQs.forEach((q, i) => { rationales.push({ question: q, answer: user.state.ans['post_' + i] }); });
                 if (rationales.length === 0) rationales.push({ question: "General Performance", answer: "Student provided no specific text rationales." });
 
-                const fullPrompt = `You are a professional history educator evaluating a student's performance in a ${window.DATA.metadata.title} simulation.
+                const fullPrompt = `You are a professional history educator evaluating a student's performance in a ${window.DATA.metadata.title} simulation. Speak directly to the student in the SECOND PERSON (using "You").
 Student Rationales: ${JSON.stringify(rationales)}
 Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking.
-Provide a concise assessment (150 words). Format with markdown.`;
+Provide a concise assessment (150 words) using markdown. At the end of your analysis, generate TWO specific, open-ended follow-up questions to challenge the student further.`;
 
                 const TARGET_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
                 let res;
@@ -1158,7 +1163,7 @@ Provide a concise assessment (150 words). Format with markdown.`;
                         <strong>ERROR:</strong> ${err.message}<br>
                         <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
                         <strong>PROTOCOL:</strong> ${location.protocol}<br>
-                        <strong>VER:</strong> v65.28<br>
+                        <strong>VER:</strong> v65.29<br>
                         <strong>STEPS:</strong> 1. UI Loaded. 2. Fetch Triggered. 3. ${err.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR'}.
                     </div>`;
             }
