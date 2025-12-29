@@ -591,7 +591,7 @@
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.26</div>
+            PROTOCOL | v65.27</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -809,7 +809,7 @@
             }
             const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerText = `${m.title || currentMission}`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.27`;
 
             // Populate the outcomes panel (popup) instead of inline text
             populateOutcomes();
@@ -870,12 +870,13 @@
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.26';
+            const simVersion = 'v65.27';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE AUTHOR:</strong> ${blobAuthor}</div>
                 <div style="margin-top:10px; opacity:0.5; font-size:0.65rem;">code.gs: Managed by Classroom Sim Architect</div>
+                <button class="btn" style="background:#400; color:#fff; border-color:#800; margin-top:15px; width:100%; font-size: 0.65rem;" onclick="resetAICache()">RESET AI CACHE</button>
             `;
             document.getElementById('version-content').innerHTML = h;
             toggleVersionPanel();
@@ -1058,7 +1059,7 @@ Provide a concise assessment (150 words). Format with markdown.`;
                                 <strong>ERROR:</strong> ${err.message}<br>
                                 <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
                                 <strong>PROTOCOL:</strong> ${location.protocol}<br>
-                                <strong>VER:</strong> v65.26<br>
+                                <strong>VER:</strong> v65.27<br>
                                 <strong>STEPS:</strong> 1. Direct fetch failed. 2. Proxy fetch failed (or internal error).
                               </div>`;
                     }
@@ -1308,20 +1309,6 @@ Provide a concise assessment (150 words). Format with markdown.`;
         async function save() { if (user.id && currentMission) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save_state', id: user.id, missionId: currentMission, state: user.state }) }); }
         async function initParticles() { await tsParticles.load("tsparticles", { particles: { number: { value: 30 }, size: { value: 2 }, move: { speed: 0.5 }, opacity: { value: 0.3 } } }); }
 
-        async function showDebugInfo() {
-            document.getElementById('debug-modal').style.display = 'flex';
-            document.getElementById('dbg-engine').innerText = "v65.26 (AI Debug Build)";
-            document.getElementById('dbg-blob').innerText = (window.DATA && window.DATA.metadata && window.DATA.metadata.version) ? "v" + window.DATA.metadata.version : "NOT LOADED";
-
-            document.getElementById('dbg-backend').innerText = "PINGING...";
-            try {
-                const res = await fetch(API_URL);
-                const txt = await res.text();
-                // Extract version if present, otherwise just show status
-                document.getElementById('dbg-backend').innerText = txt.replace("Archive Server Online.", "").trim() || "v63.0 (Legacy)";
-            } catch (e) { document.getElementById('dbg-backend').innerText = "OFFLINE/ERROR"; }
-        }
-
         function resetAICache() {
             if (!confirm("CLEAR AI FEEDBACK? This will force a fresh fetch from the server.")) return;
             user.state.aiFeedback = null;
@@ -1331,27 +1318,8 @@ Provide a concise assessment (150 words). Format with markdown.`;
         }
     </script>
 
-    <!-- DEBUG MODAL -->
-    <div id="debug-modal" class="modal"
-        style="display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.95); z-index:9999;">
-        <div style="background:#111; border:1px solid var(--accent); padding:30px; width:400px; text-align:center;">
-            <h2 style="color:var(--accent); margin-top:0;">COMPONENT STATUS</h2>
-            <div
-                style="text-align:left; font-family:var(--font-h); font-size:0.9rem; line-height:2; margin:20px 0; color:#ddd;">
-                <div><strong>ENGINE (Index):</strong> <span id="dbg-engine"
-                        style="float:right; color:var(--accent);">...</span></div>
-                <div><strong>MISSION DATA (Blob):</strong> <span id="dbg-blob"
-                        style="float:right; color:var(--accent);">...</span></div>
-                <div><strong>BACKEND (Script):</strong> <span id="dbg-backend"
-                        style="float:right; color:var(--accent);">...</span></div>
-            </div>
-            <button class="btn" style="background:#400; color:#fff; border-color:#800; margin-bottom:10px; width:100%;"
-                onclick="resetAICache()">RESET AI CACHE</button>
-            <button class="btn" style="width:100%;"
-                onclick="document.getElementById('debug-modal').style.display='none'">CLOSE
-                DIAGNOSTICS</button>
-        </div>
-    </div>
+    <!-- DEBUG MODAL (DEPRECATED) -->
+    <div id="debug-modal" class="modal" style="display:none;"></div>
 </body>
 
 </html>
