@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SITUATION ROOM | Critical Juncture Operations (DEMO)</title>
+    <script>
+        const DEMO_MISSIONS = {
+            "CUBA_62": { "metadata": { "id": "CUBA_62", "title": "DEFCON 2: The 13 Days", "description": "October 1962. Soviet nuclear missiles have been detected 90 miles from Florida. Your decisions will determine if the Cold War turns hot.", "author": "Classroom Sim Architect", "version": "60.1" }, "theme": { "accent": "#d2b48c", "fontH": "Courier New, monospace", "fontP": "Georgia, serif", "splashHeroURL": "https://dwaugh-edsim.github.io/projectimages/cuba62/splash-kennedy-1.jpg" }, "intelligenceGlossary": [{ "term": "ExComm", "definition": "Executive Committee of the National Security Council." }, { "term": "DEFCON", "definition": "Defense Readiness Condition. DEFCON 2 is 'Next step to nuclear war'." }, { "term": "Quarantine", "definition": "A naval blockade, termed 'quarantine' to avoid technical acts of war." }], "reflections": { "pre": [], "pre_narrative": "OCTOBER 16, 1962. The world stands on the razor's edge. Soviet missiles have been found in Cuba. You are inside the ExComm Situation Room. The window for diplomacy is closing.", "post": ["How did imperfect information impact your willingness to authorize force?", "Was the Turkey Trade necessary secrecy or betrayal of transparency?"], "post_narrative": "The crisis ended on Oct 28. Kennedy's restraint prevented WW3. But the world learned how fragile peace truly was." }, "slides": [{ "shortTitle": "EXHIBIT A: Discovery", "longTitle": "OCT 16: THE SMOKING GUN", "interactionPrompt": "Do you classify this as an immediate act of war requiring a strike, or a strategic shift requiring diplomacy?", "options": ["CLASSIFY AS ACT OF WAR (STRIKE)", "CLASSIFY AS STRATEGIC THREAT (DIPLOMACY)"], "tabs": { "primary": { "image": "https://dwaugh-edsim.github.io/projectimages/cuba62/u2photos.jpg", "credit": "US DoD", "body": "## SURVEILLANCE LOG\nU-2 flights have confirmed SS-4 missile launchers in Cuba. Offensive, not defensive." }, "legal": { "image": "https://dwaugh-edsim.github.io/projectimages/cuba62/airstrike-doc.jpg", "body": "The Joint Chiefs demand OPLAN 312: An immediate massive air strike." }, "intel": { "image": "https://dwaugh-edsim.github.io/projectimages/cuba62/2-classified-map.jpg", "body": "Missiles can strike DC in 5 minutes. Decapitation threat." } } }, { "shortTitle": "EXHIBIT B: The ExComm", "longTitle": "OCT 18: THE EXCOMM TABLE", "interactionPrompt": "McNamara pushes for Quarantine. LeMay pushes for Strike. Your vote?", "options": ["AUTHORIZE OPLAN 312 (AIRSTRIKE)", "AUTHORIZE QUARANTINE (BLOCKADE)"], "tabs": { "primary": { "image": "https://dwaugh-edsim.github.io/projectimages/cuba62/situationroom-1.jpg", "body": "The room is split. Kennedy haunts 'Guns of August'—stumbling into war." }, "legal": { "image": "https://dwaugh-edsim.github.io/projectimages/cuba62/lemay.jpg", "body": "LeMay: 'This is almost as bad as Munich.' He wants to hit them now." }, "intel": { "image": "https://dwaugh-edsim.github.io/projectimages/cuba62/RFK-Mcnamara-1.jpg", "body": "RFK: A surprise attack is 'Pearl Harbor in reverse.'" } } }] },
+            "MIKMAW11": {
+                "metadata": {
+                    "id": "MIKMAW11",
+                    "title": "The Trading Post",
+                    "description": "A constitutional showdown. Does an 18th-century Treaty protect a modern cannabis shop?",
+                    "author": "Situation Room AI",
+                    "version": "1.2"
+                },
+                "theme": { "accent": "#8B0000", "fontH": "Merriweather", "fontP": "Roboto", "splashHeroURL": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/leo-blockade.jpg" },
+                "intelligenceGlossary": [{ "term": "Truckhouse", "definition": "18th-century trading post." }],
+                "reflections": {
+                    "pre_narrative": "### MISSION BRIEFING: THE STANDOFF\n\nDATE: Dec 2025. Location: Leo's Trading Post. RCMP raid stopped by a Sacred Fire.",
+                    "post_narrative": "### THE JUDGMENT\nThe courtroom is quiet. Was it Safety or Sovereignty?"
+                },
+                "slides": [
+                    {
+                        "shortTitle": "The Promise",
+                        "longTitle": "EXHIBIT A: The Truckhouse",
+                        "interactionPrompt": "Does the Treaty of 1752 protect Leo?",
+                        "tabs": {
+                            "primary": { "body": "## THE MAP\nIn 1752, the British promised a Truckhouse for trade.", "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/truckhouse-map.jpg" },
+                            "legal": { "body": "## THE WORDS\n'Free liberty to bring for Sale... ANY OTHER THING.'", "image": "https://upload.wikimedia.org/wikipedia/commons/3/36/1752_Peace_and_Friendship_Treaty.jpg" }
+                        }
+                    }
+                ]
+            }
+        };
+
+        const API_URL = "OFFLINE_DEMO";
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Oswald:wght@700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg: #0c0c0c;
+            --accent: #d2b48c;
+            --text: #e0e0e0;
+            --card: #ffffff;
+            --font-p: 'Inter', sans-serif;
+            --font-h: 'Courier New', monospace;
+            --font-logo: 'Oswald', sans-serif;
+        }
+
+        body,
+        input,
+        button,
+        textarea,
+        select {
+            margin: 0;
+            font-family: var(--font-p);
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: 145px;
+            min-width: 145px;
+            background: #000;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #333;
+        }
+
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .nav-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .nav-container::-webkit-scrollbar-thumb {
+            background: var(--accent);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #111;
+            perspective: 1000px;
+            padding: 20px;
+            position: relative;
+            min-height: 100vh;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 1px solid #333;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.6rem;
+            color: #666;
+            z-index: 100;
+            pointer-events: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .mission-header {
+            font-family: var(--font-p);
+            color: #fff;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+            line-height: 1.2;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+
+        .card {
+            background: transparent;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease;
+            width: 100%;
+        }
+
+        .card.active {
+            display: flex;
+        }
+
+        .exhibit-frame {
+            display: flex;
+            background: var(--card);
+            color: #000;
+            border-radius: 4px;
+            min-height: 400px;
+            max-height: 450px;
+            overflow: hidden;
+            border: 1px solid #999;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .exhibit-left {
+            flex: 0.7;
+            background: #000;
+            position: relative;
+            border-right: 1px solid #ddd;
+        }
+
+        .exhibit-left img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .img-label {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--accent);
+            padding: 6px 10px;
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            border: 1px solid var(--accent);
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+
+        .exhibit-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .tab-bar {
+            display: flex;
+            background: #f4f4f4;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.65rem;
+            border-right: 1px solid #ddd;
+            color: #999;
+            font-weight: 700;
+            transition: 0.2s;
+            letter-spacing: 1.5px;
+        }
+
+        .tab.active {
+            background: #fff;
+            color: #000;
+        }
+
+        .tab-content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            line-height: 1.6;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .interaction-block {
+            background: #222;
+            color: #fff;
+            border-top: 4px solid var(--accent);
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        .interaction-prompt {
+            font-style: italic;
+            font-size: 0.85rem;
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+            padding-left: 12px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+        }
+
+        .btn.active {
+            background: var(--accent) !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+
+        .choice-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .choice-row .btn {
+            flex: 1;
+        }
+
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            background-size: cover;
+            background-position: center;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 100px;
+            overflow-y: auto;
+        }
+
+        .splash-inner {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .briefing-dossier {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--accent);
+            padding: 40px;
+            margin-top: 30px;
+            max-height: 45vh;
+            overflow-y: auto;
+            color: #eee;
+        }
+
+        #ref-modal {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .situation-room-logo {
+            font-family: var(--font-logo);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            line-height: 0.9;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="tsparticles"></div>
+    <div id="splash">
+        <div id="splash-version"
+            style="position:fixed; top:10px; left:10px; font-size:0.5rem; color:var(--accent); opacity:0.3;">
+            v65.52 DEMO</div>
+        <div class="splash-inner">
+            <div id="login-step" style="width:480px; text-align:center;">
+                <h1 class="situation-room-logo" style="color:var(--accent); font-size:4.5rem; margin-bottom:20px;">
+                    THE SITUATION ROOM</h1>
+                <p
+                    style="font-size:0.7rem; opacity:0.5; margin-bottom:30px; text-transform:uppercase; letter-spacing:2px;">
+                    Critical Juncture Authorization (DEMO)</p>
+                <input id="username" placeholder="NAME / CODENAME" value="DEMO_AGENT">
+                <input id="pin" type="password" placeholder="ACCESS PIN (ANY)" value="1234">
+                <input id="class-code" placeholder="CLASS CODE" value="DEMO-01">
+                <button class="btn"
+                    style="text-align:center; background:var(--accent); color:#000; font-weight:bold; width:100%; margin-top:20px;"
+                    onclick="login()">AUTHORIZE ACCESS</button>
+                <div
+                    style="margin-top:25px; font-size:0.6rem; opacity:0.3; text-transform:uppercase; letter-spacing:3px;">
+                    "The Critical Moment Where Everything Hangs on a Decision"
+                </div>
+            </div>
+
+            <div id="lobby-step" style="width:600px; display:none;">
+                <h2 style="color:var(--accent); font-size:1.5rem; text-align:center; margin-bottom:30px;">SELECT ARCHIVE
+                </h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    <button class="btn" style="height:100px; background:#111; border-color:#d2b48c;"
+                        onclick="launch('CUBA_62')">
+                        <div style="font-weight:bold; color:#d2b48c;">CUBA 62</div>
+                        <div style="font-size:0.5rem; opacity:0.6;">THE 13 DAYS</div>
+                    </button>
+                    <button class="btn" style="height:100px; background:#111; border-color:#8B0000;"
+                        onclick="launch('MIKMAW11')">
+                        <div style="font-weight:bold; color:#8B0000;">THE TRADING POST</div>
+                        <div style="font-size:0.5rem; opacity:0.6;">CONSTITUTIONAL SHOWDOWN</div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="ref-modal">
+                <h1 id="mission-title-big"
+                    style="color:#fff; font-size:3rem; font-family:var(--font-logo); letter-spacing:10px;">MISSION</h1>
+                <div class="briefing-dossier" id="ref-narrative"></div>
+                <div id="ref-q" style="margin-top:20px; font-weight:bold; color:var(--accent);"></div>
+                <textarea id="ref-a"
+                    style="width:100%; max-width:800px; margin-top:10px; height:100px; background:#000; border:1px solid #333; color:#fff; padding:15px;"></textarea>
+                <button class="btn"
+                    style="background:var(--accent); color:#000; width:100%; max-width:400px; margin-top:30px; font-weight:bold;"
+                    onclick="nextRef()">DEPLOY</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar">
+        <div id="m-header" class="mission-header">ARCHIVE LOG</div>
+        <div id="nav-container" class="nav-container"></div>
+    </nav>
+    <main class="main">
+        <div id="card-container" class="card-container"></div>
+    </main>
+    <footer class="footer">
+        <div>SITUATION ROOM PROTOCOL | v65.52 DEMO</div>
+        <div style="color:var(--accent);">DEMO DATA ACTIVE</div>
+    </footer>
+
+    <script>
+        let user = {}; let currentMission = null; let refMode = "pre"; let refIdx = 0; let DATA = null;
+
+        function login() {
+            user = { id: "DEMO", name: document.getElementById('username').value, class: document.getElementById('class-code').value };
+            gsap.to("#login-step", {
+                opacity: 0, y: -20, duration: 0.5, onComplete: () => {
+                    document.getElementById('login-step').style.display = 'none';
+                    document.getElementById('lobby-step').style.display = 'block';
+                    gsap.from("#lobby-step", { opacity: 0, y: 20, duration: 0.5 });
+                }
+            });
+        }
+
+        function launch(id) {
+            DATA = DEMO_MISSIONS[id];
+            currentMission = id;
+            startRef("pre");
+        }
+
+        function startRef(mode) {
+            refMode = mode; refIdx = 0;
+            document.getElementById('lobby-step').style.display = 'none';
+            document.getElementById('ref-modal').style.display = 'flex';
+            document.getElementById('mission-title-big').innerText = DATA.metadata.title;
+            document.getElementById('ref-narrative').innerHTML = mode === "pre" ? DATA.reflections.pre_narrative : DATA.reflections.post_narrative;
+            showRefQuestion();
+        }
+
+        function showRefQuestion() {
+            const qs = refMode === "pre" ? DATA.reflections.pre : DATA.reflections.post;
+            if (qs && qs.length > 0 && refIdx < qs.length) {
+                document.getElementById('ref-q').innerText = qs[refIdx];
+            } else {
+                document.getElementById('ref-q').innerText = "";
+            }
+        }
+
+        function nextRef() {
+            const qs = refMode === "pre" ? DATA.reflections.pre : DATA.reflections.post;
+            if (qs && refIdx < qs.length - 1) {
+                refIdx++; showRefQuestion();
+            } else {
+                if (refMode === "pre") {
+                    document.getElementById('splash').style.display = 'none';
+                    buildNav(); showSlide(0);
+                } else {
+                    alert("DEMO COMPLETE. GLOSSARY ARCHIVED.");
+                    location.reload();
+                }
+            }
+        }
+
+        function buildNav() {
+            const nav = document.getElementById('nav-container');
+            nav.innerHTML = "";
+            DATA.slides.forEach((s, idx) => {
+                const item = document.createElement('div');
+                item.className = "btn";
+                item.style.marginBottom = "5px";
+                item.innerText = s.shortTitle;
+                item.onclick = () => showSlide(idx);
+                nav.appendChild(item);
+            });
+        }
+
+        function showSlide(idx) {
+            const cont = document.getElementById('card-container');
+            cont.innerHTML = "";
+            const s = DATA.slides[idx];
+            const card = document.createElement('div');
+            card.className = "card active";
+            card.innerHTML = `
+                <div class="mission-header" style="margin-bottom:15px; border-left-color:${DATA.theme.accent}">${s.longTitle}</div>
+                <div class="exhibit-frame">
+                    <div class="exhibit-left"><img src="${s.tabs.primary.image}"></div>
+                    <div class="exhibit-right">
+                        <div class="tab-bar">
+                            <div class="tab active" style="border-top:3px solid ${DATA.theme.accent}">ANALYSIS</div>
+                        </div>
+                        <div class="tab-content-scroll">${s.tabs.primary.body}</div>
+                    </div>
+                </div>
+                <div class="interaction-block">
+                    <div class="interaction-prompt">${s.interactionPrompt}</div>
+                    <div class="choice-row">
+                        ${(s.options || ["PROCEED"]).map(opt => `<button class="btn" onclick="nextSlide(${idx})">${opt}</button>`).join('')}
+                    </div>
+                </div>
+            `;
+            cont.appendChild(card);
+        }
+
+        function nextSlide(idx) {
+            if (idx < DATA.slides.length - 1) showSlide(idx + 1);
+            else startRef("post");
+        }
+
+        window.onload = () => {
+            tsParticles.load("tsparticles", { particles: { number: { value: 40 }, color: { value: "#d2b48c" }, shape: { type: "circle" }, opacity: { value: 0.1 }, size: { value: 3 }, move: { enable: true, speed: 1 } } });
+        };
+    </script>
+</body>
+
+</html>

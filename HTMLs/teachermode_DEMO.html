@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>MISSION CONTROL // JUNCTURE OPERATIONS (DEMO)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f4f4;
+            --accent: #222;
+            --success: #28a745;
+            --err: #dc3545;
+            --terminal: #000;
+            --term-txt: #0f0;
+            --font-main: 'Inter', sans-serif;
+            --font-tech: 'Courier New', monospace;
+        }
+
+        body {
+            font-family: var(--font-main);
+            padding: 40px;
+            background: var(--bg);
+            color: #333;
+            margin: 0;
+        }
+
+        #status-bar {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 5px solid var(--accent);
+        }
+
+        .status-light {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            background: #666;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .status-light.online {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        h1 {
+            font-family: var(--font-tech);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+
+        #console {
+            background: var(--terminal);
+            color: var(--term-txt);
+            padding: 15px;
+            height: 180px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            border: 1px solid #333;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: #fff;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-top: 5px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 30px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #444;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 0.75rem;
+            vertical-align: middle;
+        }
+
+        th {
+            background: var(--accent);
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+        }
+
+        label {
+            font-size: 0.6rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+            font-weight: bold;
+        }
+
+        /* PROJECTOR MODE */
+        #projector-view {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #050505;
+            z-index: 2000;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        #projector-view.active {
+            display: block;
+        }
+
+        .proj-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #d2b48c;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .proj-header h1 {
+            margin: 0;
+            letter-spacing: 8px;
+            font-size: 2rem;
+            color: #d2b48c;
+            text-transform: uppercase;
+        }
+
+        .proj-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .proj-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 8px;
+            transition: 0.3s;
+        }
+
+        .proj-card.active {
+            border-color: #d2b48c;
+            box-shadow: 0 0 20px rgba(210, 180, 140, 0.1);
+        }
+
+        .proj-name {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #d2b48c;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .proj-class {
+            font-size: 0.55rem;
+            color: #d2b48c;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .proj-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            border-top: 1px solid #333;
+            padding-top: 6px;
+        }
+
+        .proj-bar {
+            height: 3px;
+            background: #222;
+            margin-top: 8px;
+        }
+
+        .proj-fill {
+            height: 100%;
+            background: #d2b48c;
+            transition: width 1s ease;
+        }
+
+        .demo-banner {
+            background: #d2b48c;
+            color: #000;
+            padding: 5px 15px;
+            font-size: 0.6rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-banner">DEMO MODE : OFFLINE DATA ARCHIVE ACTIVE</div>
+    <div id="projector-view">
+        <header class="proj-header">
+            <h1>COMMAND PROGRESS BOARD (DEMO)</h1>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <select id="proj-class-filter" onchange="renderProjectorBoard()"
+                    style="padding:8px 12px; font-family:inherit; font-size:0.7rem; background:#222; color:#d2b48c; border:1px solid #444;">
+                    <option value="ALL">ALL CLASSES</option>
+                </select>
+                <select id="proj-mission-filter" onchange="renderProjectorBoard()"
+                    style="padding:8px 12px; font-family:inherit; font-size:0.7rem; background:#222; color:#d2b48c; border:1px solid #444;">
+                    <option value="ALL">ALL MISSIONS</option>
+                </select>
+                <span id="proj-sync" style="font-size:0.7rem; color:#888; letter-spacing:2px;">[DEMO_ACTIVE]</span>
+                <button onclick="toggleProjector()"
+                    style="background:#d2b48c; color:#000; border:none; padding:8px 15px; cursor:pointer; font-weight:bold; letter-spacing:1px; font-size:0.7rem;">EXIT
+                    PROJECTOR</button>
+            </div>
+        </header>
+        <div id="proj-board" class="proj-grid"></div>
+    </div>
+
+    <div id="status-bar">
+        <div><span id="s-light" class="status-light online"></span> <span id="s-text"
+                style="letter-spacing: 2px;">SECURE_DEMO_LINK_ACTIVE</span></div>
+        <div style="display:flex; gap:20px; align-items:center;">
+            <button onclick="toggleProjector()"
+                style="background:#333; color:#d2b48c; font-size:0.6rem; border:1px solid #d2b48c; padding:6px 15px; border-radius:3px; cursor:pointer; font-weight:bold; letter-spacing:1px;">📺
+                PROJECTOR VIEW</button>
+            <div style="font-size: 0.7rem; opacity: 0.7;">TEACHER DEMO // v65.52</div>
+        </div>
+    </div>
+    <h1 style="margin: 0 40px 30px 40px;">COMMAND CENTER // MISSION CONTROL (DEMO)</h1>
+    <div class="grid" style="grid-template-columns: 1fr 1.5fr 1fr; padding: 0 40px;">
+        <div class="panel">
+            <h3
+                style="margin-top:0; letter-spacing:2px; font-size:0.8rem; border-bottom:1px solid #ddd; padding-bottom:10px;">
+                CAPSULE STAGING</h3>
+            <div style="padding:20px; background:#f9f9f9; border:1px solid #eee; text-align:center; opacity:0.5;">
+                <div style="font-size:0.55rem; color:#666; font-weight:bold;">LIVE UPLOADS DISABLED IN DEMO</div>
+            </div>
+            <div style="margin-top:20px;">
+                <label>Mission ID</label><input disabled placeholder="DEMO_62">
+                <label>Public Name</label><input disabled placeholder="Operation Demo">
+                <button class="btn" style="padding:10px; font-size:0.75rem; opacity:0.3; cursor:not-allowed;">INITIALIZE
+                    ARCHIVE</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div
+                style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:20px;">
+                <h3 style="margin:0; letter-spacing:2px; font-size:0.8rem;">LIVE PROGRESS (STIMULATED)</h3>
+                <div id="sync-tick" style="font-size:0.55rem; color:#888;">[SYNC_IDLE]</div>
+            </div>
+            <div style="margin-bottom:15px; display:flex; gap:10px;">
+                <select id="class-filter" style="flex:1; padding:8px; font-family:inherit; font-size:0.75rem;"
+                    onchange="renderProgress()">
+                    <option value="ALL">ALL CLASSES</option>
+                </select>
+                <button class="btn" style="width:auto; padding:0 15px; font-size:0.6rem;"
+                    onclick="fetchProgress()">REFRESH</button>
+            </div>
+            <div id="progress-list" style="max-height:500px; overflow-y:auto; border:1px solid #eee;"></div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            <div class="panel" style="flex:1;">
+                <h3
+                    style="margin-top:0; letter-spacing:2px; font-size:0.8rem; border-bottom:1px solid #ddd; padding-bottom:10px;">
+                    MISSION DIRECTORY</h3>
+                <div id="library-list"></div>
+            </div>
+            <div class="panel" style="padding:20px; background:var(--terminal); border-top:none;">
+                <h3 style="margin-top:0; color:#fff; font-size:0.6rem; letter-spacing:1px; opacity:0.6;">SYSTEM LOG</h3>
+                <div id="console" style="height:150px; overflow-y:auto; font-size:0.65rem; color:var(--term-txt);">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const allProgress = [
+            { id: "A01", name: "Agent Leo", class: "PER-01", missionData: { "CUBA_62": { preDone: true, dec: { 1: "D", 2: "Q", 3: "S", 4: "D", 5: "H" } }, "MIKMAW11": { preDone: true, dec: { 1: "L" } } } },
+            { id: "A02", name: "Agent Sarah", class: "PER-01", missionData: { "CUBA_62": { preDone: true, dec: { 1: "S", 2: "A", 3: "A", 4: "K", 5: "F" } } } },
+            { id: "A03", name: "Agent Mike", class: "PER-01", missionData: { "MIKMAW11": { preDone: true, dec: { 1: "T", 2: "F", 3: "M" } } } },
+            { id: "A04", name: "Agent Chen", class: "PER-02", missionData: { "CUBA_62": { preDone: true, dec: { 1: "D", 2: "Q", 3: "S" } } } },
+            { id: "A05", name: "Agent Rodriguez", class: "PER-02", missionData: { "CUBA_62": { preDone: true, dec: { 1: "D", 2: "Q", 3: "S", 4: "D", 5: "H", 6: "A" } } } },
+            { id: "A06", name: "Agent Thompson", class: "PER-02", missionData: { "MIKMAW11": { preDone: true, dec: { 1: "L", 2: "B", 3: "D", 4: "G" } } } },
+            { id: "A07", name: "Agent Gupta", class: "PER-03", missionData: { "CUBA_62": { preDone: true, dec: { 1: "S" } } } },
+            { id: "A08", name: "Agent Silva", class: "PER-03", missionData: { "MIKMAW11": { preDone: true, dec: { 1: "T", 2: "F" } } } },
+            { id: "A09", name: "Agent Kowalski", class: "PER-03", missionData: { "CUBA_62": { preDone: true, dec: { 1: "D", 2: "Q", 3: "S", 4: "D", 5: "H", 6: "S" } } } },
+            { id: "A10", name: "Agent Matrix", class: "PER-04", missionData: { "CUBA_62": { preDone: true, dec: { 1: "S", 2: "A", 3: "A" } }, "MIKMAW11": { preDone: true, dec: { 1: "L", 2: "B" } } } }
+        ];
+
+        function log(m, t = "info") {
+            const c = document.getElementById('console');
+            const color = t === "success" ? "lime" : t === "error" ? "red" : "#0f0";
+            if (!c) return;
+            c.innerHTML += `<div style="color:${color}">[${new Date().toLocaleTimeString()}] ${m}</div>`;
+            c.scrollTop = c.scrollHeight;
+        }
+
+        async function fetchMissions() {
+            log("Handshake successful. Demo Directory synchronized.", "success");
+            const missions = [
+                { id: "CUBA_62", name: "DEFCON 2: The 13 Days", thumb: "https://dwaugh-edsim.github.io/projectimages/cuba62/u2photos.jpg", aiEnabled: true },
+                { id: "MIKMAW11", name: "The Trading Post", thumb: "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/truckhouse-map.jpg", aiEnabled: true }
+            ];
+            renderMissions(missions);
+            renderProgress();
+            updateClassFilter();
+        }
+
+        function fetchProgress() {
+            log("Syncing offline student records...", "info");
+            document.getElementById('sync-tick').innerText = "[DEMO_OK]";
+            renderProgress();
+            setTimeout(() => document.getElementById('sync-tick').innerText = "[SYNC_IDLE]", 2000);
+        }
+
+        function updateClassFilter() {
+            const f = document.getElementById('class-filter');
+            const classes = [...new Set(allProgress.map(p => p.class))].sort();
+            let h = `<option value="ALL">ALL CLASSES</option>`;
+            classes.forEach(c => { h += `<option value="${c}">${c}</option>`; });
+            f.innerHTML = h;
+        }
+
+        function renderProgress() {
+            const filter = document.getElementById('class-filter').value;
+            const filtered = filter === "ALL" ? allProgress : allProgress.filter(p => p.class === filter);
+            let h = "";
+            filtered.forEach(p => {
+                const missions = Object.keys(p.missionData || {});
+                missions.forEach(mid => {
+                    const st = p.missionData[mid];
+                    const decs = Object.keys(st.dec || {}).length;
+                    h += `<div style="padding:6px 10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:0.7rem; font-weight:bold;">${p.name} <span style="color:#888; font-weight:normal; font-size:0.65rem;">${p.class}</span></div>
+                            <div style="color:#666; font-size:0.6rem; margin-top:2px;">MISSION: ${mid} | EXHIBIT: ${decs} / 6</div>
+                        </div>
+                        <div style="font-size:0.5rem; color:var(--success); font-weight:bold;">LOCAL DATA</div>
+                      </div>`;
+                });
+            });
+            document.getElementById('progress-list').innerHTML = h;
+        }
+
+        function renderMissions(missions) {
+            const list = document.getElementById('library-list');
+            let h = `<table><thead><tr><th>VISUAL</th><th>ID</th><th>NAME</th></tr></thead><tbody>`;
+            missions.forEach(m => {
+                h += `<tr>
+                    <td><div style="width:40px; height:25px; background-image:url('${m.thumb}'); background-size:cover; background-position:center; border-radius:2px; border:1px solid #ccc;"></div></td>
+                    <td>${m.id}</td>
+                    <td>${m.name}</td>
+                </tr>`;
+            });
+            h += `</tbody></table>`;
+            list.innerHTML = h;
+        }
+
+        function toggleProjector() {
+            const pv = document.getElementById('projector-view');
+            pv.classList.toggle('active');
+            if (pv.classList.contains('active')) renderProjectorBoard();
+        }
+
+        function renderProjectorBoard() {
+            const board = document.getElementById('proj-board');
+            const classFilter = document.getElementById('proj-class-filter');
+            const missionFilter = document.getElementById('proj-mission-filter');
+
+            const currentClass = classFilter.value;
+            const currentMission = missionFilter.value;
+
+            // Sort and render
+            let h = "";
+            allProgress.forEach(p => {
+                Object.keys(p.missionData).forEach(mid => {
+                    if (currentClass !== 'ALL' && p.class !== currentClass) return;
+                    if (currentMission !== 'ALL' && mid !== currentMission) return;
+
+                    const st = p.missionData[mid];
+                    const steps = Object.keys(st.dec).length;
+                    const pct = (steps / 6) * 100;
+
+                    h += `<div class="proj-card active">
+                        <div class="proj-name">${p.name}</div>
+                        <div class="proj-class">${p.class} // ${mid}</div>
+                        <div class="proj-stats">
+                            <div><div style="color:#d2b48c; font-size:0.55rem;">STEP</div><div style="font-size:0.75rem; color:#fff;">${steps}</div></div>
+                            <div><div style="color:#d2b48c; font-size:0.55rem;">STATUS</div><div style="font-size:0.65rem; color:#0f0;">ACTIVE</div></div>
+                        </div>
+                        <div class="proj-bar"><div class="proj-fill" style="width:${pct}%"></div></div>
+                    </div>`;
+                });
+            });
+            board.innerHTML = h;
+        }
+
+        window.onload = () => {
+            log("BOOT SEQUENCE INITIATED...");
+            fetchMissions();
+
+            // Populate projector filters once
+            const classFilter = document.getElementById('proj-class-filter');
+            const missionFilter = document.getElementById('proj-mission-filter');
+            const classes = [...new Set(allProgress.map(p => p.class))].sort();
+            classes.forEach(c => { classFilter.innerHTML += `<option value="${c}">${c}</option>`; });
+            missionFilter.innerHTML += `<option value="CUBA_62">CUBA_62</option><option value="MIKMAW11">MIKMAW11</option>`;
+        };
+    </script>
+</body>
+
+</html>
