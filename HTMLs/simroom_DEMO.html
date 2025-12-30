@@ -919,9 +919,27 @@
             const textCont = document.getElementById(`text-${slideIdx}`);
 
             // Update Media
+            // Update Media
+            // [v65.63] Smart Media Resolution (YouTube, PDF, Video, or Image)
+            const mediaUrl = tabData.video || tabData.image || "";
+            const ytMatch = mediaUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            const isPDF = mediaUrl.toLowerCase().endsWith('.pdf');
+            const isVideo = mediaUrl.match(/\.(mp4|avi|mov|webm)$/i);
+
             if (tabData.video) {
+                // Explicit video field (Legacy support)
                 mediaCont.innerHTML = `<video src="${tabData.video}" autoplay muted loop style="width:100%; height:100%; object-fit:cover;"></video>`;
+            } else if (ytMatch) {
+                // YouTube
+                mediaCont.innerHTML = `<iframe style="width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${ytMatch[1]}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            } else if (isPDF) {
+                // PDF
+                mediaCont.innerHTML = `<embed src="${mediaUrl}" type="application/pdf" width="100%" height="100%">`;
+            } else if (isVideo) {
+                // Direct Video File
+                mediaCont.innerHTML = `<video src="${mediaUrl}" controls autoplay muted loop style="width:100%; height:100%; object-fit:cover;"></video>`;
             } else {
+                // Default Image
                 mediaCont.innerHTML = `<img src="${tabData.image}">`;
             }
             mediaCont.innerHTML += `<div class="img-label">${tabData.label || tabKey} // ${tabData.credit || 'Intelligence Bureau'}</div>`;
