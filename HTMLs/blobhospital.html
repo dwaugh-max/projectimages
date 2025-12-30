@@ -609,6 +609,12 @@
                 <span>ADMIT PATIENT</span>
                 <span style="font-size:0.45rem; opacity:0.4; text-transform:lowercase;">load</span>
             </button>
+            <button class="btn secondary"
+                style="width:100%; background:#331100; color:#ffaa88; padding:6px 10px; font-size:0.6rem; display:flex; flex-direction:column; align-items:center; gap:2px; border:1px solid #552200;"
+                onclick="createFreshBlob()">
+                <span>CONCEIVE (IN-VITRO)</span>
+                <span style="font-size:0.45rem; opacity:0.6; text-transform:lowercase;">manual fallback</span>
+            </button>
             <div style="display:flex; gap:5px;">
                 <a href="https://gemini.google.com/gem/1kNu9T5P5Wi2y47KGOeU-aFSs0w2wA9AC?usp=sharing" target="_blank"
                     style="text-decoration:none; flex:1;">
@@ -816,6 +822,38 @@
 
         function showOverlay(show) {
             document.getElementById('loading-overlay').classList.toggle('visible', show);
+        }
+
+        async function createFreshBlob() {
+            if (confirm("⚠ MANUAL CONCEPTION MODE (IN-VITRO) ⚠\n\nCreating a blob without the Gem AI is difficult and not recommended.\n\nAre you sure you want to initialize an empty mission schema?")) {
+                currentBlob = {
+                    metadata: {
+                        id: "NEW_MISSION",
+                        title: "Untitled Mission",
+                        description: "Manual conception.",
+                        author: "Unknown",
+                        version: "0.1",
+                        learningOutcomes: []
+                    },
+                    theme: {
+                        accent: "#00ffcc",
+                        fontH: "Orbitron",
+                        fontP: "Roboto",
+                        splashHeroURL: ""
+                    },
+                    slides: [],
+                    intelligenceGlossary: [],
+                    reflections: {
+                        pre_narrative: "",
+                        post_narrative: "",
+                        post: []
+                    }
+                };
+                buildNav();
+                showOverlay(false);
+                logSurgical("NEW PATIENT CONCEIVED (IN-VITRO).");
+                alert("PATIENT CONCEIVED. PLEASE EDIT METADATA IMMEDIATELY.");
+            }
         }
 
         // NAVIGATION BUILDER
