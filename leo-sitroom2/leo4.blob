@@ -1,0 +1,178 @@
+{
+  "metadata": {
+    "id": "MIKMAW11",
+    "title": "The Trading Post",
+    "description": "A constitutional showdown. Does an 18th-century Treaty protect a modern cannabis shop? You are the Supreme Court Clerk.",
+    "author": "Situation Room AI (v65.36)",
+    "version": "1.2",
+    "learningOutcomes": [
+      "G4: Understand the 'Truckhouse Clause' in the Treaty of 1752.",
+      "G2: Debate the conflict between Indigenous Sovereignty and Provincial Law.",
+      "C1: Use the 'Sparrow Test' to decide if a law is fair or unfair."
+    ]
+  },
+  "theme": {
+    "layout": "immersive",
+    "accent": "#8B0000",
+    "fontH": "Merriweather",
+    "fontP": "Roboto",
+    "splashHeroURL": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/leo-blockade.jpg"
+  },
+  "intelligenceGlossary": [
+    { "term": "Truckhouse", "definition": "An 18th-century word for a government trading post or store." },
+    { "term": "Inherent Right", "definition": "A right that comes from being the first people on the land. It is not a gift from the government." },
+    { "term": "Precedent", "definition": "A past court decision that judges must follow today." },
+    { "term": "Fiduciary Duty", "definition": "The government's legal promise to look out for the best interests of Indigenous peoples." },
+    { "term": "Band Council Resolution (BCR)", "definition": "A law passed by the Chief and Council of a First Nation." }
+  ],
+  "reflections": {
+    "pre": [],
+    "pre_narrative": "### **MISSION BRIEFING: THE STANDOFF**\n\n**DATE:** December 29, 2025\n**LOCATION:** Supreme Court of Nova Scotia\n**CASE:** *R. v. Francis*\n\nThe province is in crisis. The RCMP tried to raid **Leo’s Trading Post**, a cannabis shop on the Millbrook First Nation. \n\nIt didn't go well. \n\nThe community blocked the road. They lit a **Sacred Fire** in the doorway. The Chief passed a law banning the police from the land. Now, the trucks are gone, but the lawyers are here.\n\n**YOUR JOB:**\nYou work for the Chief Justice. You have to answer one huge question:\n\n**Does the Treaty of 1752 give Leo the right to sell cannabis without a license?**\n\nThe Province says: \"No. It's illegal and unsafe.\"\nLeo says: \"Yes. My ancestors signed a treaty that allows me to trade.\"\n\nLook at the maps. Read the old texts. Decide who is right.",
+    "post": [
+      "The Musket Argument: If the British traded deadly muskets in 1760, why is cannabis considered 'too dangerous' to trade today?",
+      "The Power of the BCR: Should a Band Council Resolution (Indigenous Law) be more powerful than a Provincial Law on reserve land?",
+      "The Verdict: Did you rule for Safety (The Crown) or Sovereignty (Leo)? What are the consequences of your choice?"
+    ],
+    "post_narrative": "### **THE JUDGMENT**\n\nThe courtroom is quiet. The Chief Justice reads your decision.\n\n**IF YOU RULED FOR THE CROWN (Guilty):**\nYou decided that safety comes first. The Court rules that the Treaty protects trade, but it doesn't protect *unregulated* trade of drugs. Leo has to close his shop. The blockade might return, but the Province's laws remain supreme.\n\n**IF YOU RULED FOR LEO (Not Guilty):**\nYou decided that the Treaty is a 'Living Tree.' It grows. If they could trade furs and muskets then, they can trade modern goods now. The Court rules that the Province cannot bully a sovereign business. Leo reopens. A new chapter of economic independence begins."
+  },
+  "slides": [
+    {
+      "id": "slide_1",
+      "shortTitle": "The Promise",
+      "longTitle": "EXHIBIT A: The Truckhouse Clause",
+      "interactionPrompt": "Read the text of the Treaty. What did the British promise?",
+      "tabs": {
+        "primary": {
+          "body": "## **THE MAP OF MI'KMA'KI**\n\nLook at the map on the left. In 1752, Nova Scotia didn't really exist yet. The British were just staying in Halifax. The rest of the land was **Mi'kma'ki**.\n\n**THE DEAL:**\nThe British were desperate for peace. To stop the war, they signed a Treaty. They promised to build a **\"Truckhouse\"** (a store) where the Mi'kmaq could trade their goods.\n\n**THE ARGUMENT:**\nLeo says this promise is still alive. He says, \"You promised us a place to trade. You can't take that away just because 200 years have passed.\"\n\nThe Province says the Truckhouse system ended in the 1700s. They think it's ancient history. Leo thinks it's the law.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/truckhouse-map.jpg",
+          "credit": "Map of 1760 Truckhouse Locations"
+        },
+        "legal": {
+          "body": "## **THE WORDS THAT MATTER**\n\nThis is the actual text of the Treaty of 1752. Lawyers fight over these exact words.\n\n> *\"It is agreed that the said Tribe... shall have free liberty to bring for Sale... Skins, Feathers, Fowl, Fish or **ANY OTHER THING** they shall have to sell...\"*\n\n**THE LOOPHOLE:**\nLook at the bold words: **\"Any other thing.\"**\n\nLeo's lawyer argues: \"It doesn't say 'Any other thing EXCEPT cannabis.' It says ANY other thing.\" \n\nHe claims this phrase gives the Mi'kmaq the right to participate in the modern economy—whether that's selling lobster, timber, or cannabis.",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/3/36/1752_Peace_and_Friendship_Treaty.jpg",
+          "credit": "Original 1752 Treaty Parchment"
+        },
+        "intel": {
+          "body": "## **THE WAMPUM BELT**\n\n**EVIDENCE:** Oral History\n\nThe British wrote their laws on paper. The Mi'kmaq recorded their laws in **Wampum Belts** (beads).\n\n**WHAT IT MEANS:**\nThis belt shows a chain of friendship. It represents a relationship of **Equals**.\n\n**THE ELDER'S VIEW:**\nAn Elder testified: \"We never surrendered. We agreed to share. When you share, you don't tell your partner what they are allowed to do. You respect them. The Province is trying to act like our parent, but the Treaty says we are brothers.\"",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/wampum-ai.jpg",
+          "credit": "Wampum Belt Archive"
+        }
+      }
+    },
+    {
+      "id": "slide_2",
+      "shortTitle": "The Standoff",
+      "longTitle": "EXHIBIT B: The Raid at Millbrook",
+      "interactionPrompt": "Look at the scene. Who is in control of this land?",
+      "tabs": {
+        "primary": {
+          "body": "## **FIRE VS. LAW**\n\nThe RCMP arrived at Leo's Trading Post at 9:00 AM. They had a warrant to seize the cannabis. \n\nThey stopped when they saw the **Sacred Fire**.\n\n**WHY IT MATTERS:**\nThe community lit a fire in the doorway. In Mi'kmaw culture, this is a sacred space. If the police stepped over the fire, they would be disrespecting the culture and escalating the conflict.\n\n**THE BLOCKADE:**\nLook at the background. Pickup trucks have blocked the road. The community is saying: \"This is our land. Your rules stop at the highway.\" The police are frozen.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/rcmp-protest-ai.jpg",
+          "credit": "Standoff at the Sacred Fire"
+        },
+        "legal": {
+          "body": "## **THE BAND COUNCIL RESOLUTION (BCR)**\n\nLeo taped this document to his front door. It is a law passed by the Chief and Council.\n\n**WHAT IT SAYS:**\nIt declares that the Province has no right to enforce cannabis laws on the reserve. It says the RCMP are **Trespassing**.\n\n**THE CONFLICT:**\n* **The Province** has a Search Warrant (Provincial Law).\n* **The Band** has a Resolution (Indigenous Law).\n\n**THE PROBLEM:**\nWhich paper is more powerful? The Supreme Court hasn't fully decided yet. You have to decide which law applies here.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/band-door-AI.jpg",
+          "credit": "Band Council Resolution (BCR)"
+        },
+        "intel": {
+          "body": "## **THE LAB REPORT**\n\n**EVIDENCE:** Product Safety\n\nThe Government claims this raid is about **Public Safety**. They say illegal weed is dangerous because it might have mold or chemicals.\n\n**THE TRUTH:**\nWe tested Leo's product. Look at the report.\n* **Pesticides:** None.\n* **Mold:** None.\n* **Quality:** High.\n\n**ANALYSIS:**\nLeo runs a clean shop. He checks IDs. He tests his product. If his shop is safe, why did they raid him? Is it really about safety, or is it about **Money** (Taxes)?",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/leo-test-report.jpg",
+          "credit": "Forensic Lab Report"
+        }
+      }
+    },
+    {
+      "id": "slide_3",
+      "shortTitle": "The Defense",
+      "longTitle": "EXHIBIT C: The 'Musket' Argument",
+      "interactionPrompt": "Compare the items. Is cannabis different from a musket?",
+      "tabs": {
+        "primary": {
+          "body": "## **LEO SPEAKS**\n\nLeo Francis takes the stand. He holds an Eagle Feather. He is not nervous.\n\n**HIS ARGUMENT:**\n\"The Crown says cannabis is dangerous. They say they have to ban it to protect people.\n\nBut look at history. In 1760, what did the British trade with us? **Muskets** (Guns). **Gunpowder**. **Rum**.\n\nThose things kill people. But the Treaty protected that trade because we needed those things to survive. If the Treaty allows us to trade Guns, surely it allows us to trade a Plant.\"\n\n**YOUR THOUGHTS:**\nIt's a strong point. Does 'Safety' justify breaking a Treaty if the Treaty originally included weapons?",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/heresleo-AI.jpg",
+          "credit": "Leo Francis"
+        },
+        "legal": {
+          "body": "## **SECTION 35: THE PROTECTOR**\n\nLeo relies on **Section 35** of the Constitution. \n\n**WHAT IS IT?**\nSection 35 is the highest law in Canada regarding Indigenous people. It says: \"The existing aboriginal and treaty rights... are hereby recognized and affirmed.\"\n\n**THE 'FULL BOX':**\nLeo argues that his rights are in a 'Full Box.' He has the inherent right to earn a living. The Government can't just take that away.\n\n**THE 'EMPTY BOX':**\nThe Government argues the box is empty until *they* put rights into it. They say Leo only has rights if the Government gives him a license.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/sect35-1-ai.jpg",
+          "credit": "Constitution Act, 1982"
+        },
+        "intel": {
+          "body": "## **HISTORY OF TRADE**\n\n**IMAGE:** 18th Century Trade\n\nLook at the picture. The Mi'kmaq and British are trading. \n\n**THE LOGIC:**\n1.  The Treaty guarantees the right to trade for \"Necessaries\" (things you need to live).\n2.  In 1760, \"Necessaries\" included dangerous items like muskets.\n3.  Therefore, just because something is \"dangerous\" doesn't mean it's banned from the Treaty.\n\nLeo is using history to trap the Crown. He is proving that trade has always involved risk.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/1750-tradingpost.jpg",
+          "credit": "Trading Muskets in 1760"
+        }
+      }
+    },
+    {
+      "id": "slide_4",
+      "shortTitle": "The Crown",
+      "longTitle": "EXHIBIT D: The Government Strikes Back",
+      "interactionPrompt": "The Crown plays their strongest card. How do you beat the 'Googoo' case?",
+      "tabs": {
+        "primary": {
+          "body": "## **THE GOVERNMENT'S CASE**\n\nThe Justice Minister speaks to the press. He looks serious.\n\n**HIS MESSAGE:**\n\"We respect the Treaties. But we also have to follow the law. The Supreme Court has said that Treaty Rights are not unlimited.\n\nWe have a new court ruling called **R. v. Googoo**. A judge decided last year that cannabis is NOT protected by the Treaty because the Mi'kmaq didn't use it in 1750. \n\nLeo Francis is breaking the law. We will enforce it.\"\n\n**THE TRAP:**\nThe Government is using the **\"Frozen Rights\"** argument. They are trying to freeze Leo's rights in the past.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/scott-armstrong-and-dr-strong-micmacrightsdotcom.jpg",
+          "credit": "Justice Minister Press Conference"
+        },
+        "legal": {
+          "body": "## **THE GOOGOO CASE**\n\n**THE PRECEDENT:** *R. v. Googoo (2024)*\n\nThis is the biggest problem for Leo. In a similar case last year, the judge said **Guilty**.\n\n**WHY?**\nThe judge said there was no \"historical continuity.\" Since cannabis wasn't here in 1752, the Treaty doesn't cover it.\n\n**YOUR JOB:**\nCan you find a difference between Leo's case and the *Googoo* case? \n* Leo tests his products (Safe).\n* The shop in *Googoo* might not have been safe.\n* Maybe Leo's case is different because he is **Self-Regulated**.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/googoo-ai.jpg",
+          "credit": "The Googoo Decision Summary"
+        },
+        "intel": {
+          "body": "## **THE EMPTY BOX**\n\n**CONCEPT:** The Crown's Theory\n\nLook at the image of the box with the question mark. This is how the Province sees Indigenous rights.\n\n**THE IDEA:**\nThey believe the \"Box of Rights\" is empty. They believe Indigenous people have no commercial rights unless the Government grants them permission.\n\n**THE RISK:**\nIf you agree with the Crown, you are saying that the Treaty of 1752 is just a piece of paper with no power today.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/magicbox-1-ai.jpg",
+          "credit": "The Empty Box Concept"
+        }
+      }
+    },
+    {
+      "id": "slide_5",
+      "shortTitle": "The Test",
+      "longTitle": "EXHIBIT E: The Sparrow Test",
+      "interactionPrompt": "Use the Checklist. Is the Government allowed to break the Treaty?",
+      "tabs": {
+        "primary": {
+          "body": "## **THE MARSHALL LEGACY**\n\nThis case reminds everyone of **Donald Marshall Jr.**\n\nIn 1999, he was arrested for catching eels. The Supreme Court ruled he was innocent because he had a Treaty Right to a **\"Moderate Livelihood\"** (enough money to live on).\n\n**THE QUESTION:**\nDoes \"Moderate Livelihood\" apply to cannabis?\n\n**THE LIVING TREE:**\nIndigenous lawyers argue the Treaty is like a tree. It grows. \n* In 1750, they traded furs.\n* In 1990, they traded fish.\n* In 2025, they trade cannabis.\n\nIf you agree with Leo, you are letting the tree grow. If you agree with the Crown, you are cutting it back.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/Supreme_Court_of_Nova_Scotia_in_2018-Wikimedia.jpg",
+          "credit": "Supreme Court of Nova Scotia"
+        },
+        "legal": {
+          "body": "## **THE SPARROW CHECKLIST**\n\nJudges use a tool called the **Sparrow Test** to decide these cases. Follow the steps:\n\n**STEP 1: Is there a Right?**\n(Yes. The Treaty of 1752 exists).\n\n**STEP 2: Did the Government break the Right?**\n(Yes. They raided the shop and took the goods).\n\n**STEP 3: Was there a GOOD REASON?**\nThis is the hard part. The Government says the reason is **\"Public Safety.\"**\n\n**STEP 4: Did they do it gently?**\nThis is called \"Minimal Impairment.\" Could the police have just *inspected* Leo's shop instead of shutting it down? If they used too much force, the raid was illegal.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/sparrow-1-ai.jpg",
+          "credit": "The Sparrow Test"
+        },
+        "intel": {
+          "body": "## **WHAT IS 'MODERATE'?**\n\n**EVIDENCE:** Leo's Financials\n\nThe Crown says Leo is making too much money. They say \"Moderate Livelihood\" means just enough to buy food—poverty level.\n\n**THE REALITY:**\nWe looked at Leo's books. \n* He supports his family.\n* He pays for heating oil for Elders.\n* He sponsors the local hockey team.\n\n**DECISION:**\nIs this \"getting rich\"? Or is this supporting a community? The definition of \"Moderate\" is up to you.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/marshall-1.jpg",
+          "credit": "The Marshall Case Files"
+        }
+      }
+    },
+    {
+      "id": "slide_6",
+      "shortTitle": "Verdict",
+      "longTitle": "EXHIBIT F: The Final Decision",
+      "interactionPrompt": "The Court is waiting. What is your judgment?",
+      "tabs": {
+        "primary": {
+          "body": "## **MAKE YOUR CHOICE**\n\nThe lawyers sit down. The Chief Justice turns to you.\n\n**OPTION A: SAFETY FIRST (The Crown Wins)**\n* **The Logic:** Cannabis is a drug. The Province must control it to keep people safe. The Treaty doesn't cover modern drugs.\n* **The Result:** Leo is Guilty. The shop closes.\n\n**OPTION B: RIGHTS FIRST (Leo Wins)**\n* **The Logic:** The Treaty is supreme. Leo's shop is safe. The Province should have talked to him instead of raiding him.\n* **The Result:** Leo is Not Guilty. He can reopen. The Province must negotiate.\n\n**SELECT YOUR VERDICT.**",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/judgement-1-ai.jpg",
+          "credit": "The Decision"
+        },
+        "legal": {
+          "body": "## **THE SCALES OF JUSTICE**\n\nJustice is usually about balance. \n\nOn one side of the scale, you have the **Rule of Law** (The Province's rules). \n\nOn the other side, you have the **Honour of the Crown**. This means the Government has to keep its promises to Indigenous people.\n\nIf you rule for the Crown, are you breaking a 270-year-old promise? \nIf you rule for Leo, are you ignoring the safety laws of today?\n\nThere is no easy answer.",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/feather.jpg",
+          "credit": "Scales of Justice"
+        },
+        "intel": {
+          "body": "## **THE FUTURE**\n\n**WHAT HAPPENS NEXT?**\n\n**IF LEO WINS:**\nMore First Nations will open their own shops. They will build their own economy. They won't need permission from the Province anymore.\n\n**IF LEO LOSES:**\nThe trust might be broken. The blockades could come back. The cannabis trade will go back underground (illegal market) where it is less safe.\n\nThe goal is **Reconciliation** (making peace). Which decision creates real peace?",
+          "image": "http://dwaugh-edsim.github.io/projectimages/leo-sitroom2/images/reconciliation.jpg",
+          "credit": "Reconciliation"
+        }
+      }
+    }
+  ]
+}

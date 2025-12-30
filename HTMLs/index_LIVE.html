@@ -23,11 +23,18 @@
             --font-logo: 'Oswald', sans-serif;
         }
 
-        body {
+        body,
+        input,
+        button,
+        textarea,
+        select {
             margin: 0;
+            font-family: var(--font-p);
+        }
+
+        body {
             min-height: 100vh;
             display: flex;
-            font-family: var(--font-h);
             background: var(--bg);
             color: var(--text);
             overflow-x: hidden;
@@ -89,15 +96,16 @@
         }
 
         .mission-header {
-            font-family: var(--font-h);
+            font-family: var(--font-p);
             color: #fff;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 5px;
             border-left: 4px solid var(--accent);
             padding-left: 10px;
             line-height: 1.2;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            font-weight: 700;
         }
 
         .card-container {
@@ -183,12 +191,13 @@
             padding: 10px;
             cursor: pointer;
             text-align: center;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             border-right: 1px solid #ddd;
             color: #999;
-            font-weight: bold;
+            font-weight: 700;
             transition: 0.2s;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            font-family: var(--font-p);
         }
 
         .tab.active {
@@ -214,12 +223,13 @@
         }
 
         .tab-content-scroll h2 {
-            font-family: var(--font-h);
-            font-size: 0.75rem;
+            font-family: var(--font-p);
+            font-size: 0.9rem;
+            font-weight: 700;
             margin-top: 0;
-            color: #888;
+            color: #555;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             border-bottom: 1px solid #eee;
             padding-bottom: 8px;
             margin-bottom: 12px;
@@ -251,7 +261,7 @@
             border: 1px solid #555;
             padding: 10px;
             cursor: pointer;
-            font-family: inherit;
+            font-family: var(--font-p);
             transition: 0.2s;
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -329,21 +339,34 @@
         .briefing-dossier {
             width: 100%;
             max-width: 800px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-top: 5px solid var(--accent);
-            padding: 30px;
-            margin-top: 20px;
+            padding: 40px;
+            margin-top: 30px;
             max-height: 45vh;
             overflow-y: auto;
             scrollbar-width: thin;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 1);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8),
+                inset 0 0 40px rgba(255, 255, 255, 0.02);
             color: #eee;
             font-family: var(--font-p);
-            line-height: 1.7;
+            line-height: 1.8;
             text-align: left;
+            position: relative;
+        }
+
+        .briefing-dossier::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(rgba(255, 255, 255, 0) 0px,
+                    rgba(255, 255, 255, 0.02) 2px,
+                    rgba(255, 255, 255, 0) 4px);
+            pointer-events: none;
+            z-index: 5;
         }
 
         .briefing-dossier::-webkit-scrollbar {
@@ -362,16 +385,19 @@
         }
 
         #mission-title-big {
-            font-size: 2.5rem;
+            font-family: var(--font-logo);
+            font-size: 4rem;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            font-weight: bold;
+            letter-spacing: 12px;
+            font-weight: 700;
             color: #fff;
-            text-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
-            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 60px rgba(255, 255, 255, 0.1);
+            margin-bottom: 5px;
             text-align: center;
-            line-height: 1.2;
-            max-width: 800px;
+            line-height: 1.1;
+            max-width: 1000px;
+            opacity: 0;
+            transform: scale(1.1);
         }
 
         #ref-title {
@@ -397,7 +423,7 @@
             border: 1px solid #444;
             padding: 15px;
             width: 100%;
-            font-family: inherit;
+            font-family: var(--font-p);
             margin-bottom: 10px;
             box-sizing: border-box;
             outline: none;
@@ -543,9 +569,9 @@
                 <p
                     style="font-size:0.7rem; opacity:0.5; margin-bottom:30px; text-transform:uppercase; letter-spacing:2px;">
                     Credential Verification Required</p>
-                <input id="username" placeholder="NAME / CODENAME"><input id="pin" type="password"
-                    placeholder="ACCESS PIN">
-                <input id="class-code" placeholder="CLASS CODE (e.g. PER-01)">
+                <input id="username" placeholder="NAME / CODENAME" style="font-family:var(--font-p);">
+                <input id="pin" type="password" placeholder="ACCESS PIN" style="font-family:var(--font-p);">
+                <input id="class-code" placeholder="CLASS CODE (e.g. PER-01)" style="font-family:var(--font-p);">
                 <button class="btn"
                     style="text-align:center; background:var(--accent); color:#000; font-weight:bold; width:100%; margin-top:20px;"
                     onclick="login()">AUTHORIZE ACCESS</button>
@@ -558,7 +584,7 @@
                         PROTOCOL: MISSION AUTHORIZATION REQUIRED</p>
                     <div style="display:flex; gap:10px; margin-bottom:10px;">
                         <input id="mission-code" placeholder="MISSION CODE"
-                            style="flex:1; text-align:center; letter-spacing:5px; margin:0;">
+                            style="flex:1; text-align:center; letter-spacing:5px; margin:0; font-family:var(--font-p);">
                         <button class="btn" style="background:#fff; color:#000; width:auto; padding:0 20px;"
                             onclick="joinMission()">JOIN</button>
                     </div>
@@ -605,7 +631,7 @@
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.40</div>
+            PROTOCOL | v65.44</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -705,7 +731,14 @@
             const j = await res.json();
             if (j.status === "success") {
                 user = { id: j.id, name: cleanName, pin: pin, missions: j.missions, class: classCode };
-                showLobby();
+
+                // Cinematic Entry v65.41
+                gsap.to("#login-step", {
+                    opacity: 0, y: -20, duration: 0.5, onComplete: () => {
+                        showLobby();
+                        gsap.from("#lobby-step", { opacity: 0, y: 20, duration: 0.5 });
+                    }
+                });
             } else alert(j.message);
             document.getElementById('loading-screen').style.display = 'none';
         }
@@ -805,9 +838,14 @@
 
         function applyTheme() {
             const t = window.DATA.theme; document.documentElement.style.setProperty('--accent', t.accent);
-            // ENFORCE INTER v65.40: Override legacy serif font settings from mission data
+            // GLOBAL SANITIZER v65.44: Forcibly strip legacy serif strings from theme variables
             document.documentElement.style.setProperty('--font-p', "'Inter', sans-serif");
-            document.documentElement.style.setProperty('--font-h', t.fontH || 'Courier New, monospace');
+
+            let hFont = t.fontH || 'Courier New, monospace';
+            if (hFont.toLowerCase().includes('serif') || hFont.toLowerCase().includes('georgia') || hFont.toLowerCase().includes('times')) {
+                hFont = 'Courier New, monospace';
+            }
+            document.documentElement.style.setProperty('--font-h', hFont);
             if (t.splashHeroURL) {
                 const s = document.getElementById('splash'); s.style.backgroundImage = `url('${t.splashHeroURL}')`;
                 s.style.backgroundSize = "cover"; s.style.backgroundPosition = "center";
@@ -875,7 +913,7 @@
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.40';
+            const simVersion = 'v65.44';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -1315,16 +1353,41 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
             if (i === window.DATA.slides.length - 1 && !s.historicalOutcome) setTimeout(() => startRef("post"), 1000);
         }
 
-        function toggleHistoricalPanel(show, content) {
+        async function toggleHistoricalPanel(show, content) {
             const p = document.getElementById('historical-panel');
             if (show && content) {
-                document.getElementById('historical-content').innerHTML = content;
+                // Encrypted Reveal Effect v65.41
+                const target = document.getElementById('historical-content');
+                target.innerText = "";
                 p.style.display = 'block';
+                p.style.opacity = 0;
+                gsap.to(p, { opacity: 1, duration: 0.5 });
+
+                const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+                const words = content.replace(/<[^>]*>/g, '').split(' ');
+                let currentWordIndex = 0;
+
+                // Simple scramble effect for the first few seconds
+                const scramble = setInterval(() => {
+                    target.innerText = words.map((w, i) => i < currentWordIndex ? w : chars[Math.floor(Math.random() * chars.length)].repeat(w.length)).join(' ');
+                }, 50);
+
+                const reveal = setInterval(() => {
+                    currentWordIndex++;
+                    if (currentWordIndex >= words.length) {
+                        clearInterval(scramble);
+                        clearInterval(reveal);
+                        target.innerHTML = content; // Restore formatting
+                    }
+                }, 30);
             } else {
-                p.style.display = 'none';
-                // Check if this was the last slide to trigger debrief
-                const i = user.state.last;
-                if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 500);
+                gsap.to(p, {
+                    opacity: 0, duration: 0.3, onComplete: () => {
+                        p.style.display = 'none';
+                        const i = user.state.last;
+                        if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 500);
+                    }
+                });
             }
         }
 
