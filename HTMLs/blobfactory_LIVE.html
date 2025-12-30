@@ -443,7 +443,7 @@
 
     <header>
         <div class="logo">BLOB <span>FACTORY</span></div>
-        <div class="ver">MASTER FORGE v65.73</div>
+        <div class="ver">MASTER FORGE v65.74</div>
     </header>
 
     <div class="stepper">
@@ -521,9 +521,93 @@
         let history = [];
         let accumulatedData = {};
 
+        const NS_OUTCOMES = {
+            "African Canadian Studies 11": [
+                "Diversity and Identity: Understand diversity of Africa/cultures in shaping Canadian identity.",
+                "Pre-Colonial History: History of pre-colonial African kingdoms leading to Transatlantic Slave Trade.",
+                "Colonial Impact and Resistance: Impact of colonial expansion, enslavement, and resistance.",
+                "Research and Communication: Historical research methods and clear communication.",
+                "Civil Rights: Persistent struggle of peoples of African descent for equality.",
+                "Empowerment: Collective consciousness as a strategy for empowerment."
+            ],
+            "Canadian History 11": [
+                "G1: Pre-contact and post-contact First Nations governing structures.",
+                "G2: French, British, and American governing philosophies merging in BNA.",
+                "G3: Political and economic structures leading to Confederation.",
+                "G4: Evolution of federalism from Confederation to Patriation.",
+                "G5: Shift from two-party to multi-party process.",
+                "J5: Evolution of the struggle to achieve rights and freedoms."
+            ],
+            "Contemporary Canadian Studies 11": [
+                "Equity Advocacy: How Black Nova Scotians advocate for rights/reforms.",
+                "Sustaining Communities: Impacts of encroachment/gentrification on Black communities.",
+                "Community Priorities: How individuals/organizations support sustainability.",
+                "Systemic Barriers: Impact on education, healthcare, housing, and church support."
+            ],
+            "Economics 11": [
+                "SCO 8: Supply, demand, and price relationship in a market economy.",
+                "SCO 10: Business organizations in the Canadian market.",
+                "SCO 11: Impact of market structures (monopoly) on consumers.",
+                "SCO 12: Role of governments (regulation, taxation) in the market.",
+                "SCO 13: Measurement of Canadian economy (GDP)."
+            ],
+            "Global Sustainable Solutions 12": [
+                "Indigenous Relationships: Relationships with land and colonial decisions.",
+                "Water Security: Link between sanitation and public health.",
+                "Food Security: Factors impacting food production and security.",
+                "Disaster Management: Mitigation, preparedness, response, and recovery.",
+                "Forced Migration: Conflict-induced and disaster-induced patterns."
+            ],
+            "Social Studies 7": [
+                "Treaty Rights: Impact of policies/denial on Mi'kmaw communities.",
+                "Indian Act: Impact on geographic, civic, and economic conditions.",
+                "Mi'kmaq Resilience: Response to discriminatory policies.",
+                "Resistance: Resisting assimilation and segregation attempts.",
+                "Confederation: Impact on Mi'kmaq from multiple perspectives."
+            ],
+            "Social Studies 8": [
+                "Assimilation Policies: Indian Act and residential school system impacts.",
+                "Rights Advocacy: 1982 constitution and Truth and Reconciliation.",
+                "Inequity Issues: Historical and contemporary injustice in Canada.",
+                "First-Voice Perspectives: Understanding issues and inspiring resistance.",
+                "Reconciliation: Role and purpose in addressing conflicts."
+            ],
+            "Sociology 12": [
+                "Theories: Functionalism, conflict theory, symbolic interactionism, feminism.",
+                "Culture: Core elements (symbols, language, norms, values).",
+                "Socialization: Agents that shape the socialization process.",
+                "Stratification: Gender, race, and socio-economic status.",
+                "Social Control: Formal and informal ways to achieve conformity."
+            ],
+            "Tourism 11": ["Trends in Tourism: Research trends, issues, and innovations."],
+            "IB Global Politics SL/HL": [
+                "Power: Nature of power in shaping political outcomes.",
+                "Rights: Theory and practice of human rights and justice.",
+                "Sustainability: Approaches to development and challenges.",
+                "Conflict: Causes of conflict and strategies for peace."
+            ],
+            "Citizenship 9": [
+                "Engaged Citizenship: Collaboratively-designed service learning projects.",
+                "Who Am I?: Citizenship rights of Mi'kmaw and traditionally disempowered people.",
+                "Governance: Structure/selection of federal, provincial, indigenous governments."
+            ],
+            "Law 12": [
+                "F5: Impact of Charter of Rights and Freedoms on justice.",
+                "CR1: What constitutes a criminal offense in Canada.",
+                "AB2: Legal effects of Indian Act (1876) and Constitution Act (1982).",
+                "HR2: Safeguarding human rights in Canada."
+            ],
+            "Mi'kmaw Studies 11": [
+                "12: Pre-contact society governance and oral culture.",
+                "G4: Nationhood and Treaties (Concordat 1610).",
+                "G5: Discriminatory Policies (Indian Act) adverse effects.",
+                "E2: Residential Schools traumatizing impacts."
+            ]
+        };
+
         const SYSTEM_PROMPTS = {
             1: `You are the BLOB FACTORY COREGINE. We are in PHASE 1: CONCEPT ARRIVE.
-Identify SCO + Ethical Audit. Propose 3 detailed Scenario Concepts based on the user's input.
+Identify SCO + Ethical Audit. Propose 3 detailed Scenario Concepts based on the user's input and TARGET LEARNING OUTCOMES.
 Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 End your response with: "WHICH CONCEPT SHALL WE FORGE? (Select 1-3 or provide feedback)"`,
 
@@ -549,7 +633,7 @@ OUTPUT ONLY THE JSON CODE BLOCK.`
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v65.73), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v65.74), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
 SCHEMA RULES:
@@ -560,9 +644,53 @@ SCHEMA RULES:
 FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newlines.
 `;
 
+        function updateOutcomes() {
+            const courseSelect = document.getElementById('course-select');
+            const container = document.getElementById('outcome-checklist');
+            if (!courseSelect || !container) return;
+
+            const course = courseSelect.value;
+            container.innerHTML = "";
+
+            if (!course || !NS_OUTCOMES[course]) {
+                container.innerHTML = '<p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT A COURSE TO LOAD OUTCOMES</p>';
+                return;
+            }
+
+            NS_OUTCOMES[course].forEach((outcome, i) => {
+                const div = document.createElement('div');
+                div.className = 'outcome-item';
+                div.innerHTML = `<input type="checkbox" id="out-${i}" value="${outcome}"> <label for="out-${i}">${outcome}</label>`;
+                container.appendChild(div);
+            });
+        }
+
+        window.onload = () => {
+            const sel = document.getElementById('course-select');
+            if (sel) {
+                sel.innerHTML = '<option value="">-- SELECT COURSE --</option>';
+                Object.keys(NS_OUTCOMES).sort().forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c; opt.innerText = c; sel.appendChild(opt);
+                });
+            }
+        };
+
         async function processForgeStep() {
-            const input = document.getElementById('forge-input').value.trim();
-            if (!input && currentStep === 1) return alert("COMMAND INPUT REQUIRED.");
+            let rawInputInput = document.getElementById('forge-input');
+            let rawInput = rawInputInput ? rawInputInput.value.trim() : "";
+            const course = document.getElementById('course-select').value;
+            const checkedOutcomes = Array.from(document.querySelectorAll('#outcome-checklist input:checked')).map(v => v.value);
+
+            let input = rawInput;
+            if (currentStep === 1) {
+                if (course && checkedOutcomes.length > 0) {
+                    input = `COURSE: ${course}\nTARGET OUTCOMES:\n- ${checkedOutcomes.join('\n- ')}\n\nUSER CONTEXT: ${rawInput || "(Generic Concept Generation Based on Outcomes)"}`;
+                } else if (!rawInput) {
+                    return alert("COMMAND INPUT REQUIRED OR SELECT COURSE/OUTCOMES.");
+                }
+                document.querySelector('.curriculum-selector').style.display = 'none';
+            }
 
             addMessage(input, 'user');
             document.getElementById('forge-input').value = "";
