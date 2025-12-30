@@ -143,8 +143,62 @@
             padding: 40px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
             overflow-y: auto;
+        }
+
+        /* CURRICULUM SELECTOR */
+        .curriculum-selector {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        select {
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            font-family: var(--font-m);
+            font-size: 0.8rem;
+            width: 100%;
+            border-radius: 4px;
+        }
+
+        .outcome-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 10px;
+        }
+
+        .outcome-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-size: 0.75rem;
+            color: #888;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .outcome-item:hover {
+            background: #151515;
+            color: #fff;
+        }
+
+        .outcome-item input {
+            margin-top: 2px;
+            accent-color: var(--accent);
         }
 
         .output-panel {
@@ -416,11 +470,20 @@
             <div class="input-group">
                 <div class="panel-label">Current Step Context</div>
                 <h2 id="stage-title">Commence Conception</h2>
-                <p id="stage-desc" style="font-size:0.8rem; opacity:0.6;">Input your learning outcomes or scenario seed
-                    below.</p>
+                <p id="stage-desc" style="font-size:0.8rem; opacity:0.6;">Select a course and outcomes to target.</p>
             </div>
 
-            <textarea id="forge-input" rows="12" placeholder="COMMAND INPUT..."></textarea>
+            <div class="curriculum-selector">
+                <div class="panel-label">Nova Scotia Curriculum</div>
+                <select id="course-select" onchange="updateOutcomes()">
+                    <option value="">-- SELECT COURSE --</option>
+                </select>
+                <div id="outcome-checklist" class="outcome-list">
+                    <p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT A COURSE TO LOAD OUTCOMES</p>
+                </div>
+            </div>
+
+            <textarea id="forge-input" rows="12" placeholder="ADDITIONAL COMMANDS / CONTEXT..."></textarea>
 
             <button class="btn-forge" id="forge-btn" onclick="processForgeStep()">Submit Command</button>
             <button class="btn-secondary" id="reset-btn" onclick="resetForge()" style="margin-top:10px;">Reset
