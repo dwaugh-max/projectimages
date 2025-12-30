@@ -4,18 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE SITUATION ROOM | ENTER ARCHIVE</title>
+    <title>SITUATION ROOM | Inquiry at Terminal Velocity</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Oswald:wght@700&family=JetBrains+Mono:wght@500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Oswald:wght@700&family=JetBrains+Mono:wght@500&display=swap"
         rel="stylesheet">
     <style>
         :root {
             --bg: #050505;
             --accent: #00ffcc;
+            --accent-dim: rgba(0, 255, 204, 0.1);
             --border: #0a2a2a;
             --font-h: 'Oswald', sans-serif;
             --font-p: 'Inter', sans-serif;
             --font-m: 'JetBrains Mono', monospace;
+            --section-gap: 120px;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -24,13 +30,9 @@
             background: var(--bg);
             color: #fff;
             font-family: var(--font-p);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-            box-sizing: border-box;
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
         /* MEDICAL SCANLINE OVERLAY */
@@ -41,177 +43,430 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 2px, 3px 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 4px 100%;
             pointer-events: none;
-            z-index: 10;
+            z-index: 9999;
+            opacity: 0.5;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: var(--font-h);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .container {
-            text-align: center;
-            z-index: 5;
-            max-width: 1100px;
-            width: 90%;
-            padding: 60px 50px;
-            border: 1px solid var(--border);
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(10px);
-            position: relative;
-            box-sizing: border-box;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
         }
 
-        .container::after {
-            content: "";
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            border: 1px solid var(--accent);
-            opacity: 0.1;
-            pointer-events: none;
-        }
-
-        h1 {
-            font-family: var(--font-h);
-            font-size: 4.5rem;
-            margin: 0;
-            letter-spacing: 12px;
-            color: var(--accent);
-            text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
-            text-transform: uppercase;
-            line-height: 1;
-        }
-
-        .subtitle {
-            font-family: var(--font-m);
-            font-size: 0.85rem;
-            letter-spacing: 6px;
-            opacity: 0.5;
-            margin-top: 15px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-
-        .links-grid {
-            margin-top: 40px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .entry-card {
-            padding: 20px;
-            border: 1px solid var(--border);
-            background: #0a0a0a;
-            text-decoration: none;
-            color: #fff;
-            transition: all 0.3s;
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-        }
-
-        .entry-card:hover {
-            border-color: var(--accent);
-            background: #001a1a;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .card-icon {
-            font-size: 2rem;
-            opacity: 0.8;
-        }
-
-        .card-title {
-            font-family: var(--font-h);
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .card-desc {
-            font-size: 0.7rem;
-            opacity: 0.4;
-            letter-spacing: 1px;
+            justify-content: center;
+            position: relative;
             text-align: center;
-            line-height: 1.5;
+            background: radial-gradient(circle at center, #0a1a1a 0%, #050505 70%);
         }
 
-        .footer {
-            margin-top: 50px;
+        .hero h1 {
+            font-size: 7rem;
+            margin: 0;
+            letter-spacing: 25px;
+            color: var(--accent);
+            text-shadow: 0 0 40px rgba(0, 255, 204, 0.4);
+            animation: glitch 5s infinite;
+        }
+
+        .hero p {
             font-family: var(--font-m);
-            font-size: 0.6rem;
-            opacity: 0.2;
-            letter-spacing: 2px;
+            font-size: 1.1rem;
+            letter-spacing: 8px;
+            opacity: 0.7;
+            margin-top: 25px;
             text-transform: uppercase;
         }
 
-        @keyframes pulse {
+        .hero-cta {
+            margin-top: 60px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            background: none;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 15px 35px;
+            font-family: var(--font-h);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 30px var(--accent);
+        }
+
+        .btn.secondary {
+            border-color: #333;
+            color: #888;
+        }
+
+        .btn.secondary:hover {
+            border-color: #888;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: none;
+        }
+
+        /* --- MANIFESTO SECTION --- */
+        .section-manifesto {
+            padding: var(--section-gap) 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .manifesto-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 80px;
+        }
+
+        .manifesto-header h2 {
+            font-size: 3rem;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .manifesto-header p {
+            font-size: 1.2rem;
+            opacity: 0.7;
+            font-weight: 300;
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .p-card {
+            padding: 40px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            transition: transform 0.3s;
+        }
+
+        .p-card:hover {
+            transform: translateY(-10px);
+            background: rgba(0, 255, 204, 0.03);
+            border-color: var(--accent);
+        }
+
+        .p-card h3 {
+            color: var(--accent);
+            font-size: 1.4rem;
+            margin-top: 0;
+        }
+
+        .p-card p {
+            font-size: 0.9rem;
+            opacity: 0.5;
+        }
+
+        /* --- THE ARSENAL (TOOL CARDS) --- */
+        .section-arsenal {
+            padding: var(--section-gap) 0;
+            background: #080808;
+        }
+
+        .arsenal-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .arsenal-header p {
+            font-family: var(--font-m);
+            color: var(--accent);
+            font-size: 0.8rem;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+
+        .tool-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 100px;
+        }
+
+        .tool-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .tool-tag {
+            font-family: var(--font-m);
+            font-size: 0.7rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .tool-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .tool-desc {
+            font-size: 1rem;
+            opacity: 0.6;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .tool-visual {
+            background: #000;
+            border: 1px solid var(--border);
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: transform 0.5s;
+        }
+
+        .tool-visual:hover img {
+            transform: scale(1.05);
+        }
+
+        .tool-visual::after {
+            content: "OPERATIONAL PREVIEW";
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-family: var(--font-m);
+            font-size: 0.5rem;
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            padding: 4px 8px;
+            color: var(--accent);
+            opacity: 0.5;
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            padding: 80px 0;
+            border-top: 1px solid var(--border);
+            background: #000;
+            text-align: center;
+        }
+
+        .footer p {
+            font-family: var(--font-m);
+            font-size: 0.7rem;
+            opacity: 0.3;
+            letter-spacing: 2px;
+        }
+
+        @keyframes glitch {
             0% {
-                opacity: 0.2;
+                transform: translate(0);
             }
 
-            50% {
-                opacity: 0.5;
+            1% {
+                transform: translate(-2px, 2px);
+            }
+
+            2% {
+                transform: translate(2px, -2px);
+            }
+
+            3% {
+                transform: translate(0);
             }
 
             100% {
-                opacity: 0.2;
+                transform: translate(0);
             }
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 10px;
-            animation: pulse 2s infinite;
+        @media (max-width: 900px) {
+
+            .philosophy-grid,
+            .tool-showcase {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .tool-showcase:nth-child(even) .tool-visual {
+                order: -1;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>SITUATION ROOM</h1>
-        <div class="subtitle">Advanced Historical Inquiry Ecosystem</div>
 
-        <div class="links-grid">
-            <a href="simroom_LIVE.html" class="entry-card">
-                <div class="card-icon">🚀</div>
-                <div class="card-title">Launch Sim</div>
-                <div class="card-desc">Execute high-stakes administrative investigations. Access active mission
-                    capsules.</div>
-            </a>
-            <a href="teachermode_LIVE.html" class="entry-card">
-                <div class="card-icon">🧪</div>
-                <div class="card-title">Teacher Mode</div>
-                <div class="card-desc">Verify mission integrity and preview student outcomes. Full-fidelity sandbox.
-                </div>
-            </a>
-            <a href="blobhospital.html" class="entry-card">
-                <div class="card-icon">🩺</div>
-                <div class="card-title">Blob Hospital</div>
-                <div class="card-desc">Precision surgical theatre for mission fine-tuning. Redefine history without
-                    code.</div>
-            </a>
-            <a href="teacher_guide.md" class="entry-card">
-                <div class="card-icon">📚</div>
-                <div class="card-title">Operations Manual</div>
-                <div class="card-desc">Comprehensive pedagogical guide to the Situation Room ecosystem and deployment.
-                </div>
-            </a>
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="container">
+            <h1>SITUATION ROOM</h1>
+            <p>Administrative Inquiry at Terminal Velocity</p>
+            <div class="hero-cta">
+                <a href="#arsenal" class="btn">Examine the Arsenal</a>
+                <a href="simroom_LIVE.html" class="btn secondary">Enter Simulation</a>
+            </div>
         </div>
+    </section>
 
-        <div class="footer">
-            <div class="status-dot"></div> SECURE CONNECTION ESTABLISHED | SYSTEM v65.49 | THE SITUATION ROOM
+    <!-- MANIFESTO -->
+    <section class="section-manifesto" id="manifesto">
+        <div class="container">
+            <div class="manifesto-header">
+                <h2>The Inquiry Standard</h2>
+                <p>Forget standard "educational gaming." We've moved into <strong>Administrative Investigation</strong>.
+                    Students don't just "play"—they analyze, cross-reference, and file rationale for the record.</p>
+            </div>
+
+            <div class="philosophy-grid">
+                <div class="p-card">
+                    <h3>Digital DBQ</h3>
+                    <p>Every mission is a structured document-based question, requiring evidence extraction across
+                        multiple conflicting sources.</p>
+                </div>
+                <div class="p-card">
+                    <h3>Triple-Tab Protocol</h3>
+                    <p>Sources are segmented into PRIMARY, LEGAL, and INTEL briefs, forcing students to reconcile facts
+                        with policy and hearsay.</p>
+                </div>
+                <div class="p-card">
+                    <h3>Rationalized Action</h3>
+                    <p>No decision can be filed without a 100-word rationale citing specific documentary evidence.
+                        Accountability is the primary mechanic.</p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- THE ARSENAL -->
+    <section class="section-arsenal" id="arsenal">
+        <div class="container">
+            <div class="arsenal-header">
+                <h2>The Toolkit Ecosystem</h2>
+                <p>[ v65.50 ] INTEGRATED SURGICAL SUITE</p>
+            </div>
+
+            <!-- TOOL 1: THE GEM -->
+            <div class="tool-showcase">
+                <div class="tool-content">
+                    <span class="tool-tag">Module 01: Conception</span>
+                    <h3 class="tool-title">The Gem</h3>
+                    <p class="tool-desc">The AI mission architect. Brief it on a historical era, a policy crisis, or a
+                        moral dilemma, and watch it generate a full-intensity .blob mission in seconds. High-rigor data,
+                        curated by intelligence.</p>
+                    <a href="Gem instructions.md" class="btn secondary">Brief the Engineer</a>
+                </div>
+                <div class="tool-visual">
+                    <img src="../leo-sitroom2/images/googoo-ai.jpg" alt="The Gem AI Core">
+                </div>
+            </div>
+
+            <!-- TOOL 2: TEACHER MODE -->
+            <div class="tool-showcase" style="direction: rtl;">
+                <div class="tool-content" style="direction: ltr;">
+                    <span class="tool-tag">Module 02: Verification</span>
+                    <h3 class="tool-title">Teacher Mode</h3>
+                    <p class="tool-desc">The verification sandbox. Testing is critical. Load your generated mission,
+                        walk the student path, and ensure your documentary evidence is airtight before deployment.</p>
+                    <a href="teachermode_LIVE.html" class="btn secondary">Run Diagnostic</a>
+                </div>
+                <div class="tool-visual">
+                    <img src="../leo-sitroom2/images/leo-test-report.jpg" alt="Verification Diagnostic">
+                </div>
+            </div>
+
+            <!-- TOOL 3: BLOB HOSPITAL -->
+            <div class="tool-showcase">
+                <div class="tool-content">
+                    <span class="tool-tag">Module 03: Precision Surgery</span>
+                    <h3 class="tool-title">Blob Hospital</h3>
+                    <p class="tool-desc">When a mission needs precision tuning, you admit it here. Surgical content
+                        editing, live image swaps, and metadata surgery—all without touching a single bracket of code.
+                    </p>
+                    <a href="blobhospital.html" class="btn secondary">Enter Surgery</a>
+                </div>
+                <div class="tool-visual">
+                    <img src="../leo-sitroom2/images/evidence-table-AI.jpg" alt="Surgical Interface Mockup">
+                </div>
+            </div>
+
+            <!-- TOOL 4: SIM ROOM -->
+            <div class="tool-showcase" style="direction: rtl;">
+                <div class="tool-content" style="direction: ltr;">
+                    <span class="tool-tag">Module 04: Real-Time Inquiry</span>
+                    <h3 class="tool-title">The Sim Room</h3>
+                    <p class="tool-desc">The final frontier. A high-fidelity "Situation Room" where students face the
+                        consequences of their inquiry. Secure logins, live decision feeds, and immersive visuals.</p>
+                    <a href="simroom_LIVE.html" class="btn">Deploy Personnel</a>
+                </div>
+                <div class="tool-visual">
+                    <img src="../leo-sitroom2/images/Leo-CBC-Splash-AI.jpg" alt="Command Center View">
+                </div>
+            </div>
+
+            <!-- DEMO BRIDGE -->
+            <div
+                style="margin-top: 150px; text-align: center; border: 1px solid var(--border); padding: 80px; background: rgba(0,255,204,0.02);">
+                <span class="tool-tag">Operational Demo</span>
+                <h2 style="font-size: 3rem; margin-bottom: 20px;">Witness the Investigation</h2>
+                <p style="max-width: 600px; margin: 0 auto 40px; opacity: 0.6;">Ready to see the Situation Room in
+                    action? Take a walkthrough of our flagship Cuban Missile Crisis mission and see how high-stakes
+                    inquiry changes the learning game.</p>
+                <div style="display: flex; justify-content: center; gap: 20px;">
+                    <a href="simroom_LIVE.html" class="btn">Launch Live Demo</a>
+                    <a href="teacher_guide.md" class="btn secondary">View Documentation</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <a href="teacher_guide.md" class="btn">Read the Operations Manual</a>
+            <p style="margin-top: 50px;">ESTABLISHED 2025 | PROJECT IMAGES | THE SITUATION ROOM</p>
+        </div>
+    </footer>
+
 </body>
 
 </html>
