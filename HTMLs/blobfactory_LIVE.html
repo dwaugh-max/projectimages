@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOB FACTORY // FORGE JUNCTURE (v65.71)</title>
+    <title>BLOB FACTORY // MASTER FORGE (v65.73)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -85,6 +85,48 @@
             letter-spacing: 2px;
         }
 
+        /* PROGRESS STEPPER */
+        .stepper {
+            display: flex;
+            gap: 20px;
+            padding: 20px 40px;
+            background: #080808;
+            border-bottom: 1px solid var(--border);
+            z-index: 90;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step-num {
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-m);
+            font-size: 0.6rem;
+            color: var(--accent);
+        }
+
+        .step-label {
+            font-family: var(--font-h);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         main {
             flex: 1;
             display: grid;
@@ -128,13 +170,6 @@
             margin: 0;
             letter-spacing: 2px;
             text-transform: uppercase;
-        }
-
-        p.desc {
-            font-size: 0.85rem;
-            opacity: 0.6;
-            line-height: 1.5;
-            margin: 0;
         }
 
         textarea {
@@ -200,17 +235,49 @@
             box-shadow: none;
         }
 
-        /* CODE VIEWER */
-        #code-display {
+        /* CHAT / STATUS VIEWER */
+        #chat-display {
             flex: 1;
-            margin: 0;
             padding: 30px;
-            font-family: var(--font-m);
-            font-size: 0.8rem;
-            color: #888;
-            overflow: auto;
-            white-space: pre-wrap;
-            background: #050505;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-msg {
+            max-width: 85%;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .msg-ai {
+            background: #111;
+            border-left: 3px solid var(--accent);
+            color: #ccc;
+        }
+
+        .msg-user {
+            background: #1a1a1a;
+            align-self: flex-end;
+            border-right: 3px solid #444;
+            color: #fff;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .status-overlay {
@@ -278,46 +345,35 @@
             color: var(--accent);
         }
 
-        /* HLJS-ish colors */
-        .key {
-            color: #f92672;
-        }
-
-        .string {
-            color: #e6db74;
-        }
-
-        .number {
-            color: #ae81ff;
-        }
-
-        #visual-preview {
-            width: 100%;
-            height: 150px;
-            background: #000;
-            border: 1px solid #222;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        #visual-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.4;
-        }
-
-        #visual-preview .label {
-            position: absolute;
-            font-family: var(--font-h);
+        /* CODE DISPLAY (Phase 4) */
+        #code-display {
+            display: none;
+            background: #050505;
+            padding: 30px;
+            font-family: var(--font-m);
             font-size: 0.8rem;
-            letter-spacing: 4px;
-            color: #fff;
-            text-shadow: 0 0 10px #000;
+            color: #888;
+            overflow: auto;
+            white-space: pre-wrap;
+            flex: 1;
+        }
+
+        .markdown h1,
+        .markdown h2,
+        .markdown h3 {
+            font-family: var(--font-h);
+            color: var(--accent);
+            margin-top: 0;
+        }
+
+        .markdown ul {
+            padding-left: 20px;
+        }
+
+        .markdown code {
+            background: #222;
+            padding: 2px 5px;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -326,49 +382,58 @@
 
     <header>
         <div class="logo">BLOB <span>FACTORY</span></div>
-        <div class="ver">JUNCTURE FORGE v65.71</div>
+        <div class="ver">MASTER FORGE v65.73</div>
     </header>
+
+    <div class="stepper">
+        <div class="step active" id="step-1">
+            <div class="step-num">1</div>
+            <div class="step-label">Concept</div>
+        </div>
+        <div class="step" id="step-2">
+            <div class="step-num">2</div>
+            <div class="step-label">Deep Search</div>
+        </div>
+        <div class="step" id="step-3">
+            <div class="step-num">3</div>
+            <div class="step-label">Story</div>
+        </div>
+        <div class="step" id="step-4">
+            <div class="step-num">4</div>
+            <div class="step-label">Birth</div>
+        </div>
+    </div>
 
     <main>
         <div class="forge-panel">
             <div class="input-group">
-                <div class="panel-label">Project Identity</div>
-                <input type="text" id="mission-name" placeholder="MISSION CODENAME (e.g. OPERATION CRENEL)">
+                <div class="panel-label">Current Step Context</div>
+                <h2 id="stage-title">Commence Conception</h2>
+                <p id="stage-desc" style="font-size:0.8rem; opacity:0.6;">Input your learning outcomes or scenario seed
+                    below.</p>
             </div>
 
-            <div class="input-group">
-                <div class="panel-label">Material Inputs</div>
-                <textarea id="raw-context" rows="12"
-                    placeholder="PASTE LEARNING OUTCOMES, COURSE CONTENT, OR SCENARIO REQUIREMENTS HERE..."></textarea>
-            </div>
+            <textarea id="forge-input" rows="12" placeholder="COMMAND INPUT..."></textarea>
 
-            <div class="input-group">
-                <div class="panel-label">Complexity Tuning</div>
-                <select id="slide-count"
-                    style="background:#111; border:1px solid #333; color:#fff; padding:10px; font-family:var(--font-m); font-size:0.7rem;">
-                    <option value="5">5 SLIDES (SCOUT)</option>
-                    <option value="10" selected>10 SLIDES (STANDARD)</option>
-                    <option value="15">15 SLIDES (VETERAN)</option>
-                </select>
-            </div>
-
-            <button class="btn-forge" id="forge-btn" onclick="forgeMission()">Commence Forging</button>
-
-            <div class="input-group" style="margin-top:20px;">
-                <div class="panel-label">Sim Preview (Last Generated)</div>
-                <div id="visual-preview">
-                    <div class="label">NO DATA FORGED</div>
-                </div>
-            </div>
+            <button class="btn-forge" id="forge-btn" onclick="processForgeStep()">Submit Command</button>
+            <button class="btn-secondary" id="reset-btn" onclick="resetForge()" style="margin-top:10px;">Reset
+                Core</button>
         </div>
 
         <div class="output-panel">
             <div class="status-overlay" id="status-overlay">
                 <div class="loader"></div>
-                <div class="loading-text" id="status-text">INITIALIZING FORGE...</div>
+                <div class="loading-text" id="status-text">INITIALIZING CORE...</div>
             </div>
 
-            <pre id="code-display">// MISSION SOURCE CODE WILL APPEAR HERE...</pre>
+            <div id="chat-display">
+                <div class="chat-msg msg-ai">
+                    <strong>COREGINE v65.73 ONLINE.</strong><br>
+                    Please provide the initial mission parameters or learning outcomes to begin Phase 1: Concept Arrive.
+                </div>
+            </div>
+
+            <pre id="code-display"></pre>
 
             <div class="toolbar" id="toolbar" style="display:none;">
                 <button class="btn-secondary" onclick="copyCode()">Copy to Clipboard</button>
@@ -379,114 +444,191 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         const PROXY_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
-        let currentBlob = null;
+        let currentStep = 1;
+        let history = [];
+        let accumulatedData = {};
 
-        /**
-         * BLOB FACTORY System Prompt.
-         * This defines the exact Situation Room schema for the LLM.
-         */
-        const ARCHITECT_SYSTEM_PROMPT = `
-You are the BLOB FACTORY COREGINE, a specialized Situation Room mission designer. 
-Your goal is to forge high-stakes, realistic simulations based on the student's learning outcomes.
+        const SYSTEM_PROMPTS = {
+            1: `You are the BLOB FACTORY COREGINE. We are in PHASE 1: CONCEPT ARRIVE.
+Identify SCO + Ethical Audit. Propose 3 detailed Scenario Concepts based on the user's input.
+Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
+End your response with: "WHICH CONCEPT SHALL WE FORGE? (Select 1-3 or provide feedback)"`,
 
-OUTPUT ONLY VALID JSON. NO TALKING. 
+            2: `We are in PHASE 2: DEEP SEARCH.
+Take the chosen concept and expand it into a detailed mission outline.
+List: 
+1. The 10 Slide Titles and their high-level narrative purpose.
+2. The 'Intel' data strategy (Primary, Legal, Intel tabs) for the core slides.
+3. The Learning Outcomes and Intelligence Glossary terms.
+Rules: Standard Sentence Case. No All-Caps. 
+End your response with: "SHALL WE PROCEED TO FULL STORY DRAFTING?"`,
 
-SCHEMA REQUIREMENTS:
-- metadata: { title, id, author, thumb, description, simulationType }
-- slides: Array of objects.
-   - id: "s1", "s2", etc.
-   - type: "narrative" or "interaction"
-   - title: Dramatic title
-   - content: Markdown content. Use strong impact.
-   - mediaURL: String. Use Unsplash keyword URLs like "https://images.unsplash.com/photo-[ID]?q=80&w=1000&auto=format&fit=crop" OR a semantic keyword search like "https://source.unsplash.com/featured/?scifi,cyberpunk". Actually, use "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000" as a fallback but try to find unique photo IDs for the theme.
-   - intel: (optional) { primary, legal, intel } - text for slide-specific intel tabs.
-   - interactionPrompt: (for interactions) "Choose your path:"
-   - options: (for interactions) ["Option A", "Option B"]
-   - outcomes: (for interactions) ["Outcome A text", "Outcome B text"]
+            3: `We are in PHASE 3: STORY CONFIRM.
+Draft the FULL immersive prose for all 10 slides, including the sidebars (Intel, Legal, Primary tabs).
+Rules: High stakes, immersive, dramatic. Use standard sentence case. 200-400 words per slide.
+Identify the interaction choice and consequences.
+End your response with: "IS THE STORY COMPLETE? TYPE 'BIRTH' TO GENERATE THE FINAL BLOB."`,
 
-MISSION STRUCTURE:
-1. Start with an urgent situation.
-2. Build complexity through data and "Intel".
-3. End with a significant "Interaction" that requires a critical choice.
-4. If the user provided specific outcomes, MAP EACH SLIDE TO AN OUTCOME.
+            4: `We are in PHASE 4: BLOB BIRTH.
+Compile the confirmed story into a valid Situation Room JSON (.blob).
+Skip image sourcing - use placeholder keyword strings for mediaURL like "https://source.unsplash.com/featured/?keyword".
+OUTPUT ONLY THE JSON CODE BLOCK.`
+        };
 
-Simulation Type: "standard" unless "social_history" is requested.
+        const MASTER_SYSTEM_PROMPT_CORE = `
+You are the BLOB FACTORY COREGINE (v65.73), the multi-stage mission architect.
+GOAL: Guide the user from a seed concept to a fully realized .blob mission.
+
+SCHEMA RULES:
+- metadata: { title, id, author, thumb, description, simulationType, learningOutcomes }
+- slides: Array of objects { id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes }
+- intelligenceGlossary: Array of terms.
+
+FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newlines.
 `;
 
-        async function forgeMission() {
-            const name = document.getElementById('mission-name').value.trim() || "UNNAMED OPERATION";
-            const context = document.getElementById('raw-context').value.trim();
-            const slides = document.getElementById('slide-count').value;
+        async function processForgeStep() {
+            const input = document.getElementById('forge-input').value.trim();
+            if (!input && currentStep === 1) return alert("COMMAND INPUT REQUIRED.");
 
-            if (!context) return alert("MATERIAL INPUTS REQUIRED.");
+            addMessage(input, 'user');
+            document.getElementById('forge-input').value = "";
+            showLoader(true, getLoadingMessage());
 
-            document.getElementById('status-overlay').style.display = 'flex';
-            document.getElementById('status-text').innerText = "CALCULATING VARIABLES...";
-            document.getElementById('forge-btn').disabled = true;
-
-            const userPrompt = `
-Generate a MISSION BLOB for: ${name}
-Target Slide Count: ${slides}
-BASED ON THESE OUTCOMES/CONTEXT:
-${context}
-
-IMPORTANT: Ensure the JSON is well-formatted and includes a 'thumb' URL in metadata that matches the theme.
-`;
+            // Prepare history for AI
+            const messages = [{ role: "system", content: MASTER_SYSTEM_PROMPT_CORE + "\n" + SYSTEM_PROMPTS[currentStep] }];
+            history.forEach(m => messages.push({ role: m.role, content: m.content }));
+            messages.push({ role: "user", content: input });
 
             try {
                 const response = await fetch(PROXY_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        system: ARCHITECT_SYSTEM_PROMPT,
-                        message: userPrompt
+                        messages: messages
                     })
                 });
 
                 const data = await response.json();
-                const reply = data.reply || data.choices[0].message.content;
+                const reply = data.choices[0].message.content;
 
-                // Attempt to parse out the JSON if the AI talked
-                let jsonStr = reply;
-                if (reply.includes("```json")) {
-                    jsonStr = reply.split("```json")[1].split("```")[0].trim();
-                } else if (reply.includes("```")) {
-                    jsonStr = reply.split("```")[1].split("```")[0].trim();
+                history.push({ role: "user", content: input });
+                history.push({ role: "assistant", content: reply });
+
+                if (currentStep === 4) {
+                    handleBirth(reply);
+                } else {
+                    addMessage(reply, 'ai');
+                    // Logic to check if we should move to NEXT step based on AI response?
+                    // For now, assume step increment happens on user "confirm" or specific keywords
+                    checkForStepIncrement(input, reply);
                 }
-
-                currentBlob = JSON.parse(jsonStr);
-
-                // Finalize UI
-                displayCode(currentBlob);
-                updatePreview(currentBlob);
-                document.getElementById('toolbar').style.display = 'flex';
-
-                gsap.from("#code-display", { opacity: 0, y: 20, duration: 1 });
 
             } catch (err) {
                 console.error(err);
-                alert("FORGE FAILURE: Check console or proxy connection.");
+                addMessage("CORE ERROR: Connection link severed. " + err.message, 'ai');
             } finally {
-                document.getElementById('status-overlay').style.display = 'none';
-                document.getElementById('forge-btn').disabled = false;
+                showLoader(false);
             }
         }
 
-        function displayCode(obj) {
-            const display = document.getElementById('code-display');
-            display.innerText = JSON.stringify(obj, null, 4);
-        }
-
-        function updatePreview(blob) {
-            const prev = document.getElementById('visual-preview');
-            const thumb = blob.metadata.thumb || "";
-            if (thumb) {
-                prev.innerHTML = `<img src="${thumb}"><div class="label">${blob.metadata.title}</div>`;
+        function checkForStepIncrement(input, reply) {
+            const up = input.toUpperCase();
+            if (currentStep === 1 && (reply.includes("CONCEPTION COMPLETE") || reply.includes("PROPOSE"))) {
+                // Wait for user to pick a number
+                if (/\d/.test(input)) moveToStep(2);
+            } else if (currentStep === 2 && (up.includes("PROCEED") || up.includes("YES") || up.includes("CONFIRM"))) {
+                moveToStep(3);
+            } else if (currentStep === 3 && (up.includes("BIRTH") || up.includes("COMPLETE"))) {
+                moveToStep(4);
             }
         }
 
+        function moveToStep(step) {
+            currentStep = step;
+            document.querySelectorAll('.step').forEach((s, i) => {
+                s.classList.toggle('active', (i + 1) <= currentStep);
+            });
+
+            const titles = ["CONCEPT ARRIVE", "DEEP SEARCH", "STORY CONFIRM", "BLOB BIRTH"];
+            const descs = [
+                "Lock in the historical mission context.",
+                "Expand the intel database and slide map.",
+                "Review and finalize the narrative prose.",
+                "Transmuting story into data."
+            ];
+
+            document.getElementById('stage-title').innerText = titles[step - 1];
+            document.getElementById('stage-desc').innerText = descs[step - 1];
+
+            if (step === 4) {
+                document.getElementById('forge-input').placeholder = "FINAL VALIDATION IN PROGRESS...";
+                document.getElementById('forge-input').disabled = true;
+                document.getElementById('forge-btn').innerText = "FINALIZING BIRTH...";
+                document.getElementById('forge-btn').disabled = true;
+                // Auto-trigger step 4
+                processForgeStep();
+            }
+        }
+
+        function handleBirth(reply) {
+            let jsonStr = reply;
+            if (reply.includes("```json")) {
+                jsonStr = reply.split("```json")[1].split("```")[0].trim();
+            } else if (reply.includes("```")) {
+                jsonStr = reply.split("```")[1].split("```")[0].trim();
+            }
+
+            try {
+                accumulatedData = JSON.parse(jsonStr);
+                document.getElementById('chat-display').style.display = 'none';
+                document.getElementById('code-display').style.display = 'block';
+                document.getElementById('code-display').innerText = JSON.stringify(accumulatedData, null, 4);
+                document.getElementById('toolbar').style.display = 'flex';
+                document.getElementById('status-text').innerText = "BIRTH SUCCESSFUL.";
+
+                gsap.from("#code-display", { opacity: 0, y: 20, duration: 1 });
+            } catch (e) {
+                addMessage("BIRTH DEFECT: JSON parsing failed. Please check the output manually below.", 'ai');
+                document.getElementById('code-display').style.display = 'block';
+                document.getElementById('code-display').innerText = reply;
+            }
+        }
+
+        function addMessage(text, role) {
+            const chat = document.getElementById('chat-display');
+            const div = document.createElement('div');
+            div.className = `chat-msg msg-${role}`;
+            div.innerHTML = role === 'ai' ? marked.parse(text) : text;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function showLoader(show, text) {
+            document.getElementById('status-overlay').style.display = show ? 'flex' : 'none';
+            if (text) document.getElementById('status-text').innerText = text;
+        }
+
+        function getLoadingMessage() {
+            const msgs = {
+                1: "PROPOSING SCENARIOS...",
+                2: "MINING INTEL DATA...",
+                3: "DRAFTING NARRATIVE...",
+                4: "COMPILING FINAL BLOB..."
+            };
+            return msgs[currentStep];
+        }
+
+        function resetForge() {
+            if (confirm("PURGE CORE MEMORY? THIS WILL RESET THE FORGE.")) {
+                location.reload();
+            }
+        }
+
+        // TOOLBAR ACTIONS
         function copyCode() {
             const code = document.getElementById('code-display').innerText;
             navigator.clipboard.writeText(code);
@@ -494,19 +636,19 @@ IMPORTANT: Ensure the JSON is well-formatted and includes a 'thumb' URL in metad
         }
 
         function downloadBlob() {
-            if (!currentBlob) return;
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentBlob));
+            if (!accumulatedData) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(accumulatedData));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", (currentBlob.metadata.title || "mission") + ".blob");
+            downloadAnchorNode.setAttribute("download", (accumulatedData.metadata.title || "mission") + ".blob");
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
         }
 
         function openInHospital() {
-            if (!currentBlob) return alert("FORGE A MISSION FIRST.");
-            localStorage.setItem('forge_transit', JSON.stringify(currentBlob));
+            if (!accumulatedData) return alert("FORGE A MISSION FIRST.");
+            localStorage.setItem('forge_transit', JSON.stringify(accumulatedData));
             window.location.href = 'blobhospital.html';
         }
     </script>
