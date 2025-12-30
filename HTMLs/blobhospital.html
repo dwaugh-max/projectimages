@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Blob Hospital – Surgical Interface (v65.62)</title>
+    <title>Blob Hospital – Surgical Interface (v65.63)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -595,7 +595,7 @@
             </div>
             <div
                 style="font-family:'JetBrains Mono'; font-size:0.55rem; opacity:0.5; margin-top:5px; letter-spacing:1px;">
-                SURGICAL INTERFACE v65.62</div>
+                SURGICAL INTERFACE v65.63</div>
             <div
                 style="font-family:'Oswald'; font-size:0.6rem; opacity:0.3; margin-top:3px; letter-spacing:2px; text-transform:uppercase;">
                 The Situation Room</div>
@@ -642,7 +642,7 @@
         </div>
         <div
             style="padding:10px; border-top: 1px solid var(--border); text-align:center; font-family:'JetBrains Mono'; font-size:0.5rem; opacity:0.3; line-height:1.4;">
-            <div>BLOB HOSPITAL v65.62</div>
+            <div>BLOB HOSPITAL v65.63</div>
             <div style="margin-top:3px;">OPEN SOURCE | THE SITUATION ROOM</div>
         </div>
     </div>
@@ -731,7 +731,7 @@
 
             <div style="text-align:right; display:flex; flex-direction:column; justify-content:center;">
                 <div class="dashboard-label" style="opacity:0.3; letter-spacing:1px; font-size:0.5rem;">
-                    DIAGNOSTIC FEED v65.62
+                    DIAGNOSTIC FEED v65.63
                 </div>
                 <div style="font-size:0.45rem; opacity:0.2; font-family:'JetBrains Mono'; margin-top:5px;">
                     SECURE JUNCTURE LINK ACTIVE
@@ -864,7 +864,7 @@
             // Metadata (PATIENT DOSSIER) - now in top toolbar, skip in nav
 
             // Slides (SURGICAL THEATRE)
-            addGroup("SURGICAL THEATRE");
+            addGroup("SURGICAL THEATRE", true); // Pass true to enable add button
             currentBlob.slides.forEach((slide, sIdx) => {
                 const sName = slide.shortTitle || `Section ${sIdx + 1}`;
                 addItem(sName, `slides.${sIdx}`);
@@ -897,10 +897,46 @@
             status.innerText = `SCHEMA: MISSION_BLOB | STATUS: ADMITTED | ASSETS: ${slideCount} SECTIONS`;
         }
 
-        function addGroup(title) {
+        function addSlide() {
+            const newSlide = {
+                id: `target_${currentBlob.slides.length + 1}`,
+                shortTitle: "New Chapter",
+                longTitle: "Chapter Title",
+                interactionPrompt: "What is the critical decision?",
+                options: ["Option A", "Option B"],
+                tabs: {
+                    primary: { label: "Main", content: "### NEW BRIEFING\n\nEnter content here..." },
+                    legal: { label: "Legal", content: "### LEGAL ADVICE\n\nEnter content here..." },
+                    intel: { label: "Intel", content: "### INTEL REPORT\n\nEnter content here..." }
+                }
+            };
+            currentBlob.slides.push(newSlide);
+            logSurgical("NEW CHAPTER SUTURED TO SCHEMA.");
+            buildNav();
+            selectPath(`slides.${currentBlob.slides.length - 1}`);
+        }
+
+        function addGroup(title, allowAdd = false) {
             const div = document.createElement('div');
             div.className = 'nav-group';
-            div.innerText = title;
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+            div.innerHTML = `<span>${title}</span>`;
+
+            if (allowAdd) {
+                const addBtn = document.createElement('span');
+                addBtn.innerText = '+';
+                addBtn.style.cursor = 'pointer';
+                addBtn.style.color = 'var(--accent)';
+                addBtn.style.padding = '0 5px';
+                addBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    addSlide();
+                };
+                div.appendChild(addBtn);
+            }
+
             navTree.appendChild(div);
         }
 
