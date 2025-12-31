@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOB FACTORY // MASTER FORGE (v65.96)</title>
+    <title>BLOB FACTORY // MASTER FORGE (v65.97)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -623,7 +623,7 @@
         <div style="display:flex; align-items:center; gap:20px;">
             <button class="btn-settings-toggle" onclick="toggleSettings()">CORE SETTINGS</button>
             <div style="text-align:right;">
-                <div class="ver">MASTER FORGE v65.96</div>
+                <div class="ver">MASTER FORGE v65.97</div>
                 <div id="header-model-status"
                     style="font-size:0.5rem; color:var(--accent); text-transform:uppercase; letter-spacing:1px; opacity:0.8; margin-top:2px;">
                     Brain: Xiaomi MiMo V2</div>
@@ -693,7 +693,7 @@
 
             <div id="chat-display">
                 <div class="chat-msg msg-ai">
-                    <strong>COREGINE v65.96 ONLINE.</strong><br>
+                    <strong>COREGINE v65.97 ONLINE.</strong><br>
                     Please provide the initial mission parameters or learning outcomes to begin Phase 1: Concept Arrive.
                 </div>
             </div>
@@ -714,8 +714,13 @@
                             AWAITING SELECTION ]</div>
                         <textarea id="hospital-raw-editor"
                             style="width:100%; height:400px; background:#050505; color:#eee; border:1px solid #1a3c3c; padding:15px; font-family:var(--font-m); font-size:0.9rem;"></textarea>
-                        <button class="btn-forge" onclick="saveHospitalEdit()"
-                            style="margin-top:10px; background:#00ffcc; color:#000;">STABILIZE NODE</button>
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <button class="btn-forge" onclick="saveHospitalEdit()"
+                                style="flex:1; background:#00ffcc; color:#000;">STABILIZE NODE</button>
+                            <button id="btn-push-teacher" class="btn-forge" onclick="pushToTeacherMode()"
+                                style="flex:1; display:none; background:#ffcc00; color:#000;">PUSH TO COMMAND
+                                CENTER</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -757,6 +762,19 @@
                 </select>
                 <p style="font-size:0.6rem; opacity:0.4; margin:0;">Adjusts the concepts relative to the course grade.
                 </p>
+            </div>
+
+            <div class="settings-item" style="border-top: 1px solid #222; padding-top: 15px;">
+                <label>TEACHER MODE SYNC</label>
+                <div style="display:flex; gap:5px; margin-bottom: 5px;">
+                    <input type="password" id="teacher-pin" placeholder="ENTER TEACHER PIN (e.g. 8812)"
+                        style="flex:1; background:#050505; border:1px solid #222; color:#fff; font-size:0.7rem; padding:5px;">
+                    <button class="btn-forge" onclick="syncWithTeacherMode()"
+                        style="font-size:0.6rem; padding:5px 10px;">SYNC</button>
+                </div>
+                <div id="sync-status"
+                    style="font-size:0.5rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Cloud Link:
+                    Disconnected</div>
             </div>
 
             <div class="settings-item" style="border-top: 1px solid #222; padding-top: 15px;">
@@ -923,7 +941,7 @@ Ask the user: "WOULD YOU LIKE TO BEGIN THE CLINICAL REVIEW OR DOWNLOAD THE SOURC
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v65.96), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v65.97), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
 CONTEXT BASELINE:
@@ -983,9 +1001,99 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
             renderCustomCourseList();
         }
 
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxmJmFtT2E9OEPtFdTx2O3nBlz2zCoSQz69N37jRipWMpKd52iB_beF34cqUQbfo4MJ/exec";
+        let isTeacherLinked = false;
+        let teacherPin = "";
+
+        async function syncWithTeacherMode() {
+            const pin = document.getElementById('teacher-pin').value;
+            if (!pin) return alert("PIN REQUIRED.");
+
+            document.getElementById('sync-status').innerText = "Cloud Link: Syncing...";
+            try {
+                // We'll use a specific action name for outcomes, but first we test the PIN via a generic fetch if possible
+                // For now, we'll try to fetch custom curriculum from the sheet
+                const res = await fetch(CLOUD_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'get_curriculum', pin: pin })
+                });
+                const j = await res.json();
+
+                if (j.status === "success") {
+                    isTeacherLinked = true;
+                    teacherPin = pin;
+                    document.getElementById('sync-status').innerText = "Cloud Link: Linked (Ready)";
+                    document.getElementById('sync-status').style.color = "var(--accent)";
+                    document.getElementById('btn-push-teacher').style.display = 'block';
+
+                    if (j.curriculum) {
+                        localStorage.setItem('blob_custom_curriculum', JSON.stringify(j.curriculum));
+                        initializeCurriculum();
+                    }
+                    alert("COMMAND CENTER LINK ESTABLISHED.");
+                } else {
+                    throw new Error(j.message || "Invalid PIN or Connection Error.");
+                }
+            } catch (e) {
+                document.getElementById('sync-status').innerText = "Cloud Link: Auth Failed";
+                document.getElementById('sync-status').style.color = "#ff4444";
+                alert(`SYNC ERROR: ${e.message}`);
+            }
+        }
+
+        async function pushToTeacherMode() {
+            if (!isTeacherLinked) return alert("TEACHER MODE NOT LINKED.");
+            if (!accumulatedData || !accumulatedData.metadata) return alert("NO BLOBS DETECTED IN THEATER.");
+
+            const id = accumulatedData.metadata.id || "GENERIC";
+            const name = accumulatedData.metadata.title || "Unnamed Mission";
+
+            if (!confirm(`PUSH MISSION [${name}] TO COMMAND CENTER?`)) return;
+
+            showLoader(true, "TRANSMITTING TO COMMAND CENTER...");
+            try {
+                const res = await fetch(CLOUD_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_content',
+                        pin: teacherPin,
+                        id: id,
+                        name: name,
+                        payload: accumulatedData
+                    })
+                });
+                const j = await res.json();
+                if (j.status === "success") {
+                    alert("CAPSULE COMMITTED TO COMMAND CENTER.");
+                } else {
+                    throw new Error(j.message);
+                }
+            } catch (e) {
+                alert(`PUSH FAILED: ${e.message}`);
+            } finally {
+                showLoader(false);
+            }
+        }
+
         function getCustomOutcomes() {
             const stored = localStorage.getItem('blob_custom_curriculum');
-            return stored ? JSON.parse(stored) : {};
+            const local = stored ? JSON.parse(stored) : {};
+            return local;
+        }
+
+        async function saveCustomCourseToCloud(name, outcomes) {
+            if (!isTeacherLinked) return;
+            try {
+                const custom = getCustomOutcomes();
+                await fetch(CLOUD_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'save_curriculum',
+                        pin: teacherPin,
+                        curriculum: custom
+                    })
+                });
+            } catch (e) { console.error("Cloud save failed", e); }
         }
 
         function addCustomCourse() {
@@ -999,6 +1107,8 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
             const custom = getCustomOutcomes();
             custom[name] = outcomes;
             localStorage.setItem('blob_custom_curriculum', JSON.stringify(custom));
+
+            if (isTeacherLinked) saveCustomCourseToCloud(name, outcomes);
 
             document.getElementById('custom-course-name').value = "";
             document.getElementById('custom-course-outcomes').value = "";
