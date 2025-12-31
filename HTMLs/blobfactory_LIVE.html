@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOB FACTORY // MASTER FORGE (v65.95)</title>
+    <title>BLOB FACTORY // MASTER FORGE (v65.96)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -582,13 +582,36 @@
             color: #00ffcc;
         }
 
-        .hospital-label {
+        .custom-course-list {
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid #222;
+            padding: 5px;
+            margin-top: 10px;
+            background: #050505;
+        }
+
+        .custom-course-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            font-size: 0.6rem;
+            border-bottom: 1px solid #111;
+        }
+
+        .custom-course-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn-mini-del {
+            background: #400;
+            color: #fff;
+            border: none;
+            padding: 2px 6px;
             font-size: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #00ffcc;
-            opacity: 0.5;
-            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 2px;
         }
     </style>
 </head>
@@ -600,7 +623,7 @@
         <div style="display:flex; align-items:center; gap:20px;">
             <button class="btn-settings-toggle" onclick="toggleSettings()">CORE SETTINGS</button>
             <div style="text-align:right;">
-                <div class="ver">MASTER FORGE v65.95</div>
+                <div class="ver">MASTER FORGE v65.96</div>
                 <div id="header-model-status"
                     style="font-size:0.5rem; color:var(--accent); text-transform:uppercase; letter-spacing:1px; opacity:0.8; margin-top:2px;">
                     Brain: Xiaomi MiMo V2</div>
@@ -670,7 +693,7 @@
 
             <div id="chat-display">
                 <div class="chat-msg msg-ai">
-                    <strong>COREGINE v65.95 ONLINE.</strong><br>
+                    <strong>COREGINE v65.96 ONLINE.</strong><br>
                     Please provide the initial mission parameters or learning outcomes to begin Phase 1: Concept Arrive.
                 </div>
             </div>
@@ -734,6 +757,22 @@
                 </select>
                 <p style="font-size:0.6rem; opacity:0.4; margin:0;">Adjusts the concepts relative to the course grade.
                 </p>
+            </div>
+
+            <div class="settings-item" style="border-top: 1px solid #222; padding-top: 15px;">
+                <label>CUSTOM CURRICULUM LAB</label>
+                <div style="display:flex; gap:5px; margin-bottom: 5px;">
+                    <input type="text" id="custom-course-name" placeholder="CLASS NAME (e.g., Geo 11)"
+                        style="flex:1; background:#050505; border:1px solid #222; color:#fff; font-size:0.7rem; padding:5px;">
+                    <button class="btn-forge" onclick="addCustomCourse()"
+                        style="font-size:0.6rem; padding:5px 10px;">ADD</button>
+                </div>
+                <textarea id="custom-course-outcomes" placeholder="OUTCOMES (ONE PER LINE)"
+                    style="width:100%; height:80px; background:#050505; border:1px solid #222; color:#eee; font-size:0.7rem; padding:8px; font-family:var(--font-p);"></textarea>
+
+                <div id="custom-course-list" class="custom-course-list">
+                    <!-- Custom courses will appear here -->
+                </div>
             </div>
 
             <button class="btn-forge" onclick="toggleSettings()" style="margin-top:10px;">CONFIRM PARAMETERS</button>
@@ -884,7 +923,7 @@ Ask the user: "WOULD YOU LIKE TO BEGIN THE CLINICAL REVIEW OR DOWNLOAD THE SOURC
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v65.95), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v65.96), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
 CONTEXT BASELINE:
@@ -913,12 +952,13 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
             const course = courseSelect.value;
             container.innerHTML = "";
 
-            if (!course || !NS_OUTCOMES[course]) {
+            const allOutcomes = { ...NS_OUTCOMES, ...getCustomOutcomes() };
+            if (!course || !allOutcomes[course]) {
                 container.innerHTML = '<p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT A COURSE TO LOAD OUTCOMES</p>';
                 return;
             }
 
-            NS_OUTCOMES[course].forEach((outcome, i) => {
+            allOutcomes[course].forEach((outcome, i) => {
                 const div = document.createElement('div');
                 div.className = 'outcome-item';
                 div.innerHTML = `<input type="checkbox" id="out-${i}" value="${outcome}"> <label for="out-${i}">${outcome}</label>`;
@@ -927,15 +967,75 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
         }
 
         window.onload = () => {
+            initializeCurriculum();
+        };
+
+        function initializeCurriculum() {
             const sel = document.getElementById('course-select');
             if (sel) {
                 sel.innerHTML = '<option value="">-- SELECT COURSE --</option>';
-                Object.keys(NS_OUTCOMES).sort().forEach(c => {
+                const allOutcomes = { ...NS_OUTCOMES, ...getCustomOutcomes() };
+                Object.keys(allOutcomes).sort().forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c; opt.innerText = c; sel.appendChild(opt);
                 });
             }
-        };
+            renderCustomCourseList();
+        }
+
+        function getCustomOutcomes() {
+            const stored = localStorage.getItem('blob_custom_curriculum');
+            return stored ? JSON.parse(stored) : {};
+        }
+
+        function addCustomCourse() {
+            const name = document.getElementById('custom-course-name').value.trim();
+            const outcomesRaw = document.getElementById('custom-course-outcomes').value.trim();
+            if (!name || !outcomesRaw) return alert("NAME AND OUTCOMES REQUIRED.");
+
+            const outcomes = outcomesRaw.split('\n').map(o => o.trim()).filter(o => o.length > 0);
+            if (outcomes.length === 0) return alert("AT LEAST ONE VALID OUTCOME REQUIRED.");
+
+            const custom = getCustomOutcomes();
+            custom[name] = outcomes;
+            localStorage.setItem('blob_custom_curriculum', JSON.stringify(custom));
+
+            document.getElementById('custom-course-name').value = "";
+            document.getElementById('custom-course-outcomes').value = "";
+            initializeCurriculum();
+            alert(`COURSE '${name}' ADMITTED TO LAB.`);
+        }
+
+        function deleteCustomCourse(name) {
+            if (!confirm(`PURGE '${name}' FROM LAB?`)) return;
+            const custom = getCustomOutcomes();
+            delete custom[name];
+            localStorage.setItem('blob_custom_curriculum', JSON.stringify(custom));
+            initializeCurriculum();
+        }
+
+        function renderCustomCourseList() {
+            const listContainer = document.getElementById('custom-course-list');
+            if (!listContainer) return;
+            const custom = getCustomOutcomes();
+            const keys = Object.keys(custom);
+
+            if (keys.length === 0) {
+                listContainer.innerHTML = '<p style="font-size:0.5rem; opacity:0.3; padding:10px; text-align:center;">NO CUSTOM COURSES DEFINED</p>';
+                return;
+            }
+
+            listContainer.innerHTML = "";
+            keys.sort().forEach(name => {
+                const item = document.createElement('div');
+                item.className = 'custom-course-item';
+                item.innerHTML = `
+                    <span>${name} (${custom[name].length} Outcomes)</span>
+                    <button class="btn-mini-del" onclick="deleteCustomCourse('${name}')">DEL</button>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
 
         function toggleSettings() {
             const overlay = document.getElementById('settings-overlay');
