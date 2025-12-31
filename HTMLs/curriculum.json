@@ -1,0 +1,99 @@
+{
+    "Canada": {
+        "Nova Scotia": {
+            "African Canadian Studies 11": [
+                "Diversity and Identity: Understand diversity of Africa/cultures in shaping Canadian identity.",
+                "Pre-Colonial History: History of pre-colonial African kingdoms leading to Transatlantic Slave Trade.",
+                "Colonial Impact and Resistance: Impact of colonial expansion, enslavement, and resistance.",
+                "Research and Communication: Historical research methods and clear communication.",
+                "Civil Rights: Persistent struggle of peoples of African descent for equality.",
+                "Empowerment: Collective consciousness as a strategy for empowerment."
+            ],
+            "Canadian History 11": [
+                "G1: Pre-contact and post-contact First Nations governing structures.",
+                "G2: French, British, and American governing philosophies merging in BNA.",
+                "G3: Political and economic structures leading to Confederation.",
+                "G4: Evolution of federalism from Confederation to Patriation.",
+                "G5: Shift from two-party to multi-party process.",
+                "J5: Evolution of the struggle to achieve rights and freedoms."
+            ],
+            "Contemporary Canadian Studies 11": [
+                "Equity Advocacy: How Black Nova Scotians advocate for rights/reforms.",
+                "Sustaining Communities: Impacts of encroachment/gentrification on Black communities.",
+                "Community Priorities: How individuals/organizations support sustainability.",
+                "Systemic Barriers: Impact on education, healthcare, housing, and church support."
+            ],
+            "Economics 11": [
+                "SCO 8: Supply, demand, and price relationship in a market economy.",
+                "SCO 10: Business organizations in the Canadian market.",
+                "SCO 11: Impact of market structures (monopoly) on consumers.",
+                "SCO 12: Role of governments (regulation, taxation) in the market.",
+                "SCO 13: Measurement of Canadian economy (GDP)."
+            ],
+            "Global Sustainable Solutions 12": [
+                "Indigenous Relationships: Relationships with land and colonial decisions.",
+                "Water Security: Link between sanitation and public health.",
+                "Food Security: Factors impacting food production and security.",
+                "Disaster Management: Mitigation, preparedness, response, and recovery.",
+                "Forced Migration: Conflict-induced and disaster-induced patterns."
+            ],
+            "Social Studies 7": [
+                "Treaty Rights: Impact of policies/denial on Mi'kmaw communities.",
+                "Indian Act: Impact on geographic, civic, and economic conditions.",
+                "Mi'kmaq Resilience: Response to discriminatory policies.",
+                "Resistance: Resisting assimilation and segregation attempts.",
+                "Confederation: Impact on Mi'kmaq from multiple perspectives."
+            ],
+            "Social Studies 8": [
+                "Assimilation Policies: Indian Act and residential school system impacts.",
+                "Rights Advocacy: 1982 constitution and Truth and Reconciliation.",
+                "Inequity Issues: Historical and contemporary injustice in Canada.",
+                "First-Voice Perspectives: Understanding issues and inspiring resistance.",
+                "Reconciliation: Role and purpose in addressing conflicts."
+            ],
+            "Sociology 12": [
+                "Theories: Functionalism, conflict theory, symbolic interactionism, feminism.",
+                "Culture: Core elements (symbols, language, norms, values).",
+                "Socialization: Agents that shape the socialization process.",
+                "Stratification: Gender, race, and socio-economic status.",
+                "Social Control: Formal and informal ways to achieve conformity."
+            ],
+            "Tourism 11": [
+                "Trends in Tourism: Research trends, issues, and innovations."
+            ],
+            "Citizenship 9": [
+                "Engaged Citizenship: Collaboratively-designed service learning projects.",
+                "Who Am I?: Citizenship rights of Mi'kmaw and traditionally disempowered people.",
+                "Governance: Structure/selection of federal, provincial, indigenous governments."
+            ],
+            "Law 12": [
+                "F5: Impact of Charter of Rights and Freedoms on justice.",
+                "CR1: What constitutes a criminal offense in Canada.",
+                "AB2: Legal effects of Indian Act (1876) and Constitution Act (1982).",
+                "HR2: Safeguarding human rights in Canada."
+            ],
+            "Mi'kmaw Studies 11": [
+                "12: Pre-contact society governance and oral culture.",
+                "G4: Nationhood and Treaties (Concordat 1610).",
+                "G5: Discriminatory Policies (Indian Act) adverse effects.",
+                "E2: Residential Schools traumatizing impacts."
+            ]
+        }
+    },
+    "USA": {
+        "New York": {
+            "Regents US History": [
+                "Outcome 1: Sample New York Outcome",
+                "Outcome 2: Sample New York Outcome"
+            ]
+        }
+    },
+    "UK": {
+        "England": {
+            "GCSE History": [
+                "Outcome 1: Sample UK Outcome",
+                "Outcome 2: Sample UK Outcome"
+            ]
+        }
+    }
+}

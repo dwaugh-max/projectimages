@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOB FACTORY // AI MISSION FORGE (v66.00)</title>
+    <title>BLOB FACTORY // AI MISSION FORGE (v66.11)</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
         // GOOGLE IDENTITY CONFIGURATION (v66.00)
@@ -205,6 +205,33 @@
             flex-direction: column;
             gap: 8px;
             padding-right: 10px;
+        }
+
+        .curriculum-selector {
+            background: rgba(20, 20, 20, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #222;
+            margin-bottom: 20px;
+        }
+
+        .curriculum-selector select {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            color: #eee;
+            padding: 10px;
+            font-family: var(--font-m);
+            font-size: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .curriculum-selector select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.1);
         }
 
         .outcome-item {
@@ -712,12 +739,20 @@
             </div>
 
             <div class="curriculum-selector">
-                <div class="panel-label">Nova Scotia Curriculum</div>
-                <select id="course-select" onchange="updateOutcomes()">
-                    <option value="">-- SELECT COURSE --</option>
-                </select>
+                <div class="panel-label">Global Curriculum Hub</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <select id="country-select" onchange="updateRegions()">
+                        <option value="">-- SELECT COUNTRY --</option>
+                    </select>
+                    <select id="region-select" onchange="updateCourses()" style="display:none;">
+                        <option value="">-- SELECT REGION --</option>
+                    </select>
+                    <select id="course-select" onchange="updateOutcomes()" style="display:none;">
+                        <option value="">-- SELECT COURSE --</option>
+                    </select>
+                </div>
                 <div id="outcome-checklist" class="outcome-list" style="margin-top:10px;">
-                    <p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT A COURSE TO LOAD OUTCOMES</p>
+                    <p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT COURSE TO LOAD OUTCOMES</p>
                 </div>
             </div>
 
@@ -738,7 +773,7 @@
 
             <div id="chat-display">
                 <div class="chat-msg msg-ai">
-                    <strong>COREGINE v65.99 ONLINE.</strong><br>
+                    <strong>COREGINE v66.12 ONLINE.</strong><br>
                     Please provide the initial mission parameters or learning outcomes to begin Phase 1: Concept Arrive.
                 </div>
             </div>
@@ -776,7 +811,7 @@
                     <div class="lobby-logo">BLOB <span>FACTORY</span></div>
                     <div
                         style="font-size: 0.6rem; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px;">
-                        Atmospheric Decontamination In Progress
+                        Atmospheric Decontamination In Progress v66.12
                     </div>
 
                     <div id="google-signin-container" style="margin-top: 20px;">
@@ -797,7 +832,9 @@
                             <input type="text" id="lobby-username" placeholder="NAME (e.g. dwaugh)"
                                 style="width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; font-family: var(--font-m); border-radius: 5px;">
                         </div>
+                    </div>
 
+                    <div id="lobby-pin-container" style="margin-top: 20px;">
                         <div class="settings-item" style="text-align: left;">
                             <label>TEACHER MISSION CONTROL PIN</label>
                             <input type="password" id="lobby-pin" placeholder="ENTER PIN (e.g. 8812)"
@@ -907,89 +944,20 @@
         let history = [];
         let accumulatedData = {};
 
-        const NS_OUTCOMES = {
-            "African Canadian Studies 11": [
-                "Diversity and Identity: Understand diversity of Africa/cultures in shaping Canadian identity.",
-                "Pre-Colonial History: History of pre-colonial African kingdoms leading to Transatlantic Slave Trade.",
-                "Colonial Impact and Resistance: Impact of colonial expansion, enslavement, and resistance.",
-                "Research and Communication: Historical research methods and clear communication.",
-                "Civil Rights: Persistent struggle of peoples of African descent for equality.",
-                "Empowerment: Collective consciousness as a strategy for empowerment."
-            ],
-            "Canadian History 11": [
-                "G1: Pre-contact and post-contact First Nations governing structures.",
-                "G2: French, British, and American governing philosophies merging in BNA.",
-                "G3: Political and economic structures leading to Confederation.",
-                "G4: Evolution of federalism from Confederation to Patriation.",
-                "G5: Shift from two-party to multi-party process.",
-                "J5: Evolution of the struggle to achieve rights and freedoms."
-            ],
-            "Contemporary Canadian Studies 11": [
-                "Equity Advocacy: How Black Nova Scotians advocate for rights/reforms.",
-                "Sustaining Communities: Impacts of encroachment/gentrification on Black communities.",
-                "Community Priorities: How individuals/organizations support sustainability.",
-                "Systemic Barriers: Impact on education, healthcare, housing, and church support."
-            ],
-            "Economics 11": [
-                "SCO 8: Supply, demand, and price relationship in a market economy.",
-                "SCO 10: Business organizations in the Canadian market.",
-                "SCO 11: Impact of market structures (monopoly) on consumers.",
-                "SCO 12: Role of governments (regulation, taxation) in the market.",
-                "SCO 13: Measurement of Canadian economy (GDP)."
-            ],
-            "Global Sustainable Solutions 12": [
-                "Indigenous Relationships: Relationships with land and colonial decisions.",
-                "Water Security: Link between sanitation and public health.",
-                "Food Security: Factors impacting food production and security.",
-                "Disaster Management: Mitigation, preparedness, response, and recovery.",
-                "Forced Migration: Conflict-induced and disaster-induced patterns."
-            ],
-            "Social Studies 7": [
-                "Treaty Rights: Impact of policies/denial on Mi'kmaw communities.",
-                "Indian Act: Impact on geographic, civic, and economic conditions.",
-                "Mi'kmaq Resilience: Response to discriminatory policies.",
-                "Resistance: Resisting assimilation and segregation attempts.",
-                "Confederation: Impact on Mi'kmaq from multiple perspectives."
-            ],
-            "Social Studies 8": [
-                "Assimilation Policies: Indian Act and residential school system impacts.",
-                "Rights Advocacy: 1982 constitution and Truth and Reconciliation.",
-                "Inequity Issues: Historical and contemporary injustice in Canada.",
-                "First-Voice Perspectives: Understanding issues and inspiring resistance.",
-                "Reconciliation: Role and purpose in addressing conflicts."
-            ],
-            "Sociology 12": [
-                "Theories: Functionalism, conflict theory, symbolic interactionism, feminism.",
-                "Culture: Core elements (symbols, language, norms, values).",
-                "Socialization: Agents that shape the socialization process.",
-                "Stratification: Gender, race, and socio-economic status.",
-                "Social Control: Formal and informal ways to achieve conformity."
-            ],
-            "Tourism 11": ["Trends in Tourism: Research trends, issues, and innovations."],
-            "IB Global Politics SL/HL": [
-                "Power: Nature of power in shaping political outcomes.",
-                "Rights: Theory and practice of human rights and justice.",
-                "Sustainability: Approaches to development and challenges.",
-                "Conflict: Causes of conflict and strategies for peace."
-            ],
-            "Citizenship 9": [
-                "Engaged Citizenship: Collaboratively-designed service learning projects.",
-                "Who Am I?: Citizenship rights of Mi'kmaw and traditionally disempowered people.",
-                "Governance: Structure/selection of federal, provincial, indigenous governments."
-            ],
-            "Law 12": [
-                "F5: Impact of Charter of Rights and Freedoms on justice.",
-                "CR1: What constitutes a criminal offense in Canada.",
-                "AB2: Legal effects of Indian Act (1876) and Constitution Act (1982).",
-                "HR2: Safeguarding human rights in Canada."
-            ],
-            "Mi'kmaw Studies 11": [
-                "12: Pre-contact society governance and oral culture.",
-                "G4: Nationhood and Treaties (Concordat 1610).",
-                "G5: Discriminatory Policies (Indian Act) adverse effects.",
-                "E2: Residential Schools traumatizing impacts."
-            ]
-        };
+        let CURRICULUM_DATA = {}; // Loaded externally v66.11
+
+        async function loadGlobalCurriculum() {
+            try {
+                // Fetch from external JSON
+                const res = await fetch('curriculum.json');
+                if (!res.ok) throw new Error("Failed to load curriculum.json");
+                CURRICULUM_DATA = await res.json();
+                console.log("Global Curriculum Hub Loaded.");
+                initializeCurriculum(); // Refresh dropdowns
+            } catch (e) {
+                console.error("CURRICULUM ERROR:", e);
+            }
+        }
 
         const SYSTEM_PROMPTS = {
             1: `You are the BLOB FACTORY COREGINE. We are in PHASE 1: CONCEPT ARRIVE.
@@ -1057,13 +1025,14 @@ Ask the user: "WOULD YOU LIKE TO BEGIN THE CLINICAL REVIEW OR DOWNLOAD THE SOURC
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v66.00), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v66.12), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
-CONTEXT BASELINE:
-- Unless explicitly told otherwise, assume you are working within the Nova Scotia (CANADIAN) curriculum.
-- By default, references to topics like "The Constitution", "1982", or "Truth and Reconciliation" refer to the Canadian context.
-- However, if the user specifies a different nation or international context (e.g., IB Global Politics, Ecuador), adapt your knowledge base to that specific region immediately.
+CURRICULUM CONTEXT:
+- You are designed for GLOBAL deployment.
+- Always analyze the USER INPUT and SELECTED OUTCOMES to determine the specific regional, legal, and historical context.
+- If the outcomes refer to a specific jurisdiction (e.g., Nova Scotia, New York, England), ensure all terminology, legal references, and historical dates (e.g., 1876, 1776, 1215) are geographically and historically precise to that location.
+- If no specific location is provided, default to a generic but rigorous academic perspective.
 
 STYLE RULES:
 - Use a PUNCHY, ACTIVE writing style like modern journalism.
@@ -1078,21 +1047,133 @@ SCHEMA RULES:
 FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newlines.
 `;
 
-        function updateOutcomes() {
+        function initializeCurriculum() {
+            const countrySelect = document.getElementById('country-select');
+            if (!countrySelect) return;
+
+            countrySelect.innerHTML = '<option value="">-- SELECT COUNTRY --</option>';
+
+            if (Object.keys(CURRICULUM_DATA).length === 0) {
+                const opt = document.createElement('option');
+                opt.textContent = "LOADING GLOBAL HUB...";
+                opt.disabled = true;
+                countrySelect.appendChild(opt);
+            } else {
+                Object.keys(CURRICULUM_DATA).sort().forEach(country => {
+                    const opt = document.createElement('option');
+                    opt.value = country;
+                    opt.textContent = country;
+                    countrySelect.appendChild(opt);
+                });
+            }
+
+            // Add Custom option
+            const custom = getCustomOutcomes();
+            if (Object.keys(custom).length > 0) {
+                const opt = document.createElement('option');
+                opt.value = "CUSTOM_LAB";
+                opt.textContent = "CUSTOM (Teacher Lab)";
+                countrySelect.appendChild(opt);
+            }
+        }
+
+        function updateRegions() {
+            const country = document.getElementById('country-select').value;
+            const regionSelect = document.getElementById('region-select');
             const courseSelect = document.getElementById('course-select');
             const container = document.getElementById('outcome-checklist');
-            if (!courseSelect || !container) return;
 
-            const course = courseSelect.value;
-            container.innerHTML = "";
+            regionSelect.innerHTML = '<option value="">-- SELECT REGION --</option>';
+            courseSelect.innerHTML = '<option value="">-- SELECT COURSE --</option>';
+            container.innerHTML = '<p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT COURSE TO LOAD OUTCOMES</p>';
 
-            const allOutcomes = { ...NS_OUTCOMES, ...getCustomOutcomes() };
-            if (!course || !allOutcomes[course]) {
-                container.innerHTML = '<p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT A COURSE TO LOAD OUTCOMES</p>';
+            if (!country) {
+                regionSelect.style.display = 'none';
+                courseSelect.style.display = 'none';
                 return;
             }
 
-            allOutcomes[course].forEach((outcome, i) => {
+            if (country === "CUSTOM_LAB") {
+                regionSelect.style.display = 'none';
+                courseSelect.style.display = 'block';
+                updateCourses(); // Directly update courses for custom
+                return;
+            }
+
+            regionSelect.style.display = 'block';
+            courseSelect.style.display = 'none';
+
+            const regions = Object.keys(CURRICULUM_DATA[country]).sort();
+            regions.forEach(region => {
+                const opt = document.createElement('option');
+                opt.value = region;
+                opt.textContent = region;
+                regionSelect.appendChild(opt);
+            });
+        }
+
+        function updateCourses() {
+            const country = document.getElementById('country-select').value;
+            const region = document.getElementById('region-select').value;
+            const courseSelect = document.getElementById('course-select');
+            const container = document.getElementById('outcome-checklist');
+
+            courseSelect.innerHTML = '<option value="">-- SELECT COURSE --</option>';
+            container.innerHTML = '<p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT COURSE TO LOAD OUTCOMES</p>';
+
+            if (country === "CUSTOM_LAB") {
+                const custom = getCustomOutcomes();
+                Object.keys(custom).sort().forEach(course => {
+                    const opt = document.createElement('option');
+                    opt.value = course;
+                    opt.textContent = course;
+                    courseSelect.appendChild(opt);
+                });
+                return;
+            }
+
+            if (!region) {
+                courseSelect.style.display = 'none';
+                return;
+            }
+
+            courseSelect.style.display = 'block';
+            const courses = Object.keys(CURRICULUM_DATA[country][region]).sort();
+            courses.forEach(course => {
+                const opt = document.createElement('option');
+                opt.value = course;
+                opt.textContent = course;
+                courseSelect.appendChild(opt);
+            });
+        }
+
+        function updateOutcomes() {
+            const country = document.getElementById('country-select').value;
+            const region = document.getElementById('region-select').value;
+            const course = document.getElementById('course-select').value;
+            const container = document.getElementById('outcome-checklist');
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            if (!course) {
+                container.innerHTML = '<p style="font-size:0.6rem; opacity:0.3; text-align:center;">SELECT COURSE TO LOAD OUTCOMES</p>';
+                return;
+            }
+
+            let outcomes = [];
+            if (country === "CUSTOM_LAB") {
+                outcomes = getCustomOutcomes()[course] || [];
+            } else if (CURRICULUM_DATA[country] && CURRICULUM_DATA[country][region] && CURRICULUM_DATA[country][region][course]) {
+                outcomes = CURRICULUM_DATA[country][region][course];
+            }
+
+            if (outcomes.length === 0) {
+                container.innerHTML = '<p style="font-size:0.6rem; opacity:0.3; text-align:center;">NO OUTCOMES FOUND</p>';
+                return;
+            }
+
+            outcomes.forEach((outcome, i) => {
                 const div = document.createElement('div');
                 div.className = 'outcome-item';
                 div.innerHTML = `<input type="checkbox" id="out-${i}" value="${outcome}"> <label for="out-${i}">${outcome}</label>`;
@@ -1134,6 +1215,7 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
                 // Auto-fill and proceed to forge setup
                 teacherUsername = googleUser.name;
                 document.getElementById('lobby-manual-entry').style.display = 'none';
+                document.getElementById('google-signin-container').style.display = 'none';
 
                 // Show a mini profile in the lobby
                 const lobbyPanel = document.querySelector('.lobby-panel');
@@ -1223,7 +1305,7 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
                 alert(`LOBBY ERROR: ${e.message}\n(HINT: Verify PIN or Backend Script)`);
                 // Provide escape hatch for offline use
                 if (confirm("AUTHENTICATION FAILED. PROCEED IN OFFLINE MODE?")) {
-                    initializeCurriculum();
+                    loadGlobalCurriculum(); // Ensure curriculum loads offline too
                     document.getElementById('lobby-overlay').style.display = 'none';
                 }
             } finally {
@@ -1400,6 +1482,9 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
         async function processForgeStep() {
             let rawInputInput = document.getElementById('forge-input');
             let rawInput = rawInputInput ? rawInputInput.value.trim() : "";
+
+            const country = document.getElementById('country-select').value;
+            const region = document.getElementById('region-select').value;
             const course = document.getElementById('course-select').value;
             const checkedOutcomes = Array.from(document.querySelectorAll('#outcome-checklist input:checked')).map(v => v.value);
 
@@ -1410,7 +1495,11 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
             let input = rawInput;
             if (currentStep === 1) {
                 if (course && checkedOutcomes.length > 0) {
-                    input = `COURSE: ${course}\nFORGE COMPLEXITY: ${complexity}\nTARGET OUTCOMES:\n- ${checkedOutcomes.join('\n- ')}\n\nUSER CONTEXT: ${rawInput || "(Generic Concept Generation Based on Outcomes)"}`;
+                    input = `TOPIC: ${rawInput || "(Generic Concept Generation)"}\n`;
+                    input += `LOCATION: ${country}${region ? " > " + region : ""}\n`;
+                    input += `COURSE: ${course}\n`;
+                    input += `FORGE COMPLEXITY: ${complexity}\n`;
+                    input += `TARGET OUTCOMES:\n- ${checkedOutcomes.join('\n- ')}`;
                 } else if (!rawInput) {
                     return alert("COMMAND INPUT REQUIRED OR SELECT COURSE/OUTCOMES.");
                 }
@@ -1706,6 +1795,9 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
         function openInHospital() {
             initHospital();
         }
+
+        // Initialize Global Hub on startup
+        window.addEventListener('load', loadGlobalCurriculum);
     </script>
 </body>
 
