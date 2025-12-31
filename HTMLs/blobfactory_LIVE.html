@@ -1022,8 +1022,21 @@ You are now the SURGEON AI.
 Ask the user: "WOULD YOU LIKE TO BEGIN THE CLINICAL REVIEW OR DOWNLOAD THE SOURCE?"`
         };
 
+        const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(url, { ...options, signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (e) {
+                clearTimeout(id);
+                throw e;
+            }
+        };
+
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v65.99), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v65.99.1), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
 CONTEXT BASELINE:
@@ -1087,9 +1100,10 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
             // Attempt to sync immediately
             showLoader(true, "AUTHENTICATING COMMAND LINK...");
             try {
-                const res = await fetch(CLOUD_URL, {
+                // Use 'fetch_progress' as a reliable handshake action
+                const res = await fetchWithTimeout(CLOUD_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'get_curriculum', pin: pin })
+                    body: JSON.stringify({ action: 'fetch_progress', pin: pin })
                 });
                 const j = await res.json();
 
@@ -1102,9 +1116,17 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
                         document.getElementById('btn-push-teacher').style.display = 'block';
                     }
 
-                    if (j.curriculum) {
-                        localStorage.setItem('blob_custom_curriculum', JSON.stringify(j.curriculum));
-                    }
+                    // Try to get curriculum silently
+                    try {
+                        const cRes = await fetchWithTimeout(CLOUD_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'get_curriculum', pin: pin })
+                        }, 5000);
+                        const cJ = await cRes.json();
+                        if (cJ.status === "success" && cJ.curriculum) {
+                            localStorage.setItem('blob_custom_curriculum', JSON.stringify(cJ.curriculum));
+                        }
+                    } catch (e) { console.log("Cloud Curriculum not available yet."); }
 
                     // Finalize entry
                     initializeCurriculum();
@@ -1114,7 +1136,12 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
                     throw new Error(j.message || "Invalid PIN or Connection Error.");
                 }
             } catch (e) {
-                alert(`LOBBY ERROR: ${e.message}`);
+                alert(`LOBBY ERROR: ${e.message}\n(HINT: Verify PIN or Backend Script)`);
+                // Provide escape hatch
+                if (confirm("AUTHENTICATION FAILED. PROCEED IN OFFLINE MODE?")) {
+                    initializeCurriculum();
+                    document.getElementById('lobby-overlay').style.display = 'none';
+                }
             } finally {
                 showLoader(false);
             }
@@ -1131,11 +1158,10 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
 
             document.getElementById('sync-status').innerText = "Cloud Link: Syncing...";
             try {
-                // We'll use a specific action name for outcomes, but first we test the PIN via a generic fetch if possible
-                // For now, we'll try to fetch custom curriculum from the sheet
-                const res = await fetch(CLOUD_URL, {
+                // Use fetch_progress as test
+                const res = await fetchWithTimeout(CLOUD_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'get_curriculum', pin: pin })
+                    body: JSON.stringify({ action: 'fetch_progress', pin: pin })
                 });
                 const j = await res.json();
 
@@ -1144,11 +1170,8 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
                     teacherPin = pin;
                     document.getElementById('sync-status').innerText = "Cloud Link: Linked (Ready)";
                     document.getElementById('sync-status').style.color = "var(--accent)";
-                    document.getElementById('btn-push-teacher').style.display = 'block';
-
-                    if (j.curriculum) {
-                        localStorage.setItem('blob_custom_curriculum', JSON.stringify(j.curriculum));
-                        initializeCurriculum();
+                    if (document.getElementById('btn-push-teacher')) {
+                        document.getElementById('btn-push-teacher').style.display = 'block';
                     }
                     alert("COMMAND CENTER LINK ESTABLISHED.");
                 } else {
