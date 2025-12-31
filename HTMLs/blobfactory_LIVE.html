@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOB FACTORY // MASTER FORGE (v65.98)</title>
+    <title>BLOB FACTORY // MASTER FORGE (v65.99)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -484,10 +484,49 @@
             border-radius: 12px;
             width: 90%;
             max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
             position: relative;
+        }
+
+        /* LOBBY OVERLAY */
+        #lobby-overlay {
+            position: fixed;
+            inset: 0;
+            background: #050505;
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+            background-image: radial-gradient(circle at center, #111 0%, #050505 100%);
+        }
+
+        .lobby-panel {
+            max-width: 400px;
+            width: 100%;
+            background: rgba(15, 15, 15, 0.8);
+            border: 1px solid #222;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .lobby-logo {
+            font-family: var(--font-h);
+            font-size: 2rem;
+            letter-spacing: 12px;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .lobby-logo span {
+            color: var(--accent);
         }
 
         .settings-close {
@@ -623,7 +662,7 @@
         <div style="display:flex; align-items:center; gap:20px;">
             <button class="btn-settings-toggle" onclick="toggleSettings()">CORE SETTINGS</button>
             <div style="text-align:right;">
-                <div class="ver">MASTER FORGE v65.98</div>
+                <div class="ver">MASTER FORGE v65.99</div>
                 <div id="header-model-status"
                     style="font-size:0.5rem; color:var(--accent); text-transform:uppercase; letter-spacing:1px; opacity:0.8; margin-top:2px;">
                     Brain: Xiaomi MiMo V2</div>
@@ -693,7 +732,7 @@
 
             <div id="chat-display">
                 <div class="chat-msg msg-ai">
-                    <strong>COREGINE v65.98 ONLINE.</strong><br>
+                    <strong>COREGINE v65.99 ONLINE.</strong><br>
                     Please provide the initial mission parameters or learning outcomes to begin Phase 1: Concept Arrive.
                 </div>
             </div>
@@ -722,6 +761,49 @@
                                 CENTER</button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- DECONTAMINATION LOBBY -->
+            <div id="lobby-overlay">
+                <div class="lobby-panel">
+                    <div class="lobby-logo">BLOB <span>FACTORY</span></div>
+                    <div
+                        style="font-size: 0.6rem; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px;">
+                        Atmospheric Decontamination In Progress
+                    </div>
+
+                    <div class="settings-item" style="text-align: left; margin-bottom: 20px;">
+                        <label>TEACHER USERNAME</label>
+                        <input type="text" id="lobby-username" placeholder="NAME (e.g. dwaugh)"
+                            style="width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; font-family: var(--font-m); border-radius: 5px;">
+                    </div>
+
+                    <div class="settings-item" style="text-align: left;">
+                        <label>TEACHER MISSION CONTROL PIN</label>
+                        <input type="password" id="lobby-pin" placeholder="ENTER PIN (e.g. 8812)"
+                            style="width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; font-family: var(--font-m); border-radius: 5px;">
+                    </div>
+
+                    <div class="settings-item" style="text-align: left; margin-top: 20px;">
+                        <label>PRIMARY AI ARCHITECT</label>
+                        <select id="lobby-model"
+                            style="width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; font-family: var(--font-m); border-radius: 5px;">
+                            <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2 Flash (Default)</option>
+                            <option value="tngtech/deepseek-r1t2-chimera:free">TNG: Deepseek R1T2 Chimera</option>
+                            <option value="z-ai/glm-4.5-air:free">Z.AI GLM 4.5 Air</option>
+                            <option value="allenai/olmo-3.1-32b-think:free">AllenAI Olmo 3.1</option>
+                            <option value="nvidia/nemotron-nano-9b-v2:free">NVidia Nemotron Nano 9b</option>
+                            <option value="nex-agi/deepseek-v3.1-nex-n1:free">Nex AGI Deepseek V3.1</option>
+                            <option value="google/gemini-2.0-flash-exp:free">Google Gemini 2.0 Flash</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-forge" onclick="enterForge()"
+                        style="margin-top: 40px; width: 100%; padding: 15px; background: var(--accent); color: #000; font-weight: bold; font-family: var(--font-h); letter-spacing: 2px;">
+                        INITIATE FORGE SEQUENCE
+                    </button>
+                    <div style="font-size: 0.5rem; color: #444; margin-top: 20px;">v65.99 // SECURE CODES REQUIRED</div>
                 </div>
             </div>
 
@@ -941,7 +1023,7 @@ Ask the user: "WOULD YOU LIKE TO BEGIN THE CLINICAL REVIEW OR DOWNLOAD THE SOURC
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v65.98), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v65.99), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
 CONTEXT BASELINE:
@@ -985,25 +1067,63 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
         }
 
         window.onload = () => {
-            initializeCurriculum();
+            // Check if we have a saved PIN in localStorage to skip lobby?
+            // For now, force lobby for security.
+            renderCustomCourseList();
         };
 
-        function initializeCurriculum() {
-            const sel = document.getElementById('course-select');
-            if (sel) {
-                sel.innerHTML = '<option value="">-- SELECT COURSE --</option>';
-                const allOutcomes = { ...NS_OUTCOMES, ...getCustomOutcomes() };
-                Object.keys(allOutcomes).sort().forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c; opt.innerText = c; sel.appendChild(opt);
+        async function enterForge() {
+            const pin = document.getElementById('lobby-pin').value;
+            const model = document.getElementById('lobby-model').value;
+            const username = document.getElementById('lobby-username').value.trim();
+
+            if (!pin || !username) return alert("USERNAME AND PIN REQUIRED FOR DECONTAMINATION.");
+
+            // Set the PIN in the main settings field so sync functions work
+            document.getElementById('teacher-pin').value = pin;
+            document.getElementById('model-select').value = model;
+            teacherUsername = username;
+
+            // Attempt to sync immediately
+            showLoader(true, "AUTHENTICATING COMMAND LINK...");
+            try {
+                const res = await fetch(CLOUD_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'get_curriculum', pin: pin })
                 });
+                const j = await res.json();
+
+                if (j.status === "success") {
+                    isTeacherLinked = true;
+                    teacherPin = pin;
+                    document.getElementById('sync-status').innerText = "Cloud Link: Linked (Ready)";
+                    document.getElementById('sync-status').style.color = "var(--accent)";
+                    if (document.getElementById('btn-push-teacher')) {
+                        document.getElementById('btn-push-teacher').style.display = 'block';
+                    }
+
+                    if (j.curriculum) {
+                        localStorage.setItem('blob_custom_curriculum', JSON.stringify(j.curriculum));
+                    }
+
+                    // Finalize entry
+                    initializeCurriculum();
+                    document.getElementById('header-model-status').innerText = `Brain: ${document.getElementById('lobby-model').options[document.getElementById('lobby-model').selectedIndex].text.split(' (')[0]}`;
+                    document.getElementById('lobby-overlay').style.display = 'none';
+                } else {
+                    throw new Error(j.message || "Invalid PIN or Connection Error.");
+                }
+            } catch (e) {
+                alert(`LOBBY ERROR: ${e.message}`);
+            } finally {
+                showLoader(false);
             }
-            renderCustomCourseList();
         }
 
         const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxmJmFtT2E9OEPtFdTx2O3nBlz2zCoSQz69N37jRipWMpKd52iB_beF34cqUQbfo4MJ/exec";
         let isTeacherLinked = false;
         let teacherPin = "";
+        let teacherUsername = "";
 
         async function syncWithTeacherMode() {
             const pin = document.getElementById('teacher-pin').value;
@@ -1048,7 +1168,10 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
             const id = accumulatedData.metadata.id || "GENERIC";
             const name = accumulatedData.metadata.title || "Unnamed Mission";
 
-            if (!confirm(`PUSH MISSION [${name}] TO COMMAND CENTER?`)) return;
+            // Set authorship
+            accumulatedData.metadata.author = teacherUsername;
+
+            if (!confirm(`PUSH MISSION [${name}] TO COMMAND CENTER BY AUTHOR [${teacherUsername}]?`)) return;
 
             showLoader(true, "TRANSMITTING TO COMMAND CENTER...");
             try {
