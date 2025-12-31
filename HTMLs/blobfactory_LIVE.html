@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOB FACTORY // MASTER FORGE (v65.88)</title>
+    <title>BLOB FACTORY // MASTER FORGE (v65.89)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -542,7 +542,7 @@
         <div class="logo">BLOB <span>FACTORY</span></div>
         <div style="display:flex; align-items:center; gap:20px;">
             <button class="btn-settings-toggle" onclick="toggleSettings()">CORE SETTINGS</button>
-            <div class="ver">MASTER FORGE v65.88</div>
+            <div class="ver">MASTER FORGE v65.89</div>
         </div>
     </header>
 
@@ -602,7 +602,7 @@
 
             <div id="chat-display">
                 <div class="chat-msg msg-ai">
-                    <strong>COREGINE v65.88 ONLINE.</strong><br>
+                    <strong>COREGINE v65.89 ONLINE.</strong><br>
                     Please provide the initial mission parameters or learning outcomes to begin Phase 1: Concept Arrive.
                 </div>
             </div>
@@ -628,6 +628,8 @@
                 <label>AI MODEL ARCHITECT</label>
                 <select id="model-select">
                     <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2 Flash (Default)</option>
+                    <option value="tngtech/deepseek-r1t2-chimera:free">TNG: Deepseek R1T2 Chimera</option>
+                    <option value="z-ai/glm-4.5-air:free">Z.AI GLM 4.5 Air</option>
                     <option value="allenai/olmo-3.1-32b-think:free">AllenAI Olmo 3.1</option>
                     <option value="nvidia/nemotron-nano-9b-v2:free">NVidia Nemotron Nano 9b</option>
                     <option value="nex-agi/deepseek-v3.1-nex-n1:free">Nex AGI Deepseek V3.1</option>
@@ -777,7 +779,7 @@ OUTPUT ONLY THE JSON CODE BLOCK.`
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v65.88), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v65.89), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
 STYLE RULES:
