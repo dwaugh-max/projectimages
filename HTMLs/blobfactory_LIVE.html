@@ -443,7 +443,7 @@
 
     <header>
         <div class="logo">BLOB <span>FACTORY</span></div>
-        <div class="ver">MASTER FORGE v65.74</div>
+        <div class="ver">MASTER FORGE v65.75</div>
     </header>
 
     <div class="stepper">
@@ -633,7 +633,7 @@ OUTPUT ONLY THE JSON CODE BLOCK.`
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v65.74), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v65.75), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
 SCHEMA RULES:
@@ -711,6 +711,12 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
                 });
 
                 const data = await response.json();
+
+                if (data.error || !data.choices || !data.choices[0]) {
+                    const errMsg = data.error ? (data.error.message || JSON.stringify(data.error)) : "MALFORMED RESPONSE";
+                    throw new Error(errMsg);
+                }
+
                 const reply = data.choices[0].message.content;
 
                 history.push({ role: "user", content: input });

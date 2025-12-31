@@ -20,26 +20,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 4. Get the user's message from the frontend
-    const { message } = req.body;
+    // 4. Get the message(s) from the frontend
+    const { message, messages } = req.body;
+
+    // Choose the best payload: 'messages' array takes priority for history, fallback to single 'message'
+    const finalMessages = Array.isArray(messages) ? messages : [{ role: "user", content: message }];
 
     // 5. Call OpenRouter with your SECRET key
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`, // Pulled from Vercel Settings
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/your-username", // Optional: identifies your app to OpenRouter
+        "HTTP-Referer": "https://github.com/dwaugh-edsim/projectimages",
       },
       body: JSON.stringify({
-        model: "xiaomi/mimo-v2-flash:free", // Or any model you prefer
-        messages: [{ role: "user", content: message }],
+        model: "openai/gpt-4o-mini", // Upgraded model for better intelligence
+        messages: finalMessages,
       }),
     });
 
     const data = await response.json();
 
     // 6. Send the AI's response back to your frontend
+    if (!data.choices || !data.choices[0]) {
+      console.error("OpenRouter Error:", data);
+      return res.status(500).json({ error: "AI Response Malformed", details: data });
+    }
+
     return res.status(200).json(data);
 
   } catch (error) {
