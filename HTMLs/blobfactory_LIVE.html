@@ -711,11 +711,12 @@ FORMATTING: Use Standard Sentence Case. NO ALL-CAPS paragraphs. No escaped newli
                 });
 
                 const data = await response.json();
+                console.log("RAW COREGINE RESPONSE:", data);
 
                 if (data.error || !data.choices || !data.choices[0]) {
                     const rawErr = data.error || data;
                     const errMsg = rawErr.message ? rawErr.message : JSON.stringify(rawErr);
-                    throw new Error(errMsg);
+                    throw new Error(`API ERROR: ${errMsg}`);
                 }
 
                 const reply = data.choices[0].message.content;

@@ -33,9 +33,10 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://github.com/dwaugh-edsim/projectimages",
+        "X-Title": "Blob Factory Master Forge",
       },
       body: JSON.stringify({
-        model: "openai/gpt-3.5-turbo", // Switch to a more universal model
+        model: "google/gemini-flash-1.5", // Extremely stable on OpenRouter
         messages: finalMessages,
       }),
     });
