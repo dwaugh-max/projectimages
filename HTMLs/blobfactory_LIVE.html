@@ -7,7 +7,7 @@
     <title>BLOB FACTORY // AI MISSION FORGE (v66.16)</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-        // GOOGLE IDENTITY CONFIGURATION (v66.12)
+        // GOOGLE IDENTITY CONFIGURATION (v66.16)
         let GOOGLE_CLIENT_ID = "503537759984-imeg79p1djl1csnselh3jaqqofmi5gem.apps.googleusercontent.com"; // To be provided by user
         let googleUser = null;
     </script>
@@ -695,7 +695,7 @@
         <div style="display:flex; align-items:center; gap:20px;">
             <button class="btn-settings-toggle" onclick="toggleSettings()">CORE SETTINGS</button>
             <div style="text-align:right;">
-                <div class="ver">MASTER FORGE v65.99</div>
+                <div class="ver">MASTER FORGE v66.16</div>
                 <div id="header-model-status"
                     style="font-size:0.5rem; color:var(--accent); text-transform:uppercase; letter-spacing:1px; opacity:0.8; margin-top:2px;">
                     Brain: Xiaomi MiMo V2</div>
@@ -773,7 +773,7 @@
 
             <div id="chat-display">
                 <div class="chat-msg msg-ai">
-                    <strong>COREGINE v66.15 ONLINE.</strong><br>
+                    <strong>COREGINE v66.16 ONLINE.</strong><br>
                     Please provide the initial mission parameters or learning outcomes to begin Phase 1: Concept Arrive.
                 </div>
             </div>
@@ -811,7 +811,7 @@
                     <div class="lobby-logo">BLOB <span>FACTORY</span></div>
                     <div
                         style="font-size: 0.6rem; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px;">
-                        Atmospheric Decontamination In Progress v66.15
+                        Atmospheric Decontamination In Progress v66.16
                     </div>
 
                     <div id="google-signin-container" style="margin-top: 20px;">
@@ -860,7 +860,7 @@
                         style="margin-top: 40px; width: 100%; padding: 15px; background: var(--accent); color: #000; font-weight: bold; font-family: var(--font-h); letter-spacing: 2px;">
                         INITIATE FORGE SEQUENCE
                     </button>
-                    <div style="font-size: 0.5rem; color: #444; margin-top: 20px;">v66.00 // IDENTITY PROTOCOL ACTIVE
+                    <div style="font-size: 0.5rem; color: #444; margin-top: 20px;">v66.16 // IDENTITY PROTOCOL ACTIVE
                     </div>
                 </div>
             </div>
@@ -944,7 +944,7 @@
         let history = [];
         let accumulatedData = {};
 
-        let CURRICULUM_DATA = {}; // Loaded externally v66.11
+        let CURRICULUM_DATA = {}; // Loaded externally v66.16
 
         async function loadGlobalCurriculum() {
             try {
@@ -1025,7 +1025,7 @@ Ask the user: "WOULD YOU LIKE TO BEGIN THE CLINICAL REVIEW OR DOWNLOAD THE SOURC
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v66.15), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v66.16), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
 CURRICULUM CONTEXT:
