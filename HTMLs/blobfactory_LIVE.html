@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOB FACTORY // MASTER FORGE (v65.90)</title>
+    <title>BLOB FACTORY // MASTER FORGE (v65.91)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -542,7 +542,7 @@
         <div class="logo">BLOB <span>FACTORY</span></div>
         <div style="display:flex; align-items:center; gap:20px;">
             <button class="btn-settings-toggle" onclick="toggleSettings()">CORE SETTINGS</button>
-            <div class="ver">MASTER FORGE v65.90</div>
+            <div class="ver">MASTER FORGE v65.91</div>
         </div>
     </header>
 
@@ -602,7 +602,7 @@
 
             <div id="chat-display">
                 <div class="chat-msg msg-ai">
-                    <strong>COREGINE v65.90 ONLINE.</strong><br>
+                    <strong>COREGINE v65.91 ONLINE.</strong><br>
                     Please provide the initial mission parameters or learning outcomes to begin Phase 1: Concept Arrive.
                 </div>
             </div>
@@ -779,13 +779,13 @@ OUTPUT ONLY THE JSON CODE BLOCK.`
         };
 
         const MASTER_SYSTEM_PROMPT_CORE = `
-You are the BLOB FACTORY COREGINE (v65.90), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v65.91), the multi-stage mission architect.
 GOAL: Guide the user from a seed concept to a fully realized .blob mission.
 
-NATIONAL CONTEXT:
-- You are working within the Nova Scotia (CANADIAN) curriculum.
-- All references to "The Constitution", "1982", or "Truth and Reconciliation" refer STRICTLY to Canada.
-- Ensure all historical and geographical references are Canadian unless explicitly stated otherwise by the user.
+CONTEXT BASELINE:
+- Unless explicitly told otherwise, assume you are working within the Nova Scotia (CANADIAN) curriculum.
+- By default, references to topics like "The Constitution", "1982", or "Truth and Reconciliation" refer to the Canadian context.
+- However, if the user specifies a different nation or international context (e.g., IB Global Politics, Ecuador), adapt your knowledge base to that specific region immediately.
 
 STYLE RULES:
 - Use a PUNCHY, ACTIVE writing style like modern journalism.
