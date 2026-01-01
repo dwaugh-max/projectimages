@@ -899,12 +899,15 @@
 
     <div id="forge-overlay">
         <header class="forge-header">
-            <div style="display:flex; align-items:center; gap:15px;">
+            <div style="display:flex; align-items:center; gap:20px;">
+                <span
+                    style="font-family:'Oswald',sans-serif; font-size:1rem; color:#00ffcc; letter-spacing:3px; opacity:0.8;">SITUATION
+                    ROOM</span>
+                <span style="color:#333;">|</span>
                 <div
-                    style="font-family:var(--font-tech); font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
-                    MISSION <span>CREATE</span></div>
-                <div id="forge-ver" style="font-size:0.5rem; opacity:0.4; letter-spacing:2px; margin-top:5px;">V2.0 //
-                    INTEGRATED</div>
+                    style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
+                    MISSION CREATE</div>
+                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.47</div>
             </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="resetForge()"
@@ -940,40 +943,39 @@
         <main class="forge-main">
             <div class="forge-panel">
                 <div style="margin-bottom:20px;">
-                    <label style="color:var(--forge-accent);">Current Phase</label>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="color:var(--forge-accent);">Current Phase</label>
+                        <div class="settings-toggle" onclick="toggleGenSettings()"
+                            style="margin:0; font-size:0.55rem; opacity:0.7;">[ ⚙️ CONFIG ]</div>
+                    </div>
                     <h2 id="forge-title"
                         style="margin:0; font-family:var(--font-tech); font-size:1.1rem; text-transform:uppercase; color:#fff;">
                         Commence Conception</h2>
                     <p id="forge-desc" style="font-size:0.75rem; opacity:0.6; margin-top:5px;">Define the mission scope
-                        and
-                        learning outcomes.</p>
-                </div>
+                        and learning outcomes.</p>
 
-                <div style="margin-bottom:15px;">
-                    <div class="settings-toggle" onclick="toggleGenSettings()">⚙️ GENERATION SETTINGS</div>
-                    <div id="gen-settings-content">
-                        <div class="forge-settings">
-                            <div style="flex:1;">
-                                <label>Intelligence Model</label>
-                                <div class="guidance-text">AI Architecture Engine. *Note: Xiaomi is powerful but has
-                                    strict content filters.*</div>
-                                <select id="f-model" class="settings-select">
-                                    <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2 Flash (Default)</option>
-                                    <option value="google/gemini-2.0-flash-exp:free">Google Gemini 2.0 Flash</option>
-                                    <option value="google/learnlm-1.5-pro-experimental:free">Google LearnLM 1.5 Pro
-                                    </option>
-                                    <option value="meta-llama/llama-3.2-3b-instruct:free">Meta Llama 3.2 3B</option>
-                                </select>
-                            </div>
-                            <div style="flex:1;">
-                                <label>Complexity</label>
-                                <div class="guidance-text">Baseline: Grade Level. Offset: Adjust for this specific
-                                    class's literacy.</div>
-                                <select id="f-complexity" class="settings-select">
-                                    <option value="Low">Low (Foundational/Direct)</option>
-                                    <option value="Medium" selected>Standard (Middle/High)</option>
-                                    <option value="High">Elite (Nuanced/Advanced)</option>
-                                </select>
+                    <div id="gen-settings-content"
+                        style="margin-top:10px; border-left:2px solid var(--forge-accent); background:rgba(0,0,0,0.3);">
+                        <div class="forge-settings" style="grid-template-columns:1fr; gap:5px;">
+                            <div style="display:flex; gap:10px;">
+                                <div style="flex:1;">
+                                    <label>Model</label>
+                                    <select id="f-model" class="settings-select">
+                                        <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2</option>
+                                        <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash</option>
+                                        <option value="google/learnlm-1.5-pro-experimental:free">LearnLM 1.5 Pro
+                                        </option>
+                                        <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B</option>
+                                    </select>
+                                </div>
+                                <div style="width:120px;">
+                                    <label>Complexity</label>
+                                    <select id="f-complexity" class="settings-select">
+                                        <option value="Low">Low</option>
+                                        <option value="Medium" selected>Standard</option>
+                                        <option value="High">Elite</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
