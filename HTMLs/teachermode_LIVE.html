@@ -825,7 +825,7 @@
             <button onclick="toggleLibrary()"
                 style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📚
                 HUB</button>
-            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.471</div>
+            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.472</div>
         </div>
     </div>
     <h1 style="margin:30px 40px; font-size:1.5rem;">COMMAND CENTER // MISSION CONTROL</h1>
@@ -907,7 +907,7 @@
                 <div
                     style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
                     MISSION CREATE</div>
-                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.471</div>
+                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.472</div>
             </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="resetForge()"
@@ -957,9 +957,9 @@
                         BRAINSTORM
                     </h2>
                     <p id="forge-desc"
-                        style="font-size:0.75rem; color:#888; margin-top:5px; font-family:'Inter',sans-serif;">Bounce
-                        mission ideas off of the AI! Select (or add) your course outcomes to help tell the AI your class
-                        context. Then give the AI general direction in the text box below, and press
+                        style="font-size:0.7rem; color:#888; margin-top:5px; font-family:'Inter',sans-serif; line-height:1.4;">
+                        Bounce mission ideas off of the AI! Select (or add) your course outcomes to help tell the AI
+                        your class context. Then give the AI general direction in the text box below, and press
                         submit.<br><br>Don't feel like you have to take its first choices! Spend some time refining ("a
                         little more this, a little less that...") until you have a solid concept.</p>
 
@@ -993,10 +993,10 @@
                 <div id="curriculum-zone"
                     style="background:rgba(255,255,255,0.03); padding:15px; border-radius:4px; border:1px solid #222;">
                     <label
-                        style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">CURRICULUM
-                        CONTEXT</label>
-                    <div class="guidance-text" style="color:#666; font-style:italic;">Sync with regional outcomes to
-                        strictly align simulation goals.</div>
+                        style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">CHOOSE/ADD
+                        COURSE OUTCOMES</label>
+                    <div class="guidance-text" style="color:#888; font-style:italic; font-size:0.7rem; margin-top:3px;">
+                        Sync with regional outcomes to strictly align simulation goals.</div>
                     <div id="f-favorites-shelf"
                         style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px; border-bottom:1px solid #222; padding-bottom:10px; display:none;">
                         <!-- Pinned favorites go here -->
@@ -1040,10 +1040,10 @@
 
                 <div style="margin-top:10px;">
                     <label
-                        style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">COMMAND
-                        CONTEXT</label>
-                    <div class="guidance-text" style="color:#666; font-style:italic;">Optional. Describe a setting,
-                        specific event, or pedagogical theme.</div>
+                        style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">IDEA
+                        BOX</label>
+                    <div class="guidance-text" style="color:#666; font-style:italic; font-size:0.65rem;">What are we
+                        making today? Give the AI something to start with.</div>
                     <textarea id="f-input"
                         style="height:120px; flex:none; background:#111; border:1px solid #333; color:#fff; font-size:0.85rem; padding:15px; width:100%;"
                         placeholder="ENTER COMMAND CONTEXT..."></textarea>
@@ -1171,7 +1171,7 @@
         let forgeModel = "xiaomi/mimo-v2-flash:free";
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v66.471), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v66.472), the multi-stage mission architect.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
 SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes), intelligenceGlossary.
