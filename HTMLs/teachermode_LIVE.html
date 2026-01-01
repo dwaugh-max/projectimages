@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>MISSION CONTROL // SITUATION ROOM (v66.46)</title>
+    <title>MISSION CONTROL // SITUATION ROOM (v66.47)</title>
     <script>
         // --- BOOTSTRAP CONFIGURATION ---
         (function bootstrap() {
@@ -30,20 +30,32 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --bg: #f4f4f4;
-            --accent: #2c3e50;
-            --secondary: #34495e;
-            --success: #27ae60;
-            --err: #9a2020;
+            --bg: #050505;
+            --accent: #00ffcc;
+            --accent-dim: rgba(0, 255, 204, 0.1);
+            --secondary: #0a2a2a;
+            --success: #00ff88;
+            --err: #ff3366;
             --font-main: 'Inter', sans-serif;
-            --font-tech: 'Courier New', Courier, monospace;
-
-            /* FORGE ADDITIONS */
-            --forge-bg: #050505;
+            --font-h: 'Oswald', sans-serif;
+            --font-tech: 'JetBrains Mono', monospace;
             --forge-accent: #ff0055;
-            --forge-panel: #111;
-            --forge-border: #222;
-            --forge-text: #eee;
+        }
+
+        /* MEDICAL SCANLINE OVERLAY */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.01));
+            background-size: 100% 4px, 4px 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
         }
 
         /* NARROW TECH SCROLLBARS */
@@ -62,7 +74,7 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--forge-accent);
+            background: var(--accent);
         }
 
         * {
@@ -72,30 +84,57 @@
 
         body {
             font-family: var(--font-main);
-            padding: 40px;
-            background: var(--bg);
-            color: #333;
+            padding: 0;
             margin: 0;
+            background: radial-gradient(ellipse at top, #0a1a1a 0%, #050505 50%);
+            color: #fff;
+            min-height: 100vh;
         }
 
         #status-bar {
-            background: #1a1a1a;
-            color: #fff;
-            padding: 15px 25px;
-            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 5px solid var(--accent);
+            padding: 15px 40px;
+            background: linear-gradient(90deg, rgba(0, 255, 204, 0.08) 0%, rgba(0, 0, 0, 0.9) 50%, rgba(255, 0, 85, 0.08) 100%);
+            border-bottom: 1px solid var(--secondary);
+            font-size: 0.7rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
         }
 
         .status-light {
-            height: 12px;
-            width: 12px;
-            border-radius: 50%;
-            background: #666;
             display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
             margin-right: 10px;
+            background: #333;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .status-light.online {
+            background: var(--success);
+            box-shadow: 0 0 20px var(--success), 0 0 40px var(--success);
+        }
+
+        .status-light.offline {
+            background: var(--err);
+            box-shadow: 0 0 20px var(--err), 0 0 40px var(--err);
         }
 
         .status-light.online {
@@ -109,32 +148,36 @@
         }
 
         h1 {
-            font-family: var(--font-tech);
+            font-family: var(--font-h);
             text-transform: uppercase;
-            letter-spacing: 5px;
+            letter-spacing: 8px;
             border-bottom: 2px solid var(--accent);
-            padding-bottom: 10px;
+            padding-bottom: 15px;
             margin-bottom: 30px;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
         }
 
         #console {
-            background: var(--terminal);
-            color: var(--term-txt);
-            padding: 15px;
+            background: #000;
+            color: var(--accent);
+            padding: 20px;
             height: 180px;
             overflow-y: auto;
-            font-size: 0.8rem;
-            border: 1px solid #333;
+            font-size: 0.75rem;
+            font-family: var(--font-tech);
+            border: 1px solid var(--secondary);
             margin-bottom: 30px;
         }
 
         .panel {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.02);
             padding: 30px;
-            border: 1px solid #ddd;
-            border-top: 5px solid var(--accent);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--secondary);
+            border-top: 3px solid var(--accent);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.05);
+            backdrop-filter: blur(5px);
         }
 
         .grid {
@@ -148,26 +191,41 @@
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--secondary);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
             font-family: inherit;
             box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
         }
 
         .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
+            background: none;
+            color: var(--accent);
+            border: 1px solid var(--accent);
             padding: 15px 25px;
             cursor: pointer;
-            font-weight: bold;
+            font-family: var(--font-h);
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             width: 100%;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
         }
 
         .btn:hover {
-            background: #444;
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 30px var(--accent);
         }
 
         .btn-del {
@@ -182,7 +240,8 @@
         }
 
         .btn-del:hover {
-            color: #8b0000;
+            color: #ff6699;
+            text-shadow: 0 0 10px var(--err);
         }
 
         table {
@@ -194,18 +253,19 @@
         th,
         td {
             padding: 12px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--secondary);
             text-align: left;
             font-size: 0.75rem;
             vertical-align: middle;
         }
 
         th {
-            background: var(--accent);
-            color: #fff;
+            background: linear-gradient(90deg, var(--accent), rgba(0, 255, 204, 0.3));
+            color: #000;
             text-transform: uppercase;
-            font-size: 0.6rem;
-            letter-spacing: 1px;
+            font-family: var(--font-h);
+            font-size: 0.65rem;
+            letter-spacing: 2px;
         }
 
         .thumb {
@@ -214,17 +274,18 @@
             background-size: cover;
             background-position: center;
             border-radius: 4px;
-            border: 1px solid #ddd;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
         }
 
         label {
             font-size: 0.6rem;
-            color: #888;
+            color: var(--accent);
             text-transform: uppercase;
             margin-bottom: 5px;
             display: block;
             font-weight: bold;
+            letter-spacing: 1px;
         }
 
         /* PROJECTOR MODE */
@@ -689,8 +750,8 @@
 <body>
     <!-- AUTHENTICATION OVERLAY -->
     <div id="auth-overlay">
-        <div id="login-card">
-            <h1 class="landing-logo" style="font-size:4rem; letter-spacing:15px; margin-bottom:20px;">SITUATION ROOM
+        <div id="login-card" style="width:520px;">
+            <h1 class="landing-logo" style="font-size:3rem; letter-spacing:10px; margin-bottom:20px;">SITUATION ROOM
             </h1>
             <div style="width:60px; height:2px; background:#00ffcc; margin:0 auto 25px;"></div>
             <div
@@ -700,8 +761,7 @@
             <div id="google-signin-container" style="display:flex; justify-content:center; margin-bottom:25px;"></div>
 
             <div id="auth-status" style="font-size:0.6rem; color:#666; margin-top:10px; letter-spacing:2px;">PENDING
-                IDENTITY
-                VERIFICATION...</div>
+                IDENTITY VERIFICATION...</div>
         </div>
     </div>
 
@@ -1091,7 +1151,7 @@
         let forgeModel = "xiaomi/mimo-v2-flash:free";
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v66.46), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v66.47), the multi-stage mission architect.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
 SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes), intelligenceGlossary.
