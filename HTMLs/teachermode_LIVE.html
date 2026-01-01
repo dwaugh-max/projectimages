@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <script src="critical_crypto.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --bg: #f4f4f4;
@@ -19,6 +20,13 @@
             --term-txt: #0f0;
             --font-main: 'Inter', sans-serif;
             --font-tech: 'Courier New', monospace;
+
+            /* FORGE ADDITIONS */
+            --forge-bg: #050505;
+            --forge-accent: #ff0055;
+            --forge-panel: #111;
+            --forge-border: #222;
+            --forge-text: #eee;
         }
 
         body {
@@ -262,6 +270,169 @@
             background: #d2b48c;
             transition: width 1s ease;
         }
+
+        /* FORGE & HOSPITAL OVERLAY */
+        #forge-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--forge-bg);
+            z-index: 4000;
+            flex-direction: column;
+            color: var(--forge-text);
+        }
+
+        #forge-overlay.active {
+            display: flex;
+        }
+
+        .forge-header {
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--forge-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .forge-main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2px;
+            background: var(--forge-border);
+            overflow: hidden;
+        }
+
+        .forge-panel {
+            background: var(--forge-bg);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .forge-output {
+            background: #080808;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #forge-chat {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .msg {
+            max-width: 85%;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .msg-ai {
+            background: #111;
+            border-left: 3px solid var(--forge-accent);
+        }
+
+        .msg-user {
+            background: #1a1a1a;
+            align-self: flex-end;
+            border-right: 3px solid #444;
+        }
+
+        .stepper {
+            display: flex;
+            gap: 15px;
+            padding: 15px 40px;
+            background: #080808;
+            border-bottom: 1px solid var(--forge-border);
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.3;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step-num {
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--forge-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: var(--forge-accent);
+        }
+
+        /* HOSPITAL STYLES */
+        #hospital-view {
+            display: none;
+            height: 100%;
+            grid-template-columns: 250px 1fr;
+            background: #080808;
+        }
+
+        .hosp-sidebar {
+            background: #111;
+            border-right: 1px solid #222;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .hosp-main {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hosp-tab {
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            font-size: 0.65rem;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .hosp-tab.active {
+            border-color: #00ffcc;
+            color: #00ffcc;
+        }
+
+        /* ENHANCED CONTROLS */
+        .forge-settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .settings-select {
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px;
+            font-size: 0.65rem;
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -296,6 +467,9 @@
         <a href="projector.html" target="_blank"
             style="color:var(--accent); font-size:0.6rem; text-decoration:none; border:1px solid var(--accent); padding:5px 10px; border-radius:3px;">NEW
             WINDOW</a>
+        <button onclick="toggleForge()"
+            style="background:var(--forge-accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; border-radius:3px; cursor:pointer; font-weight:bold; letter-spacing:1px;">🔥
+            MISSION FORGE</button>
         <button onclick="toggleLibrary()"
             style="background:var(--accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; border-radius:3px; cursor:pointer; font-weight:bold; letter-spacing:1px;">📚
             OPEN COMMUNITY HUB</button>
@@ -369,8 +543,179 @@
             CATALOG...</div>
     </div>
 </div>
+
+<div id="forge-overlay">
+    <header class="forge-header">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <div style="font-family:var(--font-tech); font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
+                MISSION <span>FORGE</span></div>
+            <div id="forge-ver" style="font-size:0.5rem; opacity:0.4; letter-spacing:2px; margin-top:5px;">V2.0 //
+                INTEGRATED</div>
+        </div>
+        <button onclick="toggleForge()"
+            style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem;">[CLOSE_FORGE]</button>
+    </header>
+
+    <div class="stepper">
+        <div class="step active" id="step-1">
+            <div class="step-num">1</div>
+            <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Concept</div>
+        </div>
+        <div class="step" id="step-2">
+            <div class="step-num">2</div>
+            <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Intel</div>
+        </div>
+        <div class="step" id="step-3">
+            <div class="step-num">3</div>
+            <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Story</div>
+        </div>
+        <div class="step" id="step-4">
+            <div class="step-num">4</div>
+            <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Assets</div>
+        </div>
+        <div class="step" id="step-5">
+            <div class="step-num">5</div>
+            <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Birth</div>
+        </div>
+    </div>
+
+    <main class="forge-main">
+        <div class="forge-panel">
+            <div style="margin-bottom:20px;">
+                <label style="color:var(--forge-accent);">Current Phase</label>
+                <h2 id="forge-title"
+                    style="margin:0; font-family:var(--font-tech); font-size:1.1rem; text-transform:uppercase; color:#fff;">
+                    Commence Conception</h2>
+                <p id="forge-desc" style="font-size:0.75rem; opacity:0.6; margin-top:5px;">Define the mission scope and
+                    learning outcomes.</p>
+            </div>
+
+            <div class="forge-settings">
+                <div>
+                    <label>Intelligence Model</label>
+                    <select id="f-model" class="settings-select">
+                        <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2 (Flash)</option>
+                        <option value="google/gemini-pro-1.5-exp">Gemini 1.5 Pro (Precision)</option>
+                        <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Speed)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Complexity</label>
+                    <select id="f-complexity" class="settings-select">
+                        <option value="Basic">Basic (Elementary)</option>
+                        <option value="Standard" selected>Standard (Middle/High)</option>
+                        <option value="Hardcore">Hardcore (Expert/Adult)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="curriculum-zone"
+                style="background:rgba(255,255,255,0.03); padding:15px; border-radius:4px; border:1px solid #222;">
+                <label>Curriculum Context</label>
+                <select id="f-country" onchange="updateForgeRegions()"
+                    style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px;">
+                    <option value="">-- SELECT COUNTRY --</option>
+                </select>
+                <select id="f-region" onchange="updateForgeCourses()"
+                    style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px; display:none;">
+                </select>
+                <select id="f-course" onchange="updateForgeOutcomes()"
+                    style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px; display:none;">
+                </select>
+                <div id="f-outcomes"
+                    style="max-height:150px; overflow-y:auto; font-size:0.65rem; color:#888; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
+                    <p style="text-align:center; opacity:0.4;">SELECT COURSE TO LOAD OUTCOMES</p>
+                </div>
+            </div>
+
+            <textarea id="f-input"
+                style="flex:1; background:#111; border:1px solid #333; color:#fff; font-size:0.85rem; padding:15px; margin-top:10px;"
+                placeholder="ENTER COMMAND CONTEXT..."></textarea>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn" style="flex:1; background:#333; font-size:0.7rem; padding:12px;"
+                    onclick="forgeBack()">BACK</button>
+                <button class="btn" id="f-submit"
+                    style="flex:2; background:var(--forge-accent); font-size:0.7rem; padding:12px;"
+                    onclick="processForge()">SUBMIT COMMAND</button>
+            </div>
+        </div>
+
+        <div class="forge-output">
+            <div id="forge-chat">
+                <div class="msg msg-ai">
+                    <strong>FORGE SYSTEM ONLINE.</strong><br>
+                    Welcome to the integrated conceive-birth-finetune machine. Select your curriculum target or provide
+                    a raw historical concept to begin.
+                </div>
+            </div>
+
+            <!-- HOSPITAL INTERFACE -->
+            <div id="hospital-view">
+                <div class="hosp-sidebar" id="hosp-nav">
+                    <div
+                        style="font-size:0.6rem; color:var(--forge-accent); margin-bottom:15px; letter-spacing:1px; font-weight:bold;">
+                        SURGICAL NODES</div>
+                </div>
+                <div class="hosp-main">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <div id="hosp-path" style="font-family:var(--font-tech); font-size:0.7rem; color:#00ffcc;">NODE:
+                            SELECTION_REQUIRED</div>
+                        <button class="btn" onclick="saveHospEdit()"
+                            style="width:auto; padding:5px 15px; font-size:0.65rem; background:#00ffcc; color:#000;">STABILIZE
+                            NODE</button>
+                    </div>
+                    <textarea id="hosp-editor"
+                        style="flex:1; background:#050505; color:#eee; border:1px solid #222; font-family:var(--font-tech); font-size:0.8rem; padding:15px; resize:none;"></textarea>
+                    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+                        <button class="btn"
+                            style="width:auto; background:transparent; border:1px solid #444; color:#888; padding:10px 20px; font-size:0.7rem;"
+                            onclick="downloadBirthedBlob()">DOWNLOAD .BLOB SOURCE</button>
+                        <button class="btn"
+                            style="width:auto; background:#ffcc00; color:#000; padding:12px 30px; font-size:0.8rem;"
+                            onclick="finalizeForge()">FINALIZE & PUSH TO COMMAND CENTER</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="forge-loader"
+                style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.8); flex-direction:column; align-items:center; justify-content:center; z-index:10;">
+                <div
+                    style="width:30px; height:30px; border:2px solid var(--forge-accent); border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;">
+                </div>
+                <div id="forge-loader-text"
+                    style="font-size:0.6rem; color:var(--forge-accent); margin-top:15px; letter-spacing:2px;">
+                    PROCESSING...</div>
+            </div>
+        </div>
+    </main>
+</div>
 <script>
     let allProgress = [];
+
+    // --- FORGE CONFIGURATION ---
+    const FORGE_PROXY = "https://nextjs-basic-lemon-one.vercel.app/api/chat";
+    let forgeStep = 1;
+    let forgeHistory = [];
+    let accumulatedData = {};
+    let curriculumData = {};
+    let forgeModel = "xiaomi/mimo-v2-flash:free";
+
+    const FORGE_SYSTEM_CORE = `
+You are the BLOB FACTORY COREGINE (v66.16), the multi-stage mission architect.
+GOAL: Guide the user from a seed concept to a fully realized .blob mission.
+STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
+SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes), intelligenceGlossary.
+`;
+
+    const FORGE_PROMPTS = {
+        1: "PHASE 1: CONCEPT ARRIVE. Identify SCO + Ethical Audit. Propose 3 detailed Scenario Concepts. Include 'THEMES TARGETING SELECTED OUTCOMES'. End with: 'WHICH CONCEPT SHALL WE FORGE?'",
+        2: "PHASE 2: DEEP SEARCH. Expand chosen concept into 10 Slide Titles and Intel data strategy. End with: 'SHALL WE PROCEED TO FULL STORY DRAFTING?'",
+        3: "PHASE 3: STORY CONFIRM. Draft FULL immersive prose (200-400 words) for all 10 slides and Intel tabs. End with: 'READY TO SECURE ASSETS?'",
+        4: "PHASE 4: ASSET SECURE. Propose Visual Strategy. List each slide and 'Unsplash Keyword'. End with: 'SHALL WE COMMENCE BLOB BIRTH CONTENTION?'",
+        5: "PHASE 5: BLOB BIRTH. Compile into valid JSON .blob. OUTPUT ONLY THE JSON CODE BLOCK."
+    };
+    // --- END FORGE CONFIG ---
     const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
@@ -394,6 +739,72 @@
         h.style.display = show ? 'block' : 'none';
         if (show) fetchLibrary();
     }
+    // --- FORGE UI CONTROLS ---
+    function toggleForge() {
+        const f = document.getElementById('forge-overlay');
+        f.classList.toggle('active');
+        if (f.classList.contains('active')) {
+            if (!curriculumData.countries) fetchCurriculum();
+        }
+    }
+
+    function updateForgeUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${forgeStep}`).classList.add('active');
+
+        const titles = {
+            1: "Commence Conception",
+            2: "Intelligence Framework",
+            3: "Narrative Drafting",
+            4: "Asset Procurement",
+            5: "Biological Birth"
+        };
+        const descs = {
+            1: "Define the mission scope and learning outcomes.",
+            2: "Establish the 10-slide architecture and technical data.",
+            3: "Generating full immersive prose and intelligence files.",
+            4: "Mapping visual keywords (Unsplash) for all nodes.",
+            5: "Compiling the final .blob mission package."
+        };
+
+        document.getElementById('forge-title').innerText = titles[forgeStep];
+        document.getElementById('forge-desc').innerText = descs[forgeStep];
+        document.getElementById('f-submit').innerText = forgeStep === 5 ? "BIRTH MISSION" : "SUBMIT COMMAND";
+
+        // Only show curriculum zone on step 1
+        document.getElementById('curriculum-zone').style.display = forgeStep === 1 ? 'block' : 'none';
+
+        if (forgeStep === 5) {
+            document.getElementById('f-submit').onclick = birthMission;
+        } else {
+            document.getElementById('f-submit').onclick = processForge;
+        }
+    }
+
+    function forgeBack() {
+        if (forgeStep > 1) {
+            forgeStep--;
+            updateForgeUI();
+            addForgeChat("ai", `Reverting to Phase ${forgeStep}. Command parameters preserved.`);
+        }
+    }
+
+    function addForgeChat(side, msg) {
+        const c = document.getElementById('forge-chat');
+        const div = document.createElement('div');
+        div.className = `msg msg-${side}`;
+        div.innerHTML = typeof marked !== 'undefined' ? marked.parse(msg) : msg;
+        c.appendChild(div);
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function setForgeLoading(show, txt = "PROCESSING...") {
+        const l = document.getElementById('forge-loader');
+        l.style.display = show ? 'flex' : 'none';
+        document.getElementById('forge-loader-text').innerText = txt;
+    }
+    // --- END UI CONTROLS ---
+
     async function fetchLibrary() {
         try {
             const res = await fetch(LIB_URL);
@@ -424,6 +835,228 @@
             else log(j.message, "error");
         } catch (e) { log(`Import failed: ${e.message}`, "error"); }
     }
+
+    // --- FORGE AI ENGINE ---
+    async function processForge() {
+        const input = document.getElementById('f-input').value;
+        if (!input && forgeStep === 1) return alert("Please provide starting context.");
+
+        const selectedModel = document.getElementById('f-model').value;
+        const selectedComplexity = document.getElementById('f-complexity').value;
+
+        setForgeLoading(true, `THINKING (PHASE ${forgeStep})...`);
+        addForgeChat("user", input || "(Proceed to next phase)");
+        document.getElementById('f-input').value = "";
+
+        let context = `${FORGE_SYSTEM_CORE}\n`;
+        context += `FORGE COMPLEXITY: ${selectedComplexity}\n`;
+        if (forgeStep === 1) {
+            const out = document.getElementById('f-outcomes').innerText;
+            context += `TARGET CURRICULUM: ${out}\n\n`;
+        }
+        context += `CURRENT PHASE: ${forgeStep}\nINSTRUCTION: ${FORGE_PROMPTS[forgeStep]}\n\nUSER INPUT: ${input}`;
+
+        forgeHistory.push({ role: "user", content: context });
+
+        try {
+            const res = await fetch(FORGE_PROXY, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: context, model: selectedModel })
+            });
+            const data = await res.json();
+            const reply = data.choices[0].message.content;
+
+            addForgeChat("ai", reply);
+            forgeHistory.push({ role: "assistant", content: reply });
+
+            if (forgeStep < 5) {
+                forgeStep++;
+                updateForgeUI();
+            }
+        } catch (e) {
+            addForgeChat("ai", `!! ERROR: ${e.message}. Check Vercel Proxy connectivity.`);
+        } finally {
+            setForgeLoading(false);
+        }
+    }
+
+    function getForgeContext(userInput) {
+        // [DEPRECATED - MERGED INTO processForge for better parameter sync]
+    }
+
+    // --- CURRICULUM HUB ---
+    async function fetchCurriculum() {
+        try {
+            const res = await fetch("https://raw.githubusercontent.com/dwaugh-edsim/projectimages/main/capsule-library/curriculum.json");
+            curriculumData = await res.json();
+            const cSel = document.getElementById('f-country');
+            cSel.innerHTML = '<option value="">-- SELECT COUNTRY --</option>';
+            Object.keys(curriculumData.countries).forEach(c => {
+                cSel.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+        } catch (e) { console.error("Failed to load curriculum", e); }
+    }
+
+    function updateForgeRegions() {
+        const country = document.getElementById('f-country').value;
+        const rSel = document.getElementById('f-region');
+        rSel.innerHTML = '<option value="">-- SELECT REGION --</option>';
+        rSel.style.display = country ? 'block' : 'none';
+        if (country) {
+            Object.keys(curriculumData.countries[country]).forEach(r => {
+                rSel.innerHTML += `<option value="${r}">${r}</option>`;
+            });
+        }
+    }
+
+    function updateForgeCourses() {
+        const country = document.getElementById('f-country').value;
+        const region = document.getElementById('f-region').value;
+        const cSel = document.getElementById('f-course');
+        cSel.innerHTML = '<option value="">-- SELECT COURSE --</option>';
+        cSel.style.display = region ? 'block' : 'none';
+        if (region) {
+            const courses = curriculumData.countries[country][region];
+            Object.keys(courses).forEach(c => {
+                cSel.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+        }
+    }
+
+    function updateForgeOutcomes() {
+        const country = document.getElementById('f-country').value;
+        const region = document.getElementById('f-region').value;
+        const course = document.getElementById('f-course').value;
+        const outDiv = document.getElementById('f-outcomes');
+        if (course) {
+            const data = curriculumData.countries[country][region][course];
+            outDiv.innerHTML = `<strong>${data.code}:</strong> ${data.outcomes.join("<br>• ")}`;
+        } else {
+            outDiv.innerHTML = "<p>SELECT COURSE TO LOAD OUTCOMES</p>";
+        }
+    }
+    // --- END CURRICULUM ---
+
+    // --- BIRTH & HOSPITAL ---
+    function birthMission() {
+        const lastReply = forgeHistory.filter(m => m.role === 'assistant').pop()?.content;
+        if (!lastReply) return alert("NO BIOLOGICAL MATERIAL DETECTED.");
+
+        try {
+            const jsonStr = lastReply.match(/\{[\s\S]*\}/)[0];
+            accumulatedData = JSON.parse(jsonStr);
+            addForgeChat("ai", "!!! BIRTH SUCCESSFUL. Initiating clinical review in the Surgical Hospital.");
+            openHospital();
+        } catch (e) {
+            addForgeChat("ai", "!! BIRTH TRAUMA: JSON parsing failed. Please ask the AI to re-output the JSON block.");
+        }
+    }
+
+    function openHospital() {
+        document.getElementById('forge-chat').style.display = 'none';
+        document.getElementById('hospital-view').style.display = 'grid';
+        renderHospNodes();
+    }
+
+    function renderHospNodes() {
+        const nav = document.getElementById('hosp-nav');
+        let h = '<div style="font-size:0.6rem; color:var(--forge-accent); margin-bottom:15px; letter-spacing:1px; font-weight:bold;">SURGICAL NODES</div>';
+
+        // Metadata Node
+        h += `<div class="hosp-tab" onclick="editHospNode('metadata')">METADATA</div>`;
+
+        // Slide Nodes
+        if (accumulatedData.slides) {
+            accumulatedData.slides.forEach((s, i) => {
+                h += `<div class="hosp-tab" id="hosp-tab-${i}" onclick="editHospNode(${i})">SLIDE ${i + 1}: ${s.title.substring(0, 15)}...</div>`;
+            });
+        }
+
+        // Glossary Node
+        h += `<div class="hosp-tab" onclick="editHospNode('glossary')">INTELLIGENCE GLOSSARY</div>`;
+
+        nav.innerHTML = h;
+    }
+
+    let currentHospNode = null;
+    function editHospNode(idx) {
+        currentHospNode = idx;
+        document.querySelectorAll('.hosp-tab').forEach(t => t.classList.remove('active'));
+
+        const editor = document.getElementById('hosp-editor');
+        const path = document.getElementById('hosp-path');
+
+        if (idx === 'metadata') {
+            path.innerText = "NODE: METADATA";
+            editor.value = JSON.stringify(accumulatedData.metadata, null, 2);
+        } else if (idx === 'glossary') {
+            path.innerText = "NODE: GLOSSARY";
+            editor.value = JSON.stringify(accumulatedData.intelligenceGlossary || {}, null, 2);
+        } else {
+            path.innerText = `NODE: SLIDE_${idx + 1}`;
+            editor.value = JSON.stringify(accumulatedData.slides[idx], null, 2);
+            const tab = document.getElementById(`hosp-tab-${idx}`);
+            if (tab) tab.classList.add('active');
+        }
+    }
+
+    function saveHospEdit() {
+        const val = document.getElementById('hosp-editor').value;
+        try {
+            const parsed = JSON.parse(val);
+            if (currentHospNode === 'metadata') {
+                accumulatedData.metadata = parsed;
+            } else if (currentHospNode === 'glossary') {
+                accumulatedData.intelligenceGlossary = parsed;
+            } else {
+                accumulatedData.slides[currentHospNode] = parsed;
+            }
+            log("Surgical Node Stabilized.", "success");
+            renderHospNodes();
+        } catch (e) { alert("Surgical Error: Invalid JSON in editor."); }
+    }
+
+    function downloadBirthedBlob() {
+        if (!accumulatedData) return;
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(accumulatedData, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", (accumulatedData.metadata.id || "mission") + ".blob");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        log("Local Source Download Initiated.", "success");
+    }
+
+    async function finalizeForge() {
+        if (!confirm("Confirm Mission Deployment to Command Center?")) return;
+
+        const id = accumulatedData.metadata.id.toUpperCase().replace(/\s/g, '');
+        const name = accumulatedData.metadata.title;
+
+        log(`Injecting Birthed Capsule [${id}]...`);
+        try {
+            const res = await fetch(URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'update_content',
+                    pin: PIN,
+                    id: id,
+                    name: name,
+                    payload: accumulatedData
+                })
+            });
+            const j = await res.json();
+            if (j.status === "success") {
+                log("INTEGRATED INJECTION SUCCESSFUL.", "success");
+                toggleForge();
+                fetchMissions();
+                alert(`Mission [${name}] is now LIVE.`);
+            } else log(j.message, "error");
+        } catch (e) { log(e.message, "error"); }
+    }
+    // --- END HOSPITAL ---
 
     async function fetchMissions() {
         log("Pinging Archive Server...");
