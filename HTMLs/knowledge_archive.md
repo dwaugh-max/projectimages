@@ -1,4 +1,4 @@
-﻿# Situation Room: Knowledge Archive (v65.69 - synced with codebase)
+﻿# Situation Room: Knowledge Archive (v65.71 - synced with codebase)
 
 This document contains the universal HTML/JS shells used by the Situation Room.
 
@@ -111,9 +111,6 @@ function getContentSheet() {
   return sheet;
 }
 function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
-```
-
-### **TEMPLATE B: The Universal Carrier (Shell)**
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -122,24 +119,38 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
     <meta charset="UTF-8">
     <title>SITUATION ROOM</title>
     <script>const API_URL = "[[INJECT_URL_NOW]]";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Oswald:wght@700&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+    <script src="critical_crypto.js"></script>
+    <script src="social_history_sim_engine.js"></script>
     <style>
         :root {
             --bg: #0c0c0c;
             --accent: #d2b48c;
             --text: #e0e0e0;
             --card: #ffffff;
-            --font-p: 'Georgia', serif;
+            --font-p: 'Inter', sans-serif;
             --font-h: 'Courier New', monospace;
+            --font-logo: 'Oswald', sans-serif;
+        }
+
+        body,
+        input,
+        button,
+        textarea,
+        select {
+            margin: 0;
+            font-family: var(--font-p);
         }
 
         body {
-            margin: 0;
             min-height: 100vh;
             display: flex;
-            font-family: var(--font-h);
             background: var(--bg);
             color: var(--text);
             overflow-x: hidden;
@@ -201,15 +212,16 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
         }
 
         .mission-header {
-            font-family: var(--font-h);
+            font-family: var(--font-p);
             color: #fff;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 5px;
             border-left: 4px solid var(--accent);
             padding-left: 10px;
             line-height: 1.2;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            font-weight: 700;
         }
 
         .card-container {
@@ -295,12 +307,13 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             padding: 10px;
             cursor: pointer;
             text-align: center;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             border-right: 1px solid #ddd;
             color: #999;
-            font-weight: bold;
+            font-weight: 700;
             transition: 0.2s;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            font-family: var(--font-p);
         }
 
         .tab.active {
@@ -318,20 +331,21 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             flex: 1;
             overflow-y: auto;
             padding: 15px;
-            line-height: 1.4;
+            line-height: 1.6;
             font-family: var(--font-p);
-            text-align: justify;
+            text-align: left;
             color: #333;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
 
         .tab-content-scroll h2 {
-            font-family: var(--font-h);
-            font-size: 0.75rem;
+            font-family: var(--font-p);
+            font-size: 0.9rem;
+            font-weight: 700;
             margin-top: 0;
-            color: #888;
+            color: #555;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             border-bottom: 1px solid #eee;
             padding-bottom: 8px;
             margin-bottom: 12px;
@@ -363,7 +377,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             border: 1px solid #555;
             padding: 10px;
             cursor: pointer;
-            font-family: inherit;
+            font-family: var(--font-p);
             transition: 0.2s;
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -441,21 +455,34 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
         .briefing-dossier {
             width: 100%;
             max-width: 800px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-top: 5px solid var(--accent);
-            padding: 30px;
-            margin-top: 20px;
+            padding: 40px;
+            margin-top: 30px;
             max-height: 45vh;
             overflow-y: auto;
             scrollbar-width: thin;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 1);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8),
+                inset 0 0 40px rgba(255, 255, 255, 0.02);
             color: #eee;
             font-family: var(--font-p);
-            line-height: 1.7;
-            text-align: justify;
+            line-height: 1.8;
+            text-align: left;
+            position: relative;
+        }
+
+        .briefing-dossier::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(rgba(255, 255, 255, 0) 0px,
+                    rgba(255, 255, 255, 0.02) 2px,
+                    rgba(255, 255, 255, 0) 4px);
+            pointer-events: none;
+            z-index: 5;
         }
 
         .briefing-dossier::-webkit-scrollbar {
@@ -474,16 +501,19 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
         }
 
         #mission-title-big {
-            font-size: 2.5rem;
+            font-family: var(--font-logo);
+            font-size: 4rem;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            font-weight: bold;
+            letter-spacing: 12px;
+            font-weight: 700;
             color: #fff;
-            text-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
-            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 60px rgba(255, 255, 255, 0.1);
+            margin-bottom: 5px;
             text-align: center;
-            line-height: 1.2;
-            max-width: 800px;
+            line-height: 1.1;
+            max-width: 1000px;
+            opacity: 0;
+            transform: scale(1.1);
         }
 
         #ref-title {
@@ -509,7 +539,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             border: 1px solid #444;
             padding: 15px;
             width: 100%;
-            font-family: inherit;
+            font-family: var(--font-p);
             margin-bottom: 10px;
             box-sizing: border-box;
             outline: none;
@@ -615,6 +645,17 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             z-index: 100;
             pointer-events: none;
         }
+
+        .situation-room-logo {
+            font-family: var(--font-logo);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            display: inline-block;
+            line-height: 0.9;
+            transform: scaleY(1.1);
+            transform-origin: bottom;
+        }
     </style>
 </head>
 
@@ -636,20 +677,27 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
     </div>
 
     <div id="splash">
+        <div id="splash-version"
+            style="position:fixed; top:10px; left:10px; font-size:0.5rem; color:var(--accent); opacity:0.3; letter-spacing:1px; z-index:1000; font-family:var(--font-p);">
+            v65.71</div>
         <div id="splash-overlay"></div>
         <div class="splash-inner">
-            <div id="login-step" style="width:380px; text-align:center;">
-                <h1 style="color:var(--accent); letter-spacing:8px; font-size:2.2rem; margin-bottom:40px;">SITUATION
-                    ROOM</h1>
+            <div id="login-step" style="width:480px; text-align:center;">
+                <h1 class="situation-room-logo" style="color:var(--accent); font-size:4.5rem; margin-bottom:20px;">
+                    THE SITUATION ROOM</h1>
                 <p
                     style="font-size:0.7rem; opacity:0.5; margin-bottom:30px; text-transform:uppercase; letter-spacing:2px;">
-                    Credential Verification Required</p>
-                <input id="username" placeholder="NAME / CODENAME"><input id="pin" type="password"
-                    placeholder="ACCESS PIN">
-                <input id="class-code" placeholder="CLASS CODE (e.g. PER-01)">
+                    Critical Juncture Authorization Required</p>
+                <input id="username" placeholder="NAME / CODENAME" style="font-family:var(--font-p);">
+                <input id="pin" type="password" placeholder="ACCESS PIN" style="font-family:var(--font-p);">
+                <input id="class-code" placeholder="CLASS CODE (e.g. PER-01)" style="font-family:var(--font-p);">
                 <button class="btn"
                     style="text-align:center; background:var(--accent); color:#000; font-weight:bold; width:100%; margin-top:20px;"
                     onclick="login()">AUTHORIZE ACCESS</button>
+                <div
+                    style="margin-top:25px; font-size:0.6rem; opacity:0.3; text-transform:uppercase; letter-spacing:3px;">
+                    "The Critical Moment Where Everything Hangs on a Decision"
+                </div>
             </div>
 
             <div id="lobby-step" style="width:420px; display:none; text-align:left;">
@@ -659,11 +707,11 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
                 <div id="mission-list"></div>
                 <div style="margin-top:30px; padding:25px; background:rgba(0,0,0,0.5); border:1px solid #333;">
                     <p
-                        style="font-size:0.6rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; text-align:center;">
-                        Manual Capsule Injection</p>
+                        style="font-size:0.6rem; color:var(--accent); text-transform:uppercase; letter-spacing:2px; margin-bottom:20px; text-align:center; font-weight:bold;">
+                        PROTOCOL: JUNCTURE AUTHORIZATION REQUIRED</p>
                     <div style="display:flex; gap:10px; margin-bottom:10px;">
                         <input id="mission-code" placeholder="MISSION CODE"
-                            style="flex:1; text-align:center; letter-spacing:5px; margin:0;">
+                            style="flex:1; text-align:center; letter-spacing:5px; margin:0; font-family:var(--font-p);">
                         <button class="btn" style="background:#fff; color:#000; width:auto; padding:0 20px;"
                             onclick="joinMission()">JOIN</button>
                     </div>
@@ -678,7 +726,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
 
             <div id="ref-modal">
                 <div id="mission-title-big">MISSION_ID</div>
-                <div id="ref-title">MISSION BRIEFING</div>
+                <div id="ref-title">CROSSROADS BRIEFING</div>
                 <div class="briefing-dossier">
                     <div id="debrief-panel"
                         style="display:none; background:#000; padding:20px; border-left:4px solid var(--accent); margin-bottom:20px; font-size:0.8rem;">
@@ -700,6 +748,41 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
         <div id="p-tracker"
             style="font-size:0.6rem; opacity:0.7; color:var(--accent); letter-spacing:1px; margin-bottom:20px;">0/18
             EVIDENCE POINTS</div>
+
+        <!-- VITALS HUD [v65.71] -->
+        <div id="vitals-hud" style="margin-bottom:20px; border-top:1px solid #333; padding-top:15px; display:none;">
+            <div
+                style="font-size:0.55rem; color:var(--accent); letter-spacing:2px; margin-bottom:10px; font-weight:bold;">
+                PERSONAL VITALS</div>
+
+            <div style="margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.5rem; margin-bottom:3px;">
+                    <span>HEALTH</span><span id="stat-health-val">100%</span>
+                </div>
+                <div style="height:3px; background:#222; width:100%;">
+                    <div id="stat-health-bar" style="height:100%; background:#4f4; width:100%; transition: 0.5s;"></div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.5rem; margin-bottom:3px;">
+                    <span>MORALE</span><span id="stat-morale-val">100%</span>
+                </div>
+                <div style="height:3px; background:#222; width:100%;">
+                    <div id="stat-morale-bar"
+                        style="height:100%; background:var(--accent); width:100%; transition: 0.5s;"></div>
+                </div>
+            </div>
+
+            <div id="trust-container" style="display:none;">
+                <div style="display:flex; justify-content:space-between; font-size:0.5rem; margin-bottom:3px;">
+                    <span>COMMUNITY TRUST</span><span id="stat-trust-val">50%</span>
+                </div>
+                <div style="height:3px; background:#222; width:100%;">
+                    <div id="stat-trust-bar" style="height:100%; background:#4af; width:50%; transition: 0.5s;"></div>
+                </div>
+            </div>
+        </div>
         <div id="nav-container" class="nav-container"></div>
         <button class="btn" onclick="toggleGlossary()"
             style="margin-top:20px; border-color:var(--accent); font-size:0.7rem; text-align:center; background:transparent;">OPEN
@@ -710,7 +793,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto;" onclick="showVersionInfo()">SITUATION ROOM
-            PROTOCOL | v65.33</div>
+            PROTOCOL | v65.51</div>
         <div id="f-outcomes-btn" style="cursor:pointer; pointer-events:auto; color:var(--accent); opacity:0.7;"
             onclick="toggleOutcomes()">[VIEW OUTCOMES]</div>
         <div id="f-right" style="pointer-events:auto;">OPEN-SOURCE LICENSE</div>
@@ -803,31 +886,62 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
 
             document.getElementById('loading-screen').style.display = 'flex';
 
-            // Clean name client side too
-            const cleanName = name.replace(/\s+/g, '');
+            try {
+                const cleanName = name.replace(/\s+/g, '');
 
-            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_user', name: cleanName, pin: pin, classCode: classCode }) });
-            const j = await res.json();
-            if (j.status === "success") {
-                user = { id: j.id, name: cleanName, pin: pin, missions: j.missions, class: classCode };
-                const mRes = await fetch(API_URL + "?action=list_missions");
-                const mData = await mRes.json(); missionsAvailable = mData.missions;
-                showLobby();
-            } else alert(j.message);
-            document.getElementById('loading-screen').style.display = 'none';
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'fetch_user', name: cleanName, pin: pin, classCode: classCode })
+                });
+                const j = await res.json();
+
+                if (j.status === "success") {
+                    user = { id: j.id, name: cleanName, pin: pin, missions: j.missions, class: classCode };
+
+                    // [E2EE v65.67] Derive encryption key from CLASS CODE only (master key approach)
+                    // We use classCode as both password and salt for deterministic derivation across devices
+                    user.encryptionKey = await CriticalCrypto.deriveKey(classCode, classCode);
+
+                    // Cinematic Entry v65.41
+                    gsap.to("#login-step", {
+                        opacity: 0, y: -20, duration: 0.5, onComplete: () => {
+                            showLobby();
+                            gsap.from("#lobby-step", { opacity: 0, y: 20, duration: 0.5 });
+                        }
+                    });
+                } else {
+                    alert(j.message);
+                }
+            } catch (e) {
+                console.error("LOGIN_ERROR:", e);
+                alert("COMMUNICATION FAILURE: Check network or API configuration.");
+            } finally {
+                document.getElementById('loading-screen').style.display = 'none';
+            }
         }
 
-        function showLobby() {
-            document.getElementById('login-step').style.display = 'none'; document.getElementById('lobby-step').style.display = 'block';
+        async function showLobby() {
+            document.getElementById('login-step').style.display = 'none';
+            document.getElementById('lobby-step').style.display = 'block';
+
+            // Fetch available missions from backend
+            const mRes = await fetch(API_URL + "?action=list_missions");
+            const mData = await mRes.json();
+            missionsAvailable = mData.missions || [];
+
+            // [Fix v65.71] Only show missions the user has actually joined
+            const activeMissions = missionsAvailable.filter(m => user.missions && user.missions[m.id]);
+
+            // Populate mission list
             let h = "";
-            missionsAvailable.forEach(m => {
+            activeMissions.forEach(m => {
                 const thumb = m.thumb || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop";
                 h += `<div class="mission-item" onclick="launch('${m.id}')">
                     <div class="mission-thumb" style="background-image:url('${thumb}')"></div>
                     <div><strong style="color:var(--accent);">${m.name}</strong><br><span style="font-size:0.6rem; color:#666;">AUTHORIZATION ID: ${m.id}</span></div>
                 </div>`;
             });
-            document.getElementById('mission-list').innerHTML = h || "<p style='color:#444; font-size:0.7rem;'>No dossiers found.</p>";
+            document.getElementById('mission-list').innerHTML = h || "<p style='color:#444; font-size:0.7rem; padding:20px; text-align:center;'>No dossiers found.</p>";
         }
 
         async function joinMission() { const code = document.getElementById('mission-code').value.trim().toUpperCase(); if (code) launch(code); }
@@ -835,16 +949,16 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
         function ingest(file) {
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 try {
                     const j = JSON.parse(e.target.result);
-                    processData(j);
+                    await processData(j);
                 } catch (ex) { alert("INVALID CAPSULE DATA."); }
             };
             reader.readAsText(file);
         }
 
-        function processData(j, idOverride) {
+        async function processData(j, idOverride) {
             let data = j.data || j; // Handle wrapped or raw
             // SCHEMA NORMALIZER v60.5
             if (!data.metadata && data.meta) data.metadata = data.meta;
@@ -904,7 +1018,21 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
 
             window.DATA = data;
             currentMission = data.metadata.id || idOverride || "LOCAL_INJECT";
-            user.state = user.missions[currentMission] || { last: 0, ans: {}, dec: {}, rat: {} };
+
+            // [E2EE v65.67] Decrypt state if rejoining
+            let rawState = user.missions[currentMission];
+            if (rawState && typeof rawState === 'string') {
+                try {
+                    const decrypted = await CriticalCrypto.decrypt(rawState, user.encryptionKey);
+                    user.state = JSON.parse(decrypted);
+                } catch (e) {
+                    console.error("DECRYPTION_FAILED", e);
+                    user.state = { last: 0, ans: {}, dec: {}, rat: {} };
+                }
+            } else {
+                user.state = rawState || { last: 0, ans: {}, dec: {}, rat: {} };
+            }
+
             applyTheme(); initParticles(); renderGlossary();
             if (!user.state.preDone) startRef("pre"); else { document.getElementById('splash').style.display = 'none'; init(); }
         }
@@ -914,21 +1042,32 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             try {
                 const r = await fetch(API_URL + "?action=fetch_content&id=" + id); const j = await r.json();
                 if (j.status === "error") throw new Error(j.message);
-                processData(j, id);
+                await processData(j, id);
                 document.getElementById('loading-screen').style.display = 'none';
             } catch (e) { console.error(e); alert(e.message); document.getElementById('loading-screen').style.display = 'none'; }
         }
 
         function applyTheme() {
             const t = window.DATA.theme; document.documentElement.style.setProperty('--accent', t.accent);
-            document.documentElement.style.setProperty('--font-p', t.fontP); document.documentElement.style.setProperty('--font-h', t.fontH);
+            // GLOBAL SANITIZER v65.45: Forcibly strip legacy serif strings from theme variables
+            document.documentElement.style.setProperty('--font-p', "'Inter', sans-serif");
+
+            let hFont = t.fontH || 'Courier New, monospace';
+            if (hFont.toLowerCase().includes('serif') || hFont.toLowerCase().includes('georgia') || hFont.toLowerCase().includes('times')) {
+                hFont = 'Courier New, monospace';
+            }
+            document.documentElement.style.setProperty('--font-h', hFont);
+
+            const simVer = 'v65.71';
+            if (document.getElementById('splash-version')) document.getElementById('splash-version').innerText = simVer;
+
+            const m = window.DATA.metadata || {};
             if (t.splashHeroURL) {
                 const s = document.getElementById('splash'); s.style.backgroundImage = `url('${t.splashHeroURL}')`;
                 s.style.backgroundSize = "cover"; s.style.backgroundPosition = "center";
             }
-            const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.33`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.71`;
 
             // Populate the outcomes panel (popup) instead of inline text
             populateOutcomes();
@@ -989,7 +1128,7 @@ function createJSON(o) { return ContentService.createTextOutput(JSON.stringify(o
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.33';
+            const simVersion = 'v65.71';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -1202,7 +1341,7 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
                         <strong>ERROR:</strong> ${err.message}<br>
                         <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
                         <strong>PROTOCOL:</strong> ${location.protocol}<br>
-                        <strong>VER:</strong> v65.33<br>
+                        <strong>VER:</strong> v65.71<br>
                         <strong>STEPS:</strong> 1. UI Loaded. 2. Fetch Triggered. 3. ${err.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR'}.
                     </div>`;
             }
@@ -1300,7 +1439,9 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
 
         function parseMD(text) {
             if (!text) return "";
-            return text
+            // Fix double escaping and literal newlines v65.40
+            let clean = text.replace(/\\n/g, '\n').replace(/\\N/g, '\n');
+            return clean
                 .replace(/^## (.*$)/gm, '<h2>$1</h2>')
                 .replace(/^### (.*$)/gm, '<h3>$1</h3>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -1335,40 +1476,47 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
                 if (p[1]) credit = p[1].trim();
             }
 
-            let h = "";
             const lowerUrl = url.toLowerCase();
             const isYouTube = lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be");
+            const exhibitLeft = document.getElementById('exhibit-left');
+
+            // CLEAR PREVIOUS CONTENT
+            exhibitLeft.innerHTML = '';
 
             if (isYouTube) {
-                // Extract Video ID using robust regex to handle shorts, watch, embed, etc.
-                let vidId = "";
-                const watchMatch = url.match(/(?:\?v=|\/embed\/|\/watch\?v=|\?feature=player_embedded&v=|&v=)([a-zA-Z0-9_-]{11})/);
-                const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-                const shortsMatch = url.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
-
-                vidId = (watchMatch && watchMatch[1]) || (shortMatch && shortMatch[1]) || (shortsMatch && shortsMatch[1]) || "";
-
-                if (vidId) {
-                    h = `<iframe src="https://www.youtube.com/embed/${vidId}?rel=0&origin=https://www.youtube.com" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;" referrerpolicy="no-referrer"></iframe>`;
+                // DOM CREATION (Blob Hospital Pattern) [v65.66 Fix]
+                const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                if (ytMatch && ytMatch[1]) {
+                    const container = document.createElement('div');
+                    container.style.cssText = 'position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:4px;';
+                    container.innerHTML = `<iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`;
+                    exhibitLeft.appendChild(container);
                 } else {
-                    // Fallback to original URL but as iframe since it's YouTube
-                    h = `<iframe src="${url}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+                    exhibitLeft.innerHTML = `<div style="padding:20px; color:var(--err); text-align:center;">INVALID YOUTUBE ID</div>`;
                 }
             } else if (type === "pdf" || lowerUrl.endsWith(".pdf")) {
-                h = `<embed src="${url}" type="application/pdf" style="width:100%;height:100%;">`;
+                exhibitLeft.innerHTML = `<embed src="${url}" type="application/pdf" style="width:100%;height:100%;">`;
             } else if (type === "video" || lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".webm") || lowerUrl.endsWith(".mov")) {
-                h = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;">
+                exhibitLeft.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;">
                         <video controls src="${url}" style="width:100%;height:100%;outline:none;border:none;"></video>
                      </div>`;
             } else if (type === "audio" || lowerUrl.endsWith(".mp3") || lowerUrl.endsWith(".wav")) {
-                h = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;"><audio controls src="${url}"></audio></div>`;
+                exhibitLeft.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;padding:40px;">
+                        <audio controls src="${url}" style="width:100%;"></audio>
+                     </div>`;
             } else if (url) {
-                h = `<img src="${url}">`;
+                exhibitLeft.innerHTML = `<img src="${url}">`;
             } else {
-                h = `<div style="padding:40px; color:#333; text-align:center;">NO MEDIA DATA</div>`;
+                exhibitLeft.innerHTML = `<div style="padding:40px; color:#333; text-align:center;">NO MEDIA DATA</div>`;
             }
 
-            document.getElementById('exhibit-left').innerHTML = h + (url ? `<div class="img-label">${credit}</div>` : "");
+            // ADD CREDIT LABEL
+            if (url) {
+                const label = document.createElement('div');
+                label.className = 'img-label';
+                label.textContent = credit;
+                exhibitLeft.appendChild(label);
+            }
 
             // FAILSAFE RENDERER
             let rawTxt = c.body || c.content || "";
@@ -1380,7 +1528,37 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
             document.getElementById('tab-scroll').scrollTop = 0;
         }
 
+        // SOCIAL HISTORY DM UI [v65.71]
+        function updateVitalsHUD() {
+            if (!SocialHistorySim.state) return;
+            const h = SocialHistorySim.state.health || 0;
+            const m = SocialHistorySim.state.morale || 0;
+            const t = SocialHistorySim.state.trust || 0;
+
+            document.getElementById('stat-health-val').innerText = h + '%';
+            document.getElementById('stat-health-bar').style.width = h + '%';
+            document.getElementById('stat-health-bar').style.background = h < 30 ? '#f44' : (h < 60 ? '#fa0' : '#4f4');
+
+            document.getElementById('stat-morale-val').innerText = m + '%';
+            document.getElementById('stat-morale-bar').style.width = m + '%';
+
+            if (window.DATA.metadata.enableTrustStat) {
+                document.getElementById('trust-container').style.display = 'block';
+                document.getElementById('stat-trust-val').innerText = t + '%';
+                document.getElementById('stat-trust-bar').style.width = t + '%';
+            }
+
+            document.getElementById('vitals-hud').style.display = 'block';
+        }
+
         function renderInteraction(s, i) {
+            const isSocialHist = window.DATA.metadata.simulationType === 'social_history';
+
+            if (isSocialHist) {
+                renderSocialHistoryInteraction(s, i);
+                return;
+            }
+
             const dec = user.state.dec[i], rat = user.state.rat[i];
             const prompt = s.interactionPrompt || "[NO COMMAND PROTOCOL SPECIFIED]";
             const options = s.options || ["PROCEED"];
@@ -1412,6 +1590,82 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
             document.getElementById('interaction-z').innerHTML = h;
         }
 
+        function renderSocialHistoryInteraction(s, i) {
+            updateVitalsHUD();
+            const lastTurn = user.state.simLog ? user.state.simLog[user.state.simLog.length - 1] : null;
+            const prompt = lastTurn ? lastTurn.next_choice_prompt : (s.interactionPrompt || "What is your next move?");
+
+            let h = `<h3>SOCIAL HISTORY // DM INTERACTIVE</h3>`;
+
+            if (lastTurn) {
+                h += `<div style="background:rgba(0,0,0,0.3); border:1px solid #333; padding:20px; margin-bottom:20px; font-family:var(--font-p); line-height:1.6;">
+                        <div style="font-size:0.6rem; color:var(--accent); text-transform:uppercase; margin-bottom:10px; opacity:0.6;">RECENT EVENTS</div>
+                        ${parseMD(lastTurn.narrative)}
+                        <div style="margin-top:15px; font-size:0.75rem; color:#aaa; font-style:italic;">${lastTurn.consequences}</div>
+                         <div style="margin-top:15px; border-top:1px dashed #444; padding-top:10px; font-size:0.7rem; color:var(--accent);">
+                          ðŸ’¡ HISTORICAL REALITY: ${lastTurn.historical_fact}
+                        </div>
+                      </div>`;
+            }
+
+            h += `<div class="interaction-prompt">${prompt}</div>
+                  <strong>COMMANDER'S INTENT:</strong>
+                  <textarea id="rat-i" placeholder="Describe your action or response..."></textarea>
+                  <div class="choice-row">
+                    <button id="sim-submit-btn" class="btn active" style="width:100%;" onclick="processSimTurn(${i})">TRANSMIT ACTION</button>
+                  </div>`;
+
+            document.getElementById('interaction-z').innerHTML = h;
+        }
+
+        async function processSimTurn(i) {
+            const input = document.getElementById('rat-i').value.trim();
+            if (!input) return alert("You must provide an action.");
+
+            const btn = document.getElementById('sim-submit-btn');
+            btn.innerText = "PROCESSING...";
+            btn.disabled = true;
+
+            try {
+                // Initialize if not done
+                if (!SocialHistorySim.systemPrompt) {
+                    // Load system prompt from metadata or fallback to content of vietnam_system_prompt.md (mocked here as string)
+                    const promptText = window.DATA.metadata.systemPromptRaw || "";
+                    SocialHistorySim.init(window.DATA.metadata.historicalContext, promptText);
+
+                    // OVERRIDE: Link engine to existing fetch infrastructure
+                    SocialHistorySim.callOpenRouter = async (system, userMsg) => {
+                        const TARGET_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
+                        const res = await fetch(TARGET_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ system: system, message: userMsg })
+                        });
+                        const data = await res.json();
+                        return data.reply || data.choices[0].message.content;
+                    };
+                }
+
+                if (user.state.simState) SocialHistorySim.state = user.state.simState;
+
+                const response = await SocialHistorySim.processTurn(input);
+
+                // Persistence
+                if (!user.state.simLog) user.state.simLog = [];
+                user.state.simLog.push(response);
+                user.state.simState = SocialHistorySim.state;
+                user.state.dec[i] = "ACTION_TAKEN";
+
+                save();
+                go(i);
+            } catch (err) {
+                console.error(err);
+                alert("Communication Error. Check Protocol.");
+                btn.innerText = "TRANSMIT ACTION";
+                btn.disabled = false;
+            }
+        }
+
         function decide(i, l) {
             const r = document.getElementById('rat-i')?.value;
             if (!r || r.trim().split(/\s+/).length < 50) return alert("Formal analysis (min 50 words) required before decision.");
@@ -1427,20 +1681,59 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
             if (i === window.DATA.slides.length - 1 && !s.historicalOutcome) setTimeout(() => startRef("post"), 1000);
         }
 
-        function toggleHistoricalPanel(show, content) {
+        async function toggleHistoricalPanel(show, content) {
             const p = document.getElementById('historical-panel');
             if (show && content) {
-                document.getElementById('historical-content').innerHTML = content;
+                // Encrypted Reveal Effect v65.41
+                const target = document.getElementById('historical-content');
+                target.innerText = "";
                 p.style.display = 'block';
+                p.style.opacity = 0;
+                gsap.to(p, { opacity: 1, duration: 0.5 });
+
+                const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+                const words = content.replace(/<[^>]*>/g, '').split(' ');
+                let currentWordIndex = 0;
+
+                // Simple scramble effect for the first few seconds
+                const scramble = setInterval(() => {
+                    target.innerText = words.map((w, i) => i < currentWordIndex ? w : chars[Math.floor(Math.random() * chars.length)].repeat(w.length)).join(' ');
+                }, 50);
+
+                const reveal = setInterval(() => {
+                    currentWordIndex++;
+                    if (currentWordIndex >= words.length) {
+                        clearInterval(scramble);
+                        clearInterval(reveal);
+                        target.innerHTML = content; // Restore formatting
+                    }
+                }, 30);
             } else {
-                p.style.display = 'none';
-                // Check if this was the last slide to trigger debrief
-                const i = user.state.last;
-                if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 500);
+                gsap.to(p, {
+                    opacity: 0, duration: 0.3, onComplete: () => {
+                        p.style.display = 'none';
+                        const i = user.state.last;
+                        if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 500);
+                    }
+                });
             }
         }
 
-        async function save() { if (user.id && currentMission) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save_state', id: user.id, missionId: currentMission, state: user.state }) }); }
+        async function save() {
+            if (user.id && currentMission) {
+                // [E2EE v65.67] Encrypt state before sending to backend
+                const encryptedState = await CriticalCrypto.encrypt(JSON.stringify(user.state), user.encryptionKey);
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'save_state',
+                        id: user.id,
+                        missionId: currentMission,
+                        state: encryptedState  // Send encrypted blob instead of plaintext
+                    })
+                });
+            }
+        }
         async function initParticles() { await tsParticles.load("tsparticles", { particles: { number: { value: 30 }, size: { value: 2 }, move: { speed: 0.5 }, opacity: { value: 0.3 } } }); }
 
         function resetAICache() {
@@ -1466,8 +1759,12 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
 
 <head>
     <meta charset="UTF-8">
-    <title>MISSION CONTROL // TEACHER MODE</title>
+    <title>MISSION CONTROL // SITUATION ROOM (v65.71)</title>
     <script>const URL = "[[INJECT_URL_NOW]]"; const PIN = "[[INJECT_PIN_NOW]]";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="critical_crypto.js"></script>
     <style>
         :root {
             --bg: #f4f4f4;
@@ -1476,10 +1773,12 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
             --err: #dc3545;
             --terminal: #000;
             --term-txt: #0f0;
+            --font-main: 'Inter', sans-serif;
+            --font-tech: 'Courier New', monospace;
         }
 
         body {
-            font-family: 'Courier New', monospace;
+            font-family: var(--font-main);
             padding: 40px;
             background: var(--bg);
             color: #333;
@@ -1517,6 +1816,7 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
         }
 
         h1 {
+            font-family: var(--font-tech);
             text-transform: uppercase;
             letter-spacing: 5px;
             border-bottom: 2px solid var(--accent);

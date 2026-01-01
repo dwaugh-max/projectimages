@@ -1,13 +1,22 @@
-$ka = 'c:\Github Repos\projectimages\HTMLs\knowledge_archive.md'
-$ix = 'c:\Github Repos\projectimages\HTMLs\simroom_LIVE.html'
-$tm = 'c:\Github Repos\projectimages\HTMLs\teachermode_LIVE.html'
-$brain = 'C:\Users\dwaug\.gemini\antigravity\brain\48e268bc-65b2-4585-9e81-43a9af3646b6\knowledge_archive.md'
+$PSScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$ka = Join-Path $PSScriptRoot "knowledge_archive.md"
+$ix = Join-Path $PSScriptRoot "simroom_LIVE.html"
+$tm = Join-Path $PSScriptRoot "teachermode_LIVE.html"
+$brain = "C:\Users\dave\.gemini\antigravity\brain\4d2197d0-c5d3-4fae-86dd-348058fad718\knowledge_archive.md"
+
+# Read version from simroom_LIVE.html
+$liveContent = Get-Content $ix -Raw
+if ($liveContent -match 'v(\d+\.\d+)') {
+    $newVersion = $matches[0]
+} else {
+    $newVersion = "v65.71"
+}
 
 $head = Get-Content $ka -TotalCount 113
-# Bump version in Header from v65.44 to v65.45
-$head[0] = $head[0] -replace 'v65.44', 'v65.45'
+# Update version in Header to match live
+$head[0] = $head[0] -replace 'v\d+\.\d+', $newVersion
 
-$idxContent = Get-Content $ix -Raw
+$idxContent = $liveContent
 $idxContent = $idxContent -replace 'const API_URL = "https://script\.google\.com/[^"]+";', 'const API_URL = "[[INJECT_URL_NOW]]";'
 
 $tmContent = Get-Content $tm -Raw
@@ -24,5 +33,7 @@ $final += $tmContent
 $final += '```'
 
 $final | Set-Content $ka -Encoding UTF8
-Copy-Item $ka $brain -Force
-Write-Host "Sync Complete (v65.45)"
+if (Test-Path $brain) {
+    Copy-Item $ka $brain -Force
+}
+Write-Host "Sync Complete ($newVersion)"
