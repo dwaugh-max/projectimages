@@ -954,7 +954,13 @@ SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, 
         // --- FORGE AI ENGINE ---
         async function processForge() {
             const input = document.getElementById('f-input').value;
-            if (!input && forgeStep === 1) return alert("Please provide starting context.");
+            // Allow empty input if outcomes are selected or if the user wants to try "Auto-Pilot" Phase 1
+            if (!input && forgeStep === 1) {
+                const checks = document.querySelectorAll('#f-outcomes input[type="checkbox"]:checked');
+                if (checks.length === 0 && !confirm("No command context or outcomes selected. Proceed with pure course-based generation?")) {
+                    return;
+                }
+            }
 
             const selectedModel = document.getElementById('f-model').value;
             const selectedComplexity = document.getElementById('f-complexity').value;
@@ -970,7 +976,7 @@ SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, 
                 const selectedOutcomes = Array.from(checks).map(c => c.value);
                 context += `TARGET CURRICULUM OUTCOMES: ${selectedOutcomes.length > 0 ? selectedOutcomes.join(" | ") : "None specified. Please align with the general course vibe."}\n\n`;
             }
-            context += `CURRENT PHASE: ${forgeStep}\nINSTRUCTION: ${FORGE_PROMPTS[forgeStep]}\n\nUSER INPUT: ${input}`;
+            context += `CURRENT PHASE: ${forgeStep}\nINSTRUCTION: ${FORGE_PROMPTS[forgeStep]}\n\nUSER INPUT: ${input || "(No additional context provided - drive purely from course outcomes and system knowledge)"}`;
 
             forgeHistory.push({ role: "user", content: context });
 
