@@ -972,8 +972,13 @@ SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, 
             let context = `${FORGE_SYSTEM_CORE}\n`;
             context += `FORGE COMPLEXITY: ${selectedComplexity}\n`;
             if (forgeStep === 1) {
+                const country = document.getElementById('f-country').value;
+                const region = document.getElementById('f-region').value;
+                const course = document.getElementById('f-course').value;
                 const checks = document.querySelectorAll('#f-outcomes input[type="checkbox"]:checked');
                 const selectedOutcomes = Array.from(checks).map(c => c.value);
+
+                context += `COURSE CONTEXT: ${course} (${region}, ${country})\n`;
                 context += `TARGET CURRICULUM OUTCOMES: ${selectedOutcomes.length > 0 ? selectedOutcomes.join(" | ") : "None specified. Please align with the general course vibe."}\n\n`;
             }
             context += `CURRENT PHASE: ${forgeStep}\nINSTRUCTION: ${FORGE_PROMPTS[forgeStep]}\n\nUSER INPUT: ${input || "(No additional context provided - drive purely from course outcomes and system knowledge)"}`;
