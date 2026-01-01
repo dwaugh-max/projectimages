@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>MISSION CONTROL // SITUATION ROOM (v66.40)</title>
+    <title>MISSION CONTROL // SITUATION ROOM (v66.41)</title>
     <script>
         // --- BOOTSTRAP CONFIGURATION ---
         (function bootstrap() {
@@ -30,13 +30,12 @@
     <style>
         :root {
             --bg: #f4f4f4;
-            --accent: #222;
-            --success: #28a745;
-            --err: #dc3545;
-            --terminal: #000;
-            --term-txt: #0f0;
+            --accent: #2c3e50;
+            --secondary: #34495e;
+            --success: #27ae60;
+            --err: #9a2020;
             --font-main: 'Inter', sans-serif;
-            --font-tech: 'Courier New', monospace;
+            --font-tech: 'Courier New', Courier, monospace;
 
             /* FORGE ADDITIONS */
             --forge-bg: #050505;
@@ -44,6 +43,30 @@
             --forge-panel: #111;
             --forge-border: #222;
             --forge-text: #eee;
+        }
+
+        /* NARROW TECH SCROLLBARS */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--forge-accent);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
@@ -932,7 +955,7 @@
         let forgeModel = "xiaomi/mimo-v2-flash:free";
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v66.40), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v66.41), the multi-stage mission architect.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
 SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes), intelligenceGlossary.
