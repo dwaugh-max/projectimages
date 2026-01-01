@@ -454,10 +454,10 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: var(--forge-bg);
+            background: #050505;
             z-index: 4000;
             flex-direction: column;
-            color: var(--forge-text);
+            color: #eee;
         }
 
         #forge-overlay.active {
@@ -466,11 +466,11 @@
 
         .forge-header {
             padding: 20px 40px;
-            border-bottom: 1px solid var(--forge-border);
+            border-bottom: 1px solid #222;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
         }
 
@@ -479,12 +479,12 @@
             display: grid;
             grid-template-columns: 400px 1fr;
             gap: 2px;
-            background: var(--forge-border);
+            background: #222;
             overflow: hidden;
         }
 
         .forge-panel {
-            background: var(--forge-bg);
+            background: #050505;
             padding: 30px;
             display: flex;
             flex-direction: column;
@@ -533,7 +533,7 @@
             gap: 15px;
             padding: 15px 40px;
             background: #080808;
-            border-bottom: 1px solid var(--forge-border);
+            border-bottom: 1px solid #222;
         }
 
         .step {
@@ -805,27 +805,30 @@
     </div>
 
     <div id="status-bar">
-        <div><span id="s-light" class="status-light"></span> <span id="s-text"
-                style="letter-spacing: 2px;">VINTAGE_LINK_OFFLINE</span></div>
-        <div style="display:flex; gap:20px; align-items:center;">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <span
+                style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:#00ffcc; letter-spacing:3px; text-shadow:0 0 10px rgba(0,255,204,0.3);">SITUATION
+                ROOM</span>
+            <span style="color:#444;">|</span>
+            <span id="s-light" class="status-light"></span>
+            <span id="s-text" style="letter-spacing:2px; font-size:0.65rem;">VINTAGE_LINK_OFFLINE</span>
+        </div>
+        <div style="display:flex; gap:15px; align-items:center;">
             <button onclick="toggleProjector()"
-                style="background:#333; color:#d2b48c; font-size:0.6rem; border:1px solid #d2b48c; padding:6px 15px; border-radius:3px; cursor:pointer; font-weight:bold; letter-spacing:1px;">📺
-                PROJECTOR VIEW</button>
-            <a href="projector.html" target="_blank"
-                style="color:var(--accent); font-size:0.6rem; text-decoration:none; border:1px solid var(--accent); padding:5px 10px; border-radius:3px;">NEW
-                WINDOW</a>
+                style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📺
+                PROJECTOR</button>
             <button onclick="toggleForge()"
-                style="background:var(--forge-accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; border-radius:3px; cursor:pointer; font-weight:bold; letter-spacing:1px;">✨
-                MISSION CREATE</button>
+                style="background:var(--forge-accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">✨
+                CREATE</button>
             <button onclick="toggleSettings()"
-                style="background:transparent; border:1px solid #444; color:#666; font-size:0.8rem; padding:5px 8px; border-radius:3px; cursor:pointer;">⚙️</button>
+                style="background:transparent; border:1px solid #444; color:#666; font-size:0.8rem; padding:5px 8px; cursor:pointer;">⚙️</button>
             <button onclick="toggleLibrary()"
-                style="background:var(--accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; border-radius:3px; cursor:pointer; font-weight:bold; letter-spacing:1px;">📚
-                OPEN COMMUNITY HUB</button>
-            <div style="font-size: 0.7rem; opacity: 0.7;">TEACHER MODE // v66.21 [INTEGRATED_CREATE]</div>
+                style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📚
+                HUB</button>
+            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.47</div>
         </div>
     </div>
-    <h1 style="margin: 0 40px 30px 40px;">COMMAND CENTER // MISSION CONTROL</h1>
+    <h1 style="margin:30px 40px; font-size:1.5rem;">COMMAND CENTER // MISSION CONTROL</h1>
     <div class="grid" style="grid-template-columns: 1fr 1.5fr 1fr; padding: 0 40px;">
         <div class="panel">
             <h3
