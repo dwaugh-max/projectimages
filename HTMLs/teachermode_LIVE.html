@@ -1245,6 +1245,27 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     cSel.innerHTML += `<option value="${c}">${c}</option>`;
                 });
                 log("Curriculum Hub synchronized.", "success");
+
+                // --- STICKY RESTORATION ---
+                const savedCountry = localStorage.getItem('TM_FORGE_COUNTRY');
+                if (savedCountry && curriculumData[savedCountry]) {
+                    cSel.value = savedCountry;
+                    updateForgeRegions();
+
+                    const savedRegion = localStorage.getItem('TM_FORGE_REGION');
+                    const rSel = document.getElementById('f-region');
+                    if (savedRegion && curriculumData[savedCountry][savedRegion]) {
+                        rSel.value = savedRegion;
+                        updateForgeCourses();
+
+                        const savedCourse = localStorage.getItem('TM_FORGE_COURSE');
+                        const crsSel = document.getElementById('f-course');
+                        if (savedCourse && curriculumData[savedCountry][savedRegion][savedCourse]) {
+                            crsSel.value = savedCourse;
+                            updateForgeOutcomes();
+                        }
+                    }
+                }
             } catch (e) {
                 console.error("Failed to load curriculum", e);
                 log("CURRICULUM_LOAD_FAILURE: Check network or file integrity.", "error");
@@ -1253,6 +1274,10 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
         function updateForgeRegions() {
             const country = document.getElementById('f-country').value;
+            localStorage.setItem('TM_FORGE_COUNTRY', country);
+            localStorage.removeItem('TM_FORGE_REGION');
+            localStorage.removeItem('TM_FORGE_COURSE');
+
             const rSel = document.getElementById('f-region');
             rSel.innerHTML = '<option value="">-- SELECT REGION --</option>';
             rSel.style.display = country ? 'block' : 'none';
@@ -1261,11 +1286,17 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     rSel.innerHTML += `<option value="${r}">${r}</option>`;
                 });
             }
+            // Clear children
+            document.getElementById('f-course').style.display = 'none';
+            document.getElementById('f-outcomes').innerHTML = "<p style='text-align:center; opacity:0.4;'>SELECT COURSE TO LOAD OUTCOMES</p>";
         }
 
         function updateForgeCourses() {
             const country = document.getElementById('f-country').value;
             const region = document.getElementById('f-region').value;
+            localStorage.setItem('TM_FORGE_REGION', region);
+            localStorage.removeItem('TM_FORGE_COURSE');
+
             const cSel = document.getElementById('f-course');
             cSel.innerHTML = '<option value="">-- SELECT COURSE --</option>';
             cSel.style.display = region ? 'block' : 'none';
@@ -1275,12 +1306,15 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     cSel.innerHTML += `<option value="${c}">${c}</option>`;
                 });
             }
+            // Clear child
+            document.getElementById('f-outcomes').innerHTML = "<p style='text-align:center; opacity:0.4;'>SELECT COURSE TO LOAD OUTCOMES</p>";
         }
 
         function updateForgeOutcomes() {
             const country = document.getElementById('f-country').value;
             const region = document.getElementById('f-region').value;
             const course = document.getElementById('f-course').value;
+            localStorage.setItem('TM_FORGE_COURSE', course);
             const outDiv = document.getElementById('f-outcomes');
 
             if (course && curriculumData[country] && curriculumData[country][region] && curriculumData[country][region][course]) {
