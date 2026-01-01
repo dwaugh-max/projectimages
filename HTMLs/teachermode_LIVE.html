@@ -435,6 +435,10 @@
             width: 100%;
         }
 
+        #f-outcomes label {
+            text-transform: none !important;
+        }
+
         /* --- AUTH OVERLAY --- */
         #auth-overlay {
             position: fixed;
@@ -672,7 +676,7 @@
                         style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px; display:none;">
                     </select>
                     <div id="f-outcomes"
-                        style="max-height:150px; overflow-y:auto; font-size:0.65rem; color:#888; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
+                        style="max-height:400px; overflow-y:auto; font-size:0.65rem; color:#888; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
                         <p style="text-align:center; opacity:0.4;">SELECT COURSE TO LOAD OUTCOMES</p>
                     </div>
 
@@ -694,7 +698,7 @@
                 </div>
 
                 <textarea id="f-input"
-                    style="flex:1; background:#111; border:1px solid #333; color:#fff; font-size:0.85rem; padding:15px; margin-top:10px;"
+                    style="height:120px; flex:none; background:#111; border:1px solid #333; color:#fff; font-size:0.85rem; padding:15px; margin-top:10px;"
                     placeholder="ENTER COMMAND CONTEXT..."></textarea>
 
                 <div style="display:flex; gap:10px;">
