@@ -633,8 +633,12 @@
                 <div id="forge-ver" style="font-size:0.5rem; opacity:0.4; letter-spacing:2px; margin-top:5px;">V2.0 //
                     INTEGRATED</div>
             </div>
-            <button onclick="toggleForge()"
-                style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem;">[EXIT_CREATION]</button>
+            <div style="display:flex; gap:10px;">
+                <button onclick="resetForge()"
+                    style="background:transparent; border:1px solid var(--forge-accent); color:var(--forge-accent); padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem; font-weight:bold;">[RESTART_SESSION]</button>
+                <button onclick="toggleForge()"
+                    style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem;">[EXIT_CREATION]</button>
+            </div>
         </header>
 
         <div class="stepper">
@@ -949,6 +953,27 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         function toggleGenSettings() {
             const content = document.getElementById('gen-settings-content');
             content.classList.toggle('active');
+        }
+
+        function resetForge() {
+            if (!confirm("Are you sure you want to RESTART? This will clear all AI progress and history for this mission.")) return;
+            forgeStep = 1;
+            forgeHistory = [];
+            accumulatedData = {};
+            const chat = document.getElementById('forge-chat');
+            chat.innerHTML = `
+                <div style="font-family:monospace; font-size:0.6rem; color:#888;">
+                    <strong>CREATE SYSTEM ONLINE.</strong><br>
+                    Welcome to the integrated conceive-birth-finetune machine. Select your curriculum context to begin.
+                </div>
+            `;
+            document.getElementById('f-input').value = "";
+            document.getElementById('hospital-view').style.display = 'none';
+            chat.style.display = 'flex';
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step-1').classList.add('active');
+            updateForgeUI();
+            log("FORGE_ENGINE: System Reset Complete.", "warning");
         }
 
         function forgeBack() {
