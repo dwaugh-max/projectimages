@@ -1004,12 +1004,12 @@
                     <select id="f-region" onchange="updateForgeCourses()"
                         style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px; display:none;">
                     </select>
-                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <div style="display:flex; gap:10px; margin-bottom:10px; width:100%;">
                         <select id="f-course" onchange="updateForgeOutcomes()"
-                            style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; flex:1; display:none;">
+                            style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-family:'Inter',sans-serif; font-size:0.7rem; flex:1; min-width:0; display:none;">
                         </select>
                         <button id="f-fav-btn" onclick="toggleFavorite()"
-                            style="background:transparent; border:1px solid #333; color:#444; padding:5px 10px; border-radius:3px; cursor:pointer; display:none;">⭐</button>
+                            style="flex:0 0 40px; background:transparent; border:1px solid #333; color:#444; padding:0; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; display:none; transition:all 0.2s;">⭐</button>
                     </div>
                     <div id="f-outcomes"
                         style="max-height:400px; overflow-y:auto; font-size:0.65rem; color:#888; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
