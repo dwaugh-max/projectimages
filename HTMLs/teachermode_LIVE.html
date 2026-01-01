@@ -817,10 +817,19 @@
         let forgeModel = "xiaomi/mimo-v2-flash:free";
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v66.16), the multi-stage mission architect.
-GOAL: Guide the user from a seed concept to a fully realized .blob mission.
+You are the BLOB FACTORY COREGINE (v66.27), the multi-stage mission architect.
+GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
 SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes), intelligenceGlossary.
+
+CALIBRATION RULES:
+1. BASELINE: Automatically calibrate narrative depth for the Grade Level of the course provided in COURSE CONTEXT.
+2. STUDENT OFFSET: Use the 'FORGE COMPLEXITY' variable to adjust for the specific students in that class:
+   - "Low": Foundational literacy, direct cause/effect, clear stakes.
+   - "Medium": Typical grade-level analysis and vocabulary.
+   - "High": Sophisticated nuance, complex ethical dilemmas, advanced reading level.
+
+Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 `;
 
         const FORGE_PROMPTS = {
@@ -970,7 +979,7 @@ SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, 
             document.getElementById('f-input').value = "";
 
             let context = `${FORGE_SYSTEM_CORE}\n`;
-            context += `FORGE COMPLEXITY: ${selectedComplexity}\n`;
+            context += `STUDENT OFFSET (FORGE COMPLEXITY): ${selectedComplexity}\n`;
             if (forgeStep === 1) {
                 const country = document.getElementById('f-country').value;
                 const region = document.getElementById('f-region').value;
