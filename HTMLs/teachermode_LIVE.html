@@ -626,6 +626,22 @@
                     style="max-height:150px; overflow-y:auto; font-size:0.65rem; color:#888; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
                     <p style="text-align:center; opacity:0.4;">SELECT COURSE TO LOAD OUTCOMES</p>
                 </div>
+
+                <div id="custom-add-zone"
+                    style="margin-top:15px; border-top:1px solid #333; padding-top:10px; display:none;">
+                    <input id="custom-course-name" placeholder="COURSE NAME"
+                        style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
+                    <textarea id="custom-outcomes-raw" placeholder="OUTCOMES (ONE PER LINE)"
+                        style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; height:60px; padding:5px;"></textarea>
+                    <button class="btn"
+                        style="background:var(--forge-accent); font-size:0.6rem; padding:5px; width:100%; margin-top:5px;"
+                        onclick="saveCustomCourse()">SAVE TO CUSTOM LAB</button>
+                </div>
+                <div style="text-align:center; margin-top:10px;">
+                    <button id="custom-toggle-btn" onclick="toggleCustomAdd()"
+                        style="background:transparent; border:none; color:var(--forge-accent); font-size:0.55rem; cursor:pointer; text-decoration:underline;">+
+                        ADD CUSTOM COURSE</button>
+                </div>
             </div>
 
             <textarea id="f-input"
@@ -886,10 +902,52 @@ SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, 
     }
 
     // --- CURRICULUM HUB ---
+    function getCustomOutcomes() {
+        const stored = localStorage.getItem('blob_custom_curriculum');
+        return stored ? JSON.parse(stored) : {};
+    }
+
+    function saveCustomCourse() {
+        const name = document.getElementById('custom-course-name').value;
+        const raw = document.getElementById('custom-outcomes-raw').value;
+        if (!name || !raw) return alert("MISSING PARAMETERS.");
+
+        const custom = getCustomOutcomes();
+        custom[name] = raw.split("\n").map(o => o.trim()).filter(o => o.length > 0);
+        localStorage.setItem('blob_custom_curriculum', JSON.stringify(custom));
+
+        document.getElementById('custom-course-name').value = "";
+        document.getElementById('custom-outcomes-raw').value = "";
+        toggleCustomAdd();
+        fetchCurriculum(); // Reload and merge
+        log(`Custom Course [${name}] admitted to local lab.`, "success");
+    }
+
+    function toggleCustomAdd() {
+        const zone = document.getElementById('custom-add-zone');
+        const btn = document.getElementById('custom-toggle-btn');
+        const show = zone.style.display === 'none';
+        zone.style.display = show ? 'block' : 'none';
+        btn.innerText = show ? "CANCEL" : "+ ADD CUSTOM COURSE";
+    }
+
     async function fetchCurriculum() {
         try {
             const res = await fetch("https://raw.githubusercontent.com/dwaugh-edsim/projectimages/main/capsule-library/curriculum.json");
             curriculumData = await res.json();
+
+            // Merge Custom Lab
+            const custom = getCustomOutcomes();
+            if (Object.keys(custom).length > 0) {
+                curriculumData.countries["CUSTOM_LAB"] = { "LOCAL": {} };
+                Object.keys(custom).forEach(name => {
+                    curriculumData.countries["CUSTOM_LAB"]["LOCAL"][name] = {
+                        code: "CUST",
+                        outcomes: custom[name]
+                    };
+                });
+            }
+
             const cSel = document.getElementById('f-country');
             cSel.innerHTML = '<option value="">-- SELECT COUNTRY --</option>';
             Object.keys(curriculumData.countries).forEach(c => {
