@@ -161,6 +161,24 @@ const SupabaseBridge = {
         return data;
     },
 
+    async saveCustomOutcome(country, region, course, description, teacherId) {
+        if (!this.client) return false;
+        const { data, error } = await this.client
+            .from('curriculum_outcomes')
+            .insert({
+                country,
+                region,
+                course,
+                description,
+                teacher_id: teacherId, // Track who created it
+                is_favorite: false
+            })
+            .select();
+
+        if (error) throw error;
+        return data;
+    },
+
     // --- LEGACY FALLBACK ---
     saveToLegacy(title, blobData) {
         console.log("SUPABASE_BRIDGE: Saving to localStorage fallback.");

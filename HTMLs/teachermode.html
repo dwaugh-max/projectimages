@@ -1985,7 +1985,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             return stored ? JSON.parse(stored) : {};
         }
 
-        function saveCustomCourse() {
+        async function saveCustomCourse() {
             const country = document.getElementById('custom-country').value.trim() || "CUSTOM_LAB";
             const region = document.getElementById('custom-region').value.trim() || "LOCAL";
             const name = document.getElementById('custom-course-name').value.trim();
@@ -1993,16 +1993,26 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
             if (!name || !raw) return alert("MISSING PARAMETERS: Course Name and Outcomes are required.");
 
-            const custom = getCustomOutcomes();
+            const outcomes = raw.split("\n").map(o => o.trim()).filter(o => o.length > 0);
 
-            // Initialize structure if needed
+            // Save to localStorage (local backup)
+            const custom = getCustomOutcomes();
             if (!custom[country]) custom[country] = {};
             if (!custom[country][region]) custom[country][region] = {};
-
-            // Save outcomes
-            custom[country][region][name] = raw.split("\n").map(o => o.trim()).filter(o => o.length > 0);
-
+            custom[country][region][name] = outcomes;
             localStorage.setItem('blob_custom_curriculum', JSON.stringify(custom));
+
+            // Push to Supabase (cloud sync)
+            if (SupabaseBridge.client) {
+                try {
+                    for (const outcome of outcomes) {
+                        await SupabaseBridge.saveCustomOutcome(country, region, name, outcome);
+                    }
+                    log(`Custom Course [${name}] synced to Supabase Cloud.`, "success");
+                } catch (e) {
+                    log(`Supabase Sync Warning: ${e.message}`, "error");
+                }
+            }
 
             // Clear inputs
             document.getElementById('custom-course-name').value = "";
