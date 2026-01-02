@@ -1950,10 +1950,15 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             }
 
             try {
-                const res = await fetchWithTimeout(TM_URL, {
+                // CACHE BUSTER: Add timestamp to URL to bypass browser/proxy caching
+                const bustUrl = TM_URL + (TM_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+                console.log("DIAGNOSTIC: Requesting Archive handover from:", bustUrl);
+
+                const res = await fetchWithTimeout(bustUrl, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'list_missions', pin: TM_PIN })
                 });
+                console.log("DIAGNOSTIC: Handshake response received. Status:", res.status);
                 if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
                 const j = await res.json();
 
