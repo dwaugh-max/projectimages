@@ -827,7 +827,7 @@
             <button onclick="toggleLibrary()"
                 style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📚
                 HUB</button>
-            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.478</div>
+            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.481</div>
         </div>
     </div>
     <h1 style="margin:30px 40px; font-size:1.5rem;">COMMAND CENTER // MISSION CONTROL</h1>
@@ -914,7 +914,7 @@
                 <div
                     style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
                     MISSION CREATE</div>
-                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.478</div>
+                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.481</div>
             </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="resetForge()"
@@ -1254,7 +1254,7 @@
         let forgeModel = "xiaomi/mimo-v2-flash:free";
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v66.478), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v66.481), the multi-stage mission architect.
 LANGUAGE PROTOCOL: STRICTLY ENGLISH ONLY. Do not use Chinese characters or any non-English script. Translate all internal logic or model defaults to English immediately.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
@@ -1964,7 +1964,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
                 if (j.status === "success") {
                     setStatus("online", "ENCRYPTED_LINK_ACTIVE");
-                    log(`Handshake successful [Backend: ${j.version || 'v1'}].`, "success");
+                    log(`Handshake successful [Backend: ${j.version || 'v1'}]. Found ${j.missions ? j.missions.length : 0} mission(s).`, "success");
                     localStorage.setItem('TM_MISSION_CACHE', JSON.stringify(j.missions));
                     renderMissions(j.missions);
                     fetchProgress();
@@ -1972,6 +1972,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             } catch (e) {
                 setStatus("offline", "CONNECTION_FAILURE");
                 log(`CRITICAL: ${e.message}`, "error");
+                console.error("DIAGNOSTIC: Full error object:", e);
                 log("HINT: Ensure the Apps Script URL and TEACHER_PIN are correctly configured.");
                 // Failover to cache already rendered, or show empty if no cache
             }
