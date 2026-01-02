@@ -2384,15 +2384,30 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
         async function importMissionFromArchive(id) {
             log(`Loading Archive Mission [${id}]...`);
-            const cachedMissions = JSON.parse(localStorage.getItem('TM_MISSION_CACHE') || "[]");
-            const m = cachedMissions.find(x => x.id === id);
 
-            if (m && m.payload) {
-                loadMissionIntoForge(m.payload, `ARCHIVE: ${m.name}`);
-                toggleLibrary(); // Close hub
+            // Fetch full payload from Supabase (cache only has metadata)
+            if (SupabaseBridge.client) {
+                try {
+                    const teacherId = googleUser?.email || 'GUEST';
+                    const { data, error } = await SupabaseBridge.client
+                        .from('missions')
+                        .select('payload')
+                        .eq('id', id)
+                        .eq('teacher_id', teacherId)
+                        .single();
+
+                    if (error) throw error;
+                    if (!data || !data.payload) throw new Error("Mission payload not found");
+
+                    loadMissionIntoForge(data.payload, `ARCHIVE: ${id}`);
+                    toggleLibrary(); // Close hub
+                    return;
+                } catch (e) {
+                    log(`Supabase Fetch Failed: ${e.message}`, "error");
+                    alert(`FAILED: Could not load mission from archive.\n\n${e.message}`);
+                }
             } else {
-                log("Archive Error: Payload missing in cache.", "error");
-                alert("This mission is indexed but the data is not in your local cache. Try refreshing the archive.");
+                alert("Supabase is not configured. Cannot load missions from archive.");
             }
         }
 
