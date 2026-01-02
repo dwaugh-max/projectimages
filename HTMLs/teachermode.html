@@ -2395,28 +2395,144 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         }
 
         let currentHospNode = null;
+        let editorMode = 'visual'; // 'visual' or 'code'
+
+        function toggleEditorMode(mode) {
+            editorMode = mode;
+            const visual = document.getElementById('hosp-visual');
+            const code = document.getElementById('hosp-editor');
+
+            if (mode === 'visual') {
+                visual.style.display = 'block';
+                code.style.display = 'none';
+                // Sync code -> visual
+                try {
+                    const data = JSON.parse(code.value);
+                    renderSurgicalForm(currentHospNode, data);
+                } catch (e) { }
+            } else {
+                visual.style.display = 'none';
+                code.style.display = 'block';
+                // Sync visual -> code handled by save logic or live sync
+            }
+        }
+
         function editHospNode(idx) {
             currentHospNode = idx;
             document.querySelectorAll('.hosp-tab').forEach(t => t.classList.remove('active'));
 
             const editor = document.getElementById('hosp-editor');
             const path = document.getElementById('hosp-path');
+            let data = {};
 
             if (idx === 'metadata') {
                 path.innerText = "NODE: METADATA";
-                editor.value = JSON.stringify(accumulatedData.metadata, null, 2);
+                data = accumulatedData.metadata;
             } else if (idx === 'glossary') {
                 path.innerText = "NODE: GLOSSARY";
-                editor.value = JSON.stringify(accumulatedData.intelligenceGlossary || {}, null, 2);
+                data = accumulatedData.intelligenceGlossary || {};
             } else {
                 path.innerText = `NODE: SLIDE_${idx + 1}`;
-                editor.value = JSON.stringify(accumulatedData.slides[idx], null, 2);
+                data = accumulatedData.slides[idx];
                 const tab = document.getElementById(`hosp-tab-${idx}`);
                 if (tab) tab.classList.add('active');
             }
+
+            // Populate Code Editor
+            editor.value = JSON.stringify(data, null, 2);
+
+            // Populate Visual Editor
+            renderSurgicalForm(idx, data);
+        }
+
+        function renderSurgicalForm(nodeType, data) {
+            const container = document.getElementById('hosp-visual');
+            let h = '';
+
+            const inputStyle = "width:100%; background:#222; border:1px solid #444; color:#fff; padding:8px; font-family:var(--font-main); font-size:0.8rem; margin-bottom:10px;";
+            const labelStyle = "display:block; color:#888; font-size:0.6rem; margin-bottom:4px; letter-spacing:1px;";
+
+            if (nodeType === 'metadata') {
+                h += `<label style="${labelStyle}">TITLE</label>
+                      <input class="vis-input" data-key="title" value="${(data.title || '').replace(/"/g, '&quot;')}" style="${inputStyle}">
+                      
+                      <label style="${labelStyle}">DESCRIPTION</label>
+                      <textarea class="vis-input" data-key="description" style="${inputStyle} height:80px;">${(data.description || '')}</textarea>
+                      
+                      <label style="${labelStyle}">AUTHOR</label>
+                      <input class="vis-input" data-key="author" value="${(data.author || '').replace(/"/g, '&quot;')}" style="${inputStyle}">
+                      
+                      <label style="${labelStyle}">VERSION</label>
+                      <input class="vis-input" data-key="version" value="${(data.version || '')}" style="${inputStyle}">`;
+
+            } else if (nodeType === 'glossary') {
+                h += `<div style="color:#666; font-size:0.7rem;">Key/Value pairs for AI context.</div>`;
+                // Simple read-only view for now or basic editor
+                for (const [key, val] of Object.entries(data)) {
+                    h += `<div style="margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">
+                            <div style="color:#00ffcc; font-size:0.7rem;">${key}</div>
+                            <div style="color:#bbb; font-size:0.8rem;">${val}</div>
+                          </div>`;
+                }
+                h += `<div style="font-size:0.6rem; color:#666; margin-top:10px;">To edit Glossary keys, switch to RAW JSON mode.</div>`;
+
+            } else {
+                // SLIDES
+                h += `<label style="${labelStyle}">SLIDE TITLE</label>
+                      <input class="vis-input" data-key="title" value="${(data.title || '').replace(/"/g, '&quot;')}" style="${inputStyle}">
+                      
+                      <label style="${labelStyle}">IMAGE URL</label>
+                      <div style="display:flex; gap:10px;">
+                        <input class="vis-input" data-key="image" value="${(data.image || '')}" style="${inputStyle}">
+                        <div style="width:40px; height:40px; background-image:url('${data.image}'); background-size:cover; border:1px solid #444;"></div>
+                      </div>
+
+                      <label style="${labelStyle}">COMPONENT TYPE</label>
+                      <select class="vis-input" data-key="component" style="${inputStyle}">
+                        <option value="narrative" ${data.component === 'narrative' ? 'selected' : ''}>Narrative (Text Only)</option>
+                        <option value="chat" ${data.component === 'chat' ? 'selected' : ''}>Chat Interface</option>
+                        <option value="voting" ${data.component === 'voting' ? 'selected' : ''}>Voting System</option>
+                        <option value="code" ${data.component === 'code' ? 'selected' : ''}>Code Terminal</option>
+                      </select>
+
+                      <label style="${labelStyle}">CONTENT</label>
+                      <textarea class="vis-input" data-key="content" style="${inputStyle} height:150px;">${(data.content || '')}</textarea>`;
+
+                if (data.options) {
+                    h += `<label style="${labelStyle}">OPTIONS (Coming soon to Visual Editor)</label>
+                           <div style="font-size:0.7rem; color:#666;">Switch to RAW JSON to edit options array.</div>`;
+                }
+            }
+
+            container.innerHTML = h;
+
+            // Auto-update JSON on input change
+            container.querySelectorAll('.vis-input').forEach(el => {
+                el.oninput = function () {
+                    syncVisualToCode(nodeType);
+                };
+            });
+        }
+
+        function syncVisualToCode(nodeType) {
+            const container = document.getElementById('hosp-visual');
+            const editor = document.getElementById('hosp-editor');
+            let currentData = JSON.parse(editor.value); // start with current state
+
+            // Update fields from visual inputs
+            container.querySelectorAll('.vis-input').forEach(el => {
+                const key = el.getAttribute('data-key');
+                currentData[key] = el.value;
+            });
+
+            // Write back to code editor
+            editor.value = JSON.stringify(currentData, null, 2);
         }
 
         function saveHospEdit() {
+            // Logic is unified: The Code Editor is the Source of Truth.
+            // Visual inputs update the Code Editor in real-time.
+            // When saving, we just parse the Code Editor.
             const val = document.getElementById('hosp-editor').value;
             try {
                 const parsed = JSON.parse(val);
@@ -2428,7 +2544,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     accumulatedData.slides[currentHospNode] = parsed;
                 }
                 log("Surgical Node Stabilized.", "success");
-                renderHospNodes();
+                renderHospNodes(); // Refresh sidebar titles
             } catch (e) { alert("Surgical Error: Invalid JSON in editor."); }
         }
 
