@@ -30,13 +30,10 @@
             margin: 0;
             padding: 0;
             background: var(--bg);
-            color: #fff;
+            color: #ccc;
             font-family: var(--font-p);
             line-height: 1.6;
             overflow-x: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
         /* MEDICAL SCANLINE OVERLAY */
@@ -55,217 +52,266 @@
             opacity: 0.5;
         }
 
-        header {
-            padding: 30px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--secondary);
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 100;
+        /* TYPOGRAPHY */
+        h1,
+        h2,
+        h3 {
+            font-family: var(--font-h);
+            text-transform: uppercase;
+            margin: 0;
+            line-height: 1.1;
         }
 
         h1 {
-            font-family: var(--font-h);
-            font-size: 1.5rem;
-            margin: 0;
+            font-size: 4rem;
             letter-spacing: 5px;
-            color: var(--accent);
-            text-transform: uppercase;
-        }
-
-        .version-tag {
-            font-family: var(--font-m);
-            font-size: 0.7rem;
-            color: #666;
-            letter-spacing: 2px;
-        }
-
-        .main-stage {
-            flex: 1;
-            display: flex;
-            position: relative;
-        }
-
-        .split-pane {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 60px;
-            position: relative;
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            border-right: 1px solid var(--secondary);
-            overflow: hidden;
-        }
-
-        .split-pane:last-child {
-            border-right: none;
-        }
-
-        /* STUDENT SIDE (LEFT) */
-        .student-pane {
-            background: radial-gradient(circle at center, #0a1010 0%, #050505 70%);
-        }
-
-        .student-pane:hover {
-            background: radial-gradient(circle at center, #0a1a1a 0%, #050505 70%);
-        }
-
-        /* TEACHER SIDE (RIGHT) */
-        .teacher-pane {
-            background: radial-gradient(circle at center, #080a10 0%, #050505 70%);
-        }
-
-        .teacher-pane:hover {
-            background: radial-gradient(circle at center, #0a0e1a 0%, #050505 70%);
-        }
-
-        .pane-content {
-            text-align: center;
-            max-width: 500px;
-            z-index: 10;
-        }
-
-        .role-tag {
-            font-family: var(--font-m);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 20px;
-            display: inline-block;
-            padding: 5px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .student-pane .role-tag {
-            color: var(--accent);
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
-        }
-
-        .teacher-pane .role-tag {
-            color: var(--blue-accent);
-            border-color: var(--blue-accent);
-            box-shadow: 0 0 15px rgba(0, 136, 255, 0.1);
+            color: #fff;
         }
 
         h2 {
-            font-family: var(--font-h);
-            font-size: 3.5rem;
-            margin: 0 0 20px 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            line-height: 1;
+            font-size: 3rem;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .subhead {
+            font-family: var(--font-m);
+            color: var(--accent);
+            letter-spacing: 3px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: block;
         }
 
         p {
-            font-size: 1.1rem;
-            color: #aaa;
-            margin-bottom: 40px;
+            opacity: 0.8;
             font-weight: 300;
+            margin-bottom: 30px;
+            max-width: 700px;
         }
 
+        /* BUTTONS */
         .btn {
             display: inline-block;
             text-decoration: none;
-            padding: 20px 50px;
+            padding: 15px 40px;
             font-family: var(--font-h);
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            font-weight: bold;
-            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-            background: #000;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            background: transparent;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 40px var(--accent-dim);
+        }
+
+        /* SECTIONS */
+        section {
+            padding: 120px 40px;
+            border-bottom: 1px solid var(--secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #111 0%, #000 80%);
+        }
+
+        .hero-content {
+            z-index: 10;
+        }
+
+        .hero h1 {
+            margin-bottom: 20px;
+            text-shadow: 0 0 50px rgba(0, 255, 204, 0.2);
+        }
+
+        .hero p {
+            margin: 0 auto 40px;
+            font-size: 1.2rem;
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            opacity: 0.5;
+            font-size: 2rem;
+            color: var(--accent);
+        }
+
+        /* PROMOTIONAL GRID */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--secondary);
+            padding: 40px;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+        }
+
+        /* FEATURE ROW (FLY-IN) */
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 80px;
+            margin-bottom: 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s ease-out;
+        }
+
+        .feature-row.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feature-row:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-img {
+            flex: 1.2;
+            height: 400px;
+            background: #111;
+            border: 1px solid #333;
+            overflow: hidden;
             position: relative;
         }
 
-        /* BUTTON STYLES */
-        .btn-student {
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.1);
+        .feature-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: transform 0.5s;
         }
 
-        .btn-student:hover {
-            background: var(--accent);
-            color: #000;
-            box-shadow: 0 0 60px rgba(0, 255, 204, 0.4);
+        .feature-img:hover img {
             transform: scale(1.05);
         }
 
-        .btn-teacher {
-            color: var(--blue-accent);
-            border: 1px solid var(--blue-accent);
-            box-shadow: 0 0 30px rgba(0, 136, 255, 0.1);
+        /* COMMAND HUB (REUSED) */
+        .hub-section {
+            padding: 0;
+            border-bottom: none;
+            background: #000;
         }
 
-        .btn-teacher:hover {
-            background: var(--blue-accent);
-            color: #000;
-            box-shadow: 0 0 60px rgba(0, 136, 255, 0.4);
-            transform: scale(1.05);
-        }
-
-        .features {
+        .split-pane {
+            height: 80vh;
             display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 40px;
-            opacity: 0.6;
         }
 
-        .feature-item {
-            font-family: var(--font-m);
-            font-size: 0.65rem;
-            text-transform: uppercase;
+        .pane-half {
+            flex: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+            transition: 0.5s;
+            position: relative;
+            border-right: 1px solid #222;
         }
 
-        .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
+        .pane-half:last-child {
+            border-right: none;
         }
 
-        .student-pane .dot {
-            background: var(--accent);
+        .pane-half:hover {
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        .teacher-pane .dot {
-            background: var(--blue-accent);
-        }
-
-        .watermark {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
+        .role-badge {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
             font-family: var(--font-m);
-            font-size: 0.6rem;
-            color: #444;
+            font-size: 0.7rem;
+            margin-bottom: 20px;
             letter-spacing: 2px;
-            z-index: 50;
+            text-transform: uppercase;
+        }
+
+        /* ANIMATIONS */
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
         }
 
         @media (max-width: 900px) {
-            .main-stage {
+
+            .grid-3,
+            .feature-row,
+            .split-pane {
                 flex-direction: column;
+                display: flex;
             }
 
-            h2 {
+            .hero h1 {
                 font-size: 2.5rem;
             }
 
-            .split-pane {
-                border-right: none;
-                border-bottom: 1px solid var(--secondary);
-                padding: 40px 20px;
+            .feature-img {
+                height: 250px;
+                width: 100%;
             }
         }
     </style>
@@ -273,66 +319,137 @@
 
 <body>
 
-    <header>
-        <h1>Situation Room</h1>
-        <div class="version-tag">SYSTEM v66.492 // ONLINE</div>
-    </header>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="subhead">CRITICAL JUNCTURE SIMULATION ENGINE (v66)</span>
+            <h1>THIS IS NOT A GAME.<br>IT'S A CRISIS.</h1>
+            <p>The open-source platform for high-stakes history. Drop your students into the "Situation Room" where
+                standard multiple-choice fails and every decision has a consequence.</p>
+            <a href="#hub" class="btn">Deploy Now</a>
+        </div>
+        <div class="scroll-down">&darr;</div>
+    </section>
 
-    <div class="main-stage">
-        <!-- LEFT: STUDENT / OPERATIVE -->
-        <div class="split-pane student-pane">
-            <div class="pane-content">
-                <span class="role-tag">Field Operative</span>
-                <h2>The Simulation</h2>
-                <p>Deploy into historical critical junctures. Analyze high-fidelity intel, debate policy, and file
-                    rationale in the heat of the moment.</p>
-                <a href="simroom.html" class="btn btn-student">LAUNCH SIMULATION</a>
-
-                <div class="features">
-                    <div class="feature-item">
-                        <div class="dot"></div>Granite AI 4.0
-                    </div>
-                    <div class="feature-item">
-                        <div class="dot"></div>Real-time Debrief
-                    </div>
-                    <div class="feature-item">
-                        <div class="dot"></div>4K Immersion
-                    </div>
+    <!-- VALUE PROP -->
+    <section>
+        <div class="container">
+            <div class="grid-3">
+                <div class="card">
+                    <h3>Stop Teaching. Start Simulating.</h3>
+                    <p>Forget passive lectures. The Situation Room demands active engagement. Students must reconcile
+                        conflicting intelligence, navigate political pressure, and cross the Rubicon of decision-making.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Primary Source Immersion</h3>
+                    <p>We don't just "show" documents; we weaponize them. Primary sources, legal statutes, and raw intel
+                        are the only tools students have to solve the crisis. If they don't read, they fail.</p>
+                </div>
+                <div class="card">
+                    <h3>Assessment Built-In</h3>
+                    <p>Every choice is logged. Every rationale is filed. The system generates a comprehensive debrief of
+                        student thinking, analyzing their logic against historical reality. Grading is done before the
+                        bell rings.</p>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- RIGHT: TEACHER / COMMAND -->
-        <div class="split-pane teacher-pane">
-            <div class="pane-content">
-                <span class="role-tag">Mission Control</span>
-                <h2>Mission Create</h2>
-                <p>The architect's interface. Conceive, Birth, and Finetune new historical scenarios powered by our
-                    generative engine.</p>
-                <a href="teachermode.html" class="btn btn-teacher">ENTER COMMAND</a>
+    <!-- FEATURE SHOWCASE -->
+    <section>
+        <div class="container">
+            <!-- 1 -->
+            <div class="feature-row">
+                <div class="feature-text">
+                    <span class="subhead">PHASE 01: THE FORGE</span>
+                    <h2>AI-Powered Mission Creation</h2>
+                    <p>Building a simulation used to take weeks. Now it takes seconds. Feed our Granite 4.0 engine a
+                        topic—"The Cuban Missile Crisis," "The Fall of Rome"—and watch it generate a full tactical
+                        briefing with slide data, decision matrices, and historical counterfactuals.</p>
+                </div>
+                <div class="feature-img">
+                    <img src="../leo-sitroom2/images/googoo-ai.jpg" alt="AI Forge Interface">
+                </div>
+            </div>
 
-                <div class="features">
-                    <div class="feature-item">
-                        <div class="dot"></div>AI Forge
-                    </div>
-                    <div class="feature-item">
-                        <div class="dot"></div>Hospital Mode
-                    </div>
-                    <div class="feature-item">
-                        <div class="dot"></div>Cloud Archives
-                    </div>
+            <!-- 2 -->
+            <div class="feature-row" style="margin-top: 80px;">
+                <div class="feature-text">
+                    <span class="subhead">PHASE 02: THE OPERATION</span>
+                    <h2>Multimedia Intelligence</h2>
+                    <p>History isn't text-only. The Situation Room natively supports YouTube streams for newsreels,
+                        embedded PDFs for declassified documents, and high-res imagery. It's a multimedia command center
+                        for the digital age.</p>
+                </div>
+                <div class="feature-img">
+                    <img src="../leo-sitroom2/images/Leo-CBC-Splash-AI.jpg" alt="Multimedia Interface">
+                </div>
+            </div>
+
+            <!-- 3 -->
+            <div class="feature-row" style="margin-top: 80px;">
+                <div class="feature-text">
+                    <span class="subhead">PHASE 03: THE DEBRIEF</span>
+                    <h2>Rationalize or Perish</h2>
+                    <p>We enforce a "Rationale First" protocol. Students cannot click a decision button without typing a
+                        50-word defense citing their evidence. It's the ultimate check against guessing. If you can't
+                        argue it, you can't do it.</p>
+                </div>
+                <div class="feature-img">
+                    <img src="../leo-sitroom2/images/evidence-table-AI.jpg" alt="Rationale Input Area">
                 </div>
             </div>
         </div>
+    </section>
+
+    <!-- COMMAND HUB (CTA) -->
+    <div id="hub" class="hub-section">
+        <div class="split-pane">
+
+            <!-- STUDENT -->
+            <div class="pane-half" style="background: radial-gradient(circle at center, #0a1010 0%, #000 80%);">
+                <div class="role-badge" style="color:var(--accent); border-color:var(--accent);">Field Operative</div>
+                <h2 style="color:#fff;">Launch Simulation</h2>
+                <p>Enter the Situation Room. Access active dossiers.</p>
+                <a href="simroom.html" class="btn">Start Mission</a>
+            </div>
+
+            <!-- TEACHER -->
+            <div class="pane-half" style="background: radial-gradient(circle at center, #080a14 0%, #000 80%);">
+                <div class="role-badge" style="color:var(--blue-accent); border-color:var(--blue-accent);">Mission
+                    Control</div>
+                <h2 style="color:#fff;">Mission Create</h2>
+                <p>Design new scenarios. Verify historical logic.</p>
+                <a href="teachermode.html" class="btn"
+                    style="border-color:var(--blue-accent); color:var(--blue-accent);">Enter Forge</a>
+            </div>
+
+        </div>
     </div>
 
-    <div class="watermark">
-        <a href="teacher_guide.html"
-            style="color:inherit; text-decoration:none; margin-right:20px; border-bottom:1px solid #444;">OPERATIONS
-            MANUAL</a>
-        PROJECT IMAGES | ESTABLISHED 2025 | OPEN SOURCE EDUCATIONAL PROTOCOL
-    </div>
+    <footer style="text-align:center; padding: 40px; background:#000; border-top:1px solid #111;">
+        <div style="font-family: var(--font-m); font-size: 0.7rem; color: #444; letter-spacing: 2px;">
+            <a href="teacher_guide.html" style="color:inherit; text-decoration:none; margin-right:20px;">OPERATIONS
+                MANUAL</a>
+            OPEN SOURCE PROJECT | ESTABLISHED 2025
+        </div>
+    </footer>
 
+    <script>
+        // Scroll Animation Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.querySelectorAll('.feature-row').forEach(row => {
+            observer.observe(row);
+        });
+    </script>
 </body>
 
 </html>
