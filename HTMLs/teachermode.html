@@ -3,6 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>MISSION CONTROL // SITUATION ROOM (v74)</title>
     <script>
         // --- BOOTSTRAP CONFIGURATION ---
@@ -2036,7 +2039,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         async function fetchCurriculum() {
             try {
                 // 1. Load static curriculum.json (fast, cached)
-                const res = await fetch("curriculum.json?v=66.21");
+                const res = await fetch("curriculum.json?v=74.01");
                 curriculumData = await res.json();
 
                 // 2. Fetch from Supabase (extended library)
