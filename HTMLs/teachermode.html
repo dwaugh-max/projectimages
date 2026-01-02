@@ -2510,53 +2510,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         let currentHospNode = null;
         let editorMode = 'visual'; // 'visual' or 'code'
 
-        function toggleEditorMode(mode) {
-            editorMode = mode;
-            const visual = document.getElementById('hosp-visual');
-            const code = document.getElementById('hosp-editor');
 
-            if (mode === 'visual') {
-                visual.style.display = 'block';
-                code.style.display = 'none';
-                // Sync code -> visual
-                try {
-                    const data = JSON.parse(code.value);
-                    renderSurgicalForm(currentHospNode, data);
-                } catch (e) { }
-            } else {
-                visual.style.display = 'none';
-                code.style.display = 'block';
-                // Sync visual -> code handled by save logic or live sync
-            }
-        }
-
-        function editHospNode(idx) {
-            currentHospNode = idx;
-            document.querySelectorAll('.hosp-tab').forEach(t => t.classList.remove('active'));
-
-            const editor = document.getElementById('hosp-editor');
-            const path = document.getElementById('hosp-path');
-            let data = {};
-
-            if (idx === 'metadata') {
-                path.innerText = "NODE: METADATA";
-                data = accumulatedData.metadata;
-            } else if (idx === 'glossary') {
-                path.innerText = "NODE: GLOSSARY";
-                data = accumulatedData.intelligenceGlossary || {};
-            } else {
-                path.innerText = `NODE: SLIDE_${idx + 1}`;
-                data = accumulatedData.slides[idx];
-                const tab = document.getElementById(`hosp-tab-${idx}`);
-                if (tab) tab.classList.add('active');
-            }
-
-            // Populate Code Editor
-            editor.value = JSON.stringify(data, null, 2);
-
-            // Populate Visual Editor
-            renderSurgicalForm(idx, data);
-        }
 
         function renderSurgicalForm(nodeType, data) {
             const container = document.getElementById('hosp-visual');
@@ -2627,19 +2581,271 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             });
         }
 
-        function syncVisualToCode(nodeType) {
-            const container = document.getElementById('hosp-visual');
-            const editor = document.getElementById('hosp-editor');
-            let currentData = JSON.parse(editor.value); // start with current state
 
-            // Update fields from visual inputs
-            container.querySelectorAll('.vis-input').forEach(el => {
-                const key = el.getAttribute('data-key');
-                currentData[key] = el.value;
+        let activeTabKey = 'primary';
+        let quill = null;
+        let turndownService = new TurndownService();
+        turndownService.addRule('bold', { filter: ['strong', 'b'], replacement: function (content) { return '**' + content + '**' } });
+
+        // Helper: Deep set
+        function setNested(obj, path, value) {
+            const parts = path.split('.');
+            let current = obj;
+            for (let i = 0; i < parts.length - 1; i++) {
+                if (!current[parts[i]]) current[parts[i]] = {};
+                current = current[parts[i]];
+            }
+            current[parts[parts.length - 1]] = value;
+        }
+
+        // Helper: Media Resolver (YouTube/PDF/Video)
+        function formatText(text) {
+            if (!text) return "";
+            return text
+                .replace(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/g,
+                    '<div class="video-container" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; margin:10px 0;"><iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/$1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>')
+                .replace(/(https?:\/\/.*\.pdf)/gi,
+                    '<div class="pdf-container" style="height:300px; margin:10px 0;"><embed src="$1" type="application/pdf" width="100%" height="100%"></div>')
+                .replace(/(https?:\/\/.*\.(?:mp4|avi|mov|webm))/gi,
+                    '<video controls style="width:100%; max-height:300px; background:#000; margin:10px 0;"><source src="$1">Video not supported.</video>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function toggleEditorMode(mode) {
+            const visual = document.getElementById('hosp-visual');
+            const code = document.getElementById('hosp-editor');
+            if (mode === 'visual') {
+                visual.style.display = 'block';
+                code.style.display = 'none';
+                // Re-render visual from code
+                try {
+                    const data = JSON.parse(code.value);
+                    if (currentHospNode === 'metadata') {
+                        accumulatedData.metadata = data;
+                        renderMetadataEditor(data);
+                    } else if (currentHospNode === 'glossary') {
+                        accumulatedData.intelligenceGlossary = data;
+                        renderGlossaryEditor(data);
+                    } else {
+                        accumulatedData.slides[currentHospNode] = data;
+                        renderSurgicalTheater(data);
+                    }
+                } catch (e) { }
+            } else {
+                visual.style.display = 'none';
+                code.style.display = 'block';
+            }
+        }
+
+        function editHospNode(idx) {
+            currentHospNode = idx;
+            document.querySelectorAll('.hosp-tab').forEach(t => t.classList.remove('active'));
+
+            const path = document.getElementById('hosp-path');
+
+            // Force Visual Mode on Open
+            document.getElementById('hosp-visual').style.display = 'block';
+            document.getElementById('hosp-editor').style.display = 'none';
+            document.querySelector('input[value="visual"]').checked = true;
+
+            let data = {};
+
+            if (idx === 'metadata') {
+                path.innerText = "NODE: METADATA";
+                renderMetadataEditor(accumulatedData.metadata);
+            } else if (idx === 'glossary') {
+                path.innerText = "NODE: GLOSSARY";
+                renderGlossaryEditor(accumulatedData.intelligenceGlossary || {});
+            } else {
+                path.innerText = `NODE: SLIDE_${idx + 1}`;
+                const tab = document.getElementById(`hosp-tab-${idx}`);
+                if (tab) tab.classList.add('active');
+
+                // Ensure tabs structure exists
+                if (!accumulatedData.slides[idx].tabs) {
+                    accumulatedData.slides[idx].tabs = { primary: { label: "Main", content: "" } };
+                }
+                renderSurgicalTheater(accumulatedData.slides[idx]);
+            }
+
+            // Populate Code Editor (Hidden Backup)
+            document.getElementById('hosp-editor').value = JSON.stringify(
+                (idx === 'metadata') ? accumulatedData.metadata :
+                    (idx === 'glossary') ? accumulatedData.intelligenceGlossary :
+                        accumulatedData.slides[idx], null, 2
+            );
+        }
+
+        function renderMetadataEditor(data) {
+            const container = document.getElementById('hosp-visual');
+            container.innerHTML = `<h3 style="color:var(--forge-accent); margin-top:0;">PATIENT DOSSIER</h3>`;
+
+            createSharedInput("Mission ID", data.id || "", "id", data, container);
+            createSharedInput("Title", data.title || "", "title", data, container);
+            createSharedInput("Description", data.description || "", "description", data, container);
+            createSharedInput("Author", data.author || "", "author", data, container);
+            createSharedInput("Version", data.version || "", "version", data, container);
+        }
+
+        function renderGlossaryEditor(data) {
+            const container = document.getElementById('hosp-visual');
+            let h = `<h3 style="color:var(--forge-accent); margin-top:0;">INTELLIGENCE GLOSSARY</h3>`;
+            h += `<div style="font-size:0.7rem; color:#666; margin-bottom:10px;">Define key terms for the AI context.</div>`;
+
+            // Render existing keys
+            Object.keys(data).forEach(key => {
+                h += `<div class="med-input" style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--forge-accent);">${key}</span>
+                        <span style="color:#ccc;">${data[key]}</span>
+                       </div>`;
+            });
+            h += `<div style="margin-top:10px; color:#888; font-size:0.7rem;">(Use RAW JSON mode to edit keys)</div>`;
+            container.innerHTML = h;
+        }
+
+        function renderSurgicalTheater(slide) {
+            const container = document.getElementById('hosp-visual');
+            container.innerHTML = ''; // Clear
+
+            const theater = document.createElement('div');
+            theater.className = 'surgical-theater';
+
+            // --- LEFT: VISUAL MONITOR ---
+            const monitor = document.createElement('div');
+            monitor.className = 'visual-monitor';
+
+            const tabData = slide.tabs[activeTabKey] || slide.tabs.primary || {};
+
+            // Media Preview Logic
+            const imgLabel = document.createElement('label');
+            imgLabel.className = 'med-label';
+            imgLabel.innerText = `${activeTabKey.toUpperCase()} // VISUAL SENSOR FEED`;
+            monitor.appendChild(imgLabel);
+
+            if (tabData.image) {
+                const url = tabData.image;
+                const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                const isPDF = url.toLowerCase().endsWith('.pdf');
+                const isVideo = url.match(/\.(mp4|avi|mov|webm)$/i);
+
+                const mediaBox = document.createElement('div');
+                mediaBox.style.border = "1px solid #333";
+
+                if (ytMatch) {
+                    mediaBox.innerHTML = `<div class="video-container" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;"><iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div>`;
+                } else if (isPDF) {
+                    mediaBox.innerHTML = `<embed src="${url}" type="application/pdf" width="100%" height="200px">`;
+                } else if (isVideo) {
+                    mediaBox.innerHTML = `<video controls style="width:100%;"><source src="${url}"></video>`;
+                } else {
+                    mediaBox.innerHTML = `<img src="${url}" style="width:100%; opacity:0.9;">`;
+                }
+                monitor.appendChild(mediaBox);
+            } else {
+                const noSig = document.createElement('div');
+                noSig.style.height = '150px';
+                noSig.style.background = '#111';
+                noSig.style.display = 'flex';
+                noSig.alignItems = 'center';
+                noSig.justifyContent = 'center';
+                noSig.style.color = '#333';
+                noSig.innerText = "NO VISUAL SIGNAL";
+                monitor.appendChild(noSig);
+            }
+
+            // Monitor Inputs
+            createSharedInput("Slide Title (Navigation)", slide.title || "", "title", slide, monitor);
+            createSharedInput("Tab Label", tabData.label || "", `tabs.${activeTabKey}.label`, slide, monitor);
+            createSharedInput("Image/Media URL", tabData.image || "", `tabs.${activeTabKey}.image`, slide, monitor, true); // True triggers re-render
+            createSharedInput("Interaction Prompt", slide.interactionPrompt || "", "interactionPrompt", slide, monitor);
+
+            // --- RIGHT: DATA INPUT PANEL ---
+            const inputPanel = document.createElement('div');
+            inputPanel.className = 'data-input-panel';
+
+            // Tactical Tabs Headers
+            const tabsHeader = document.createElement('div');
+            tabsHeader.className = 'tactical-tabs';
+            const availableTabs = Object.keys(slide.tabs);
+            ['primary', 'legal', 'intel'].forEach(key => {
+                if (availableTabs.includes(key)) {
+                    const btn = document.createElement('div');
+                    btn.className = `t-tab ${activeTabKey === key ? 'active' : ''}`;
+                    btn.innerText = key.toUpperCase();
+                    btn.onclick = () => { activeTabKey = key; renderSurgicalTheater(slide); };
+                    tabsHeader.appendChild(btn);
+                }
+            });
+            inputPanel.appendChild(tabsHeader);
+
+            // Quill Editor
+            const quillWrap = document.createElement('div');
+            inputPanel.appendChild(quillWrap);
+
+            // Append output
+            theater.appendChild(monitor);
+            theater.appendChild(inputPanel);
+            container.appendChild(theater);
+
+            // Init Quill (must be in DOM)
+            // Fix: handle legacy 'content' vs new 'body'
+            const content = tabData.body || tabData.content || "";
+            createQuillEditor(content, `tabs.${activeTabKey}.body`, slide, quillWrap);
+        }
+
+        function createSharedInput(label, val, path, objRoot, appendTo, triggerRender = false) {
+            const group = document.createElement('div');
+            group.innerHTML = `<label class="med-label">${label}</label>`;
+            const input = document.createElement('input');
+            input.className = 'med-input';
+            input.value = val;
+            input.onchange = (e) => {
+                setNested(objRoot, path, e.target.value);
+                // updating master 'accumulatedData' implicitly via reference
+                document.getElementById('hosp-editor').value = JSON.stringify(
+                    (currentHospNode === 'metadata') ? accumulatedData.metadata :
+                        (currentHospNode === 'glossary') ? accumulatedData.intelligenceGlossary :
+                            accumulatedData.slides[currentHospNode], null, 2
+                );
+                if (triggerRender) renderSurgicalTheater(objRoot);
+            };
+            group.appendChild(input);
+            appendTo.appendChild(group);
+        }
+
+        function createQuillEditor(mdContent, path, objRoot, appendTo) {
+            const group = document.createElement('div');
+            group.innerHTML = `<label class="med-label">OPERATIONAL NARRATIVE (RICH TEXT)</label>`;
+            const editorDiv = document.createElement('div');
+            editorDiv.style.background = '#080808';
+            editorDiv.style.border = '1px solid #333';
+            group.appendChild(editorDiv);
+            appendTo.appendChild(group);
+
+            quill = new Quill(editorDiv, {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, false] }],
+                        ['bold', 'italic', 'underline'],
+                        ['link', 'blockquote', 'code-block'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }]
+                    ]
+                }
             });
 
-            // Write back to code editor
-            editor.value = JSON.stringify(currentData, null, 2);
+            // Set content
+            quill.root.innerHTML = marked.parse(mdContent || "");
+
+            // Sync on change
+            quill.on('text-change', () => {
+                const html = quill.root.innerHTML;
+                const md = turndownService.turndown(html);
+                setNested(objRoot, path, md);
+                document.getElementById('hosp-editor').value = JSON.stringify(
+                    accumulatedData.slides[currentHospNode], null, 2
+                );
+            });
         }
 
         function saveHospEdit() {
