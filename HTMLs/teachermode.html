@@ -1102,7 +1102,7 @@
                 <div
                     style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
                     MISSION CREATE</div>
-                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.487</div>
+                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v72.SB</div>
             </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="resetForge()"
@@ -1511,11 +1511,11 @@
         }
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v70), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v72.SB), the multi-stage mission architect.
 LANGUAGE PROTOCOL: STRICTLY ENGLISH ONLY. Do not use Chinese characters or any non-English script. Translate all internal logic or model defaults to English immediately.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
-SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes), intelligenceGlossary.
+SCHEMA: metadata, slides(id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes), intelligenceGlossary.
 
 CALIBRATION RULES:
 1. BASELINE: Automatically calibrate narrative depth for the Grade Level of the course provided in COURSE CONTEXT.
@@ -1601,17 +1601,17 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 const isLocked = p.locked;
 
                 html += `
-                    <div class="pipeline-node ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}" 
-                         draggable="${!isLocked}" 
-                         data-phase="${phaseId}"
-                         data-index="${idx}"
-                         onclick="jumpToPhase(${idx})">
+            < div class="pipeline-node ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}"
+        draggable = "${!isLocked}"
+        data - phase="${phaseId}"
+        data - index="${idx}"
+        onclick = "jumpToPhase(${idx})" >
                         <span class="node-icon">${p.icon}</span>
                         <span class="node-label">${p.label}</span>
                         ${!isLocked ? '<span class="node-grip">≡</span>' : '<span class="node-lock">🔒</span>'}
-                    </div>
-                    ${idx < forgePipeline.length - 1 ? '<span class="pipeline-arrow">→</span>' : ''}
-                `;
+                    </div >
+            ${idx < forgePipeline.length - 1 ? '<span class="pipeline-arrow">→</span>' : ''}
+        `;
             });
             container.innerHTML = html;
 
@@ -1640,11 +1640,11 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             accumulatedData = {};
             const chat = document.getElementById('forge-chat');
             chat.innerHTML = `
-                <div style="font-family:monospace; font-size:0.6rem; color:#888;">
+            < div style = "font-family:monospace; font-size:0.6rem; color:#888;" >
                     <strong>CREATE SYSTEM ONLINE (v70).</strong><br>
                     Welcome to the modular mission architect. Configure your pipeline, then begin.
                 </div>
-            `;
+        `;
             document.getElementById('f-input').value = "";
             document.getElementById('hospital-view').style.display = 'none';
             chat.style.display = 'flex';
@@ -1712,7 +1712,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
                     savePipeline();
                     renderPipelineStepper();
-                    log(`Pipeline reordered. New order: ${forgePipeline.join(' → ')}`, 'success');
+                    log(`Pipeline reordered.New order: ${forgePipeline.join(' → ')} `, 'success');
                 });
             });
         }
@@ -1728,7 +1728,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         function addForgeChat(side, msg) {
             const c = document.getElementById('forge-chat');
             const div = document.createElement('div');
-            div.className = `msg msg-${side}`;
+            div.className = `msg msg - ${side} `;
             div.innerHTML = typeof marked !== 'undefined' ? marked.parse(msg) : msg;
             c.appendChild(div);
             c.scrollTop = c.scrollHeight;
@@ -1787,29 +1787,29 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     const j2 = await res2.json();
                     renderLibrary(j2.capsules, false);
                 }
-            } catch (e) { document.getElementById('hub-grid').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:#888; padding:100px;">COMMUNITY_CATALOG_OFFLINE<br><br><span style="font-size:0.5rem; opacity:0.5;">Manual Import Recommended for now.</span></div>`; }
+            } catch (e) { document.getElementById('hub-grid').innerHTML = `< div style = "grid-column:1/-1; text-align:center; color:#888; padding:100px;" > COMMUNITY_CATALOG_OFFLINE < br > <br><span style="font-size:0.5rem; opacity:0.5;">Manual Import Recommended for now.</span></div>`; }
         }
         function renderLibrary(caps, fromBackend) {
             const isUserAdmin = googleUser && ["dwaugh@gmail.com"].includes(googleUser.email);
             let h = "";
             caps.forEach(c => {
-                const removeBtn = (isUserAdmin && fromBackend) ? `<button onclick="removeFromHub('${c.id}')" style="font-size:0.5rem; padding:4px 8px; background:#c00; color:#fff; border:none; cursor:pointer; margin-top:5px; width:100%;">REMOVE FROM HUB</button>` : "";
-                const importBtn = c.downloadUrl ? `<button class="btn" onclick="importMission('${c.downloadUrl}', '${c.id}', '${c.title}')" style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px; font-size:0.6rem; width:100%; margin-top:10px;">IMPORT TO ARCHIVE</button>` : "";
+                const removeBtn = (isUserAdmin && fromBackend) ? `< button onclick = "removeFromHub('${c.id}')" style = "font-size:0.5rem; padding:4px 8px; background:#c00; color:#fff; border:none; cursor:pointer; margin-top:5px; width:100%;" > REMOVE FROM HUB</button > ` : "";
+                const importBtn = c.downloadUrl ? `< button class="btn" onclick = "importMission('${c.downloadUrl}', '${c.id}', '${c.title}')" style = "background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px; font-size:0.6rem; width:100%; margin-top:10px;" > IMPORT TO ARCHIVE</button > ` : "";
 
-                h += `<div class="panel" style="border-top-color:#666;">
+                h += `< div class="panel" style = "border-top-color:#666;" >
                     <div style="height:150px; background-image:url('${c.thumb}'); background-size:cover; background-position:center; margin-bottom:15px; border-radius:4px; border:1px solid #333;"></div>
                     <h4 style="margin:0; letter-spacing:1px; font-size:0.85rem;">${c.title}</h4>
                     <div style="font-size:0.6rem; color:#888; margin-bottom:15px; text-transform:uppercase;">AUTHOR: ${c.author}</div>
                     <p style="font-size:0.7rem; height:45px; overflow:hidden; opacity:0.7; line-height:1.4;">${c.description || 'An interactive educational simulation.'}</p>
                     ${importBtn}
                     ${removeBtn}
-                </div>`;
+                </div > `;
             });
             document.getElementById('hub-grid').innerHTML = h || "<div style='grid-column:1/-1; text-align:center; opacity:0.5; padding:100px; color:#fff;'>NO MISSIONS IN CATALOG.</div>";
         }
         async function publishToHub(id, title, thumb, description) {
-            if (!confirm(`Publish "${title}" to Community Hub?`)) return;
-            log(`Publishing [${id}] to Community Hub...`);
+            if (!confirm(`Publish "${title}" to Community Hub ? `)) return;
+            log(`Publishing[${id}] to Community Hub...`);
             try {
                 const res = await fetch(TM_URL, {
                     method: 'POST',
@@ -1829,13 +1829,13 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     log(`[${id}] published to Community Hub!`, "success");
                     alert(`${title} is now in the Community Hub!`);
                 } else {
-                    log(`Publish failed: ${j.message}`, "error");
+                    log(`Publish failed: ${j.message} `, "error");
                 }
-            } catch (e) { log(`Publish error: ${e.message}`, "error"); }
+            } catch (e) { log(`Publish error: ${e.message} `, "error"); }
         }
         async function removeFromHub(id) {
-            if (!confirm(`Remove "${id}" from Community Hub?`)) return;
-            log(`Removing [${id}] from Community Hub...`);
+            if (!confirm(`Remove "${id}" from Community Hub ? `)) return;
+            log(`Removing[${id}] from Community Hub...`);
             try {
                 const res = await fetch(TM_URL, {
                     method: 'POST',
@@ -1851,19 +1851,19 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     log(`[${id}] removed from Community Hub.`, "success");
                     fetchLibrary();
                 } else {
-                    log(`Remove failed: ${j.message}`, "error");
+                    log(`Remove failed: ${j.message} `, "error");
                 }
-            } catch (e) { log(`Remove error: ${e.message}`, "error"); }
+            } catch (e) { log(`Remove error: ${e.message} `, "error"); }
         }
         async function importMission(url, id, name) {
-            log(`Syncing Remote Capsule [${id}]...`);
+            log(`Syncing Remote Capsule[${id}]...`);
             try {
                 const res = await fetch(url); const payload = await res.json();
                 const res2 = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: TM_PIN, id: id, name: name, payload: payload }) });
                 const j = await res2.json();
-                if (j.status === "success") { log(`Remote Capsule [${id}] committed to local record.`, "success"); fetchMissions(); alert(`Mission [${name}] successfully imported!`); }
+                if (j.status === "success") { log(`Remote Capsule[${id}] committed to local record.`, "success"); fetchMissions(); alert(`Mission[${name}] successfully imported!`); }
                 else log(j.message, "error");
-            } catch (e) { log(`Import failed: ${e.message}`, "error"); }
+            } catch (e) { log(`Import failed: ${e.message} `, "error"); }
         }
 
         // --- FORGE AI ENGINE ---
@@ -1881,12 +1881,12 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             const selectedComplexity = document.getElementById('f-complexity').value;
             const phase = getCurrentPhase();
 
-            setForgeLoading(true, `THINKING (${phase.label})...`);
+            setForgeLoading(true, `THINKING(${phase.label})...`);
             addForgeChat("user", input || "(Proceed to next phase)");
             document.getElementById('f-input').value = "";
 
-            let context = `${FORGE_SYSTEM_CORE}\n`;
-            context += `STUDENT OFFSET (FORGE COMPLEXITY): ${selectedComplexity}\n`;
+            let context = `${FORGE_SYSTEM_CORE} \n`;
+            context += `STUDENT OFFSET(FORGE COMPLEXITY): ${selectedComplexity} \n`;
 
             // Add Course/Curriculum Context (Persistent)
             const country = document.getElementById('f-country').value;
@@ -1895,19 +1895,19 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             const checks = document.querySelectorAll('#f-outcomes input[type="checkbox"]:checked');
             const selectedOutcomes = Array.from(checks).map(c => c.value);
 
-            context += `COURSE CONTEXT: ${course} (${region}, ${country})\n`;
-            context += `TARGET CURRICULUM OUTCOMES: ${selectedOutcomes.length > 0 ? selectedOutcomes.join(" | ") : "Drive purely from system knowledge."}\n\n`;
+            context += `COURSE CONTEXT: ${course} (${region}, ${country}) \n`;
+            context += `TARGET CURRICULUM OUTCOMES: ${selectedOutcomes.length > 0 ? selectedOutcomes.join(" | ") : "Drive purely from system knowledge."} \n\n`;
 
             // Add History for continuity
             if (forgeHistory.length > 0) {
-                context += `--- ARCHIVE HISTORY (DO NOT DEVIATE) ---\n`;
+                context += `-- - ARCHIVE HISTORY(DO NOT DEVIATE)-- -\n`;
                 forgeHistory.forEach(msg => {
-                    context += `[${msg.role.toUpperCase()}]: ${msg.content}\n\n`;
+                    context += `[${msg.role.toUpperCase()}]: ${msg.content} \n\n`;
                 });
-                context += `--- END HISTORY ---\n\n`;
+                context += `-- - END HISTORY-- -\n\n`;
             }
 
-            context += `CURRENT PHASE: ${phase.label}\nINSTRUCTION: ${phase.prompt}\n\nUSER INPUT: ${input || "(Proceed based on previous phase)"}`;
+            context += `CURRENT PHASE: ${phase.label} \nINSTRUCTION: ${phase.prompt} \n\nUSER INPUT: ${input || "(Proceed based on previous phase)"} `;
 
             try {
                 const res = await fetch(FORGE_PROXY, {
@@ -1973,7 +1973,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
             toggleCustomAdd();
             fetchCurriculum(); // Reload and merge
-            log(`Custom Course [${name}] added to Local Lab under ${country}/${region}.`, "success");
+            log(`Custom Course[${name}] added to Local Lab under ${country}/${region}.`, "success");
         }
 
         function toggleCustomAdd() {
