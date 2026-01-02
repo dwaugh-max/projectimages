@@ -18,8 +18,8 @@
             }
         })();
 
-        const URL = localStorage.getItem('TM_BACKEND_URL');
-        const PIN = localStorage.getItem('TM_BACKEND_PIN');
+        const TM_URL = localStorage.getItem('TM_BACKEND_URL');
+        const TM_PIN = localStorage.getItem('TM_BACKEND_PIN');
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -827,7 +827,7 @@
             <button onclick="toggleLibrary()"
                 style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📚
                 HUB</button>
-            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.475</div>
+            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.476</div>
         </div>
     </div>
     <h1 style="margin:30px 40px; font-size:1.5rem;">COMMAND CENTER // MISSION CONTROL</h1>
@@ -890,8 +890,13 @@
             style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:20px; margin-bottom:40px;">
             <h1 style="margin:0; color:var(--accent); letter-spacing:5px; border-bottom:none;">COMMUNITY ARCHIVE HUB
             </h1>
-            <button onclick="toggleLibrary()"
-                style="background:transparent; border:1px solid #666; color:#666; padding:10px 20px; cursor:pointer; font-family:inherit;">[CLOSE_HUB]</button>
+            <div style="display:flex; gap:10px;">
+                <button onclick="fetchMissions()"
+                    style="background:none; border:1px solid #00ffcc; color:#00ffcc; padding:10px 20px; cursor:pointer; font-family:inherit;">[
+                    REFRESH ARCHIVE ]</button>
+                <button onclick="toggleLibrary()"
+                    style="background:transparent; border:1px solid #666; color:#666; padding:10px 20px; cursor:pointer; font-family:inherit;">[CLOSE_HUB]</button>
+            </div>
         </div>
         <div id="hub-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
             <div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5; color:#fff;">LOADING MISSION
@@ -909,7 +914,7 @@
                 <div
                     style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
                     MISSION CREATE</div>
-                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.475</div>
+                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.476</div>
             </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="resetForge()"
@@ -1912,11 +1917,11 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
             log(`Injecting Birthed Capsule [${id}]...`);
             try {
-                const res = await fetch(URL, {
+                const res = await fetch(TM_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'update_content',
-                        pin: PIN,
+                        pin: TM_PIN,
                         id: id,
                         name: name,
                         payload: accumulatedData
@@ -1935,23 +1940,35 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
         async function fetchMissions() {
             log("Pinging Archive Server...");
+
+            // --- CACHE LOAD ---
+            const cachedMissions = localStorage.getItem('TM_MISSION_CACHE');
+            if (cachedMissions) {
+                try {
+                    renderMissions(JSON.parse(cachedMissions));
+                } catch (e) { }
+            }
+
             try {
-                const res = await fetchWithTimeout(URL, {
+                const res = await fetchWithTimeout(TM_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'list_missions', pin: PIN })
+                    body: JSON.stringify({ action: 'list_missions', pin: TM_PIN })
                 });
                 if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
                 const j = await res.json();
+
                 if (j.status === "success") {
                     setStatus("online", "ENCRYPTED_LINK_ACTIVE");
-                    renderMissions(j.missions); fetchProgress();
-                    log("Handshake successful. Directory synchronized.", "success");
+                    log(`Handshake successful [Backend: ${j.version || 'v1'}].`, "success");
+                    localStorage.setItem('TM_MISSION_CACHE', JSON.stringify(j.missions));
+                    renderMissions(j.missions);
+                    fetchProgress();
                 } else { throw new Error(j.message || "Unknown server error"); }
             } catch (e) {
                 setStatus("offline", "CONNECTION_FAILURE");
                 log(`CRITICAL: ${e.message}`, "error");
                 log("HINT: Ensure the Apps Script URL and TEACHER_PIN are correctly configured.");
-                renderMissions([]); // Show empty table so UI isn't empty
+                // Failover to cache already rendered, or show empty if no cache
             }
         }
 
@@ -1960,7 +1977,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             if (!id || !name || !raw) return log("ABORTED: Missing required parameters.", "error");
             log(`Opening stream for Capsule [${id}]...`);
             try {
-                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: PIN, id: id, name: name, payload: JSON.parse(raw) }) });
+                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: TM_PIN, id: id, name: name, payload: JSON.parse(raw) }) });
                 const j = await res.json();
                 if (j.status === "success") {
                     log("CAPSULE COMMITTED TO RECORD.", "success");
@@ -1994,7 +2011,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         async function fetchProgress() {
             document.getElementById('sync-tick').innerText = "[SYNC_BUSY]";
             try {
-                const res = await fetchWithTimeout(URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_progress', pin: PIN }) });
+                const res = await fetchWithTimeout(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_progress', pin: TM_PIN }) });
                 const j = await res.json();
                 if (j.status === "success") {
                     allProgress = j.progress;
@@ -2043,7 +2060,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             if (!confirm(`DELETE STUDENT: ${name}?\n\nThis will permanently remove all progress data. This action cannot be undone.`)) return;
             log(`Deleting student [${name}]...`);
             try {
-                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'delete_student', pin: PIN, id: id }) });
+                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_student', pin: TM_PIN, id: id }) });
                 const j = await res.json();
                 if (j.status === "success") {
                     log(`Student [${name}] deleted.`, "success");
@@ -2059,11 +2076,11 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             const mData = student.missionData[mid]; if (!mData) return log("Mission data not found", "error");
 
             try {
-                const res = await fetch(URL, {
+                const res = await fetch(TM_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'generate_ai_feedback',
-                        pin: PIN,
+                        pin: TM_PIN,
                         rationales: mData.rat,
                         context: { title: mid }
                     })
@@ -2073,7 +2090,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     log("AI Feedback generated successfully.", "success");
                     // Save feedback back to student state
                     mData.aiFeedback = j.feedback;
-                    await fetch(URL, {
+                    await fetch(TM_URL, {
                         method: 'POST',
                         body: JSON.stringify({
                             action: 'save_state',
@@ -2092,11 +2109,11 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             log(`Updating AI Protocols for [${id}]...`);
             try {
                 // SHOTGUN APPROACH: Send multiple property names to try and hit the correct backend handler
-                const res = await fetch(URL, {
+                const res = await fetch(TM_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'toggle_ai',
-                        pin: PIN,
+                        pin: TM_PIN,
                         id: id,
                         state: state,       // boolean
                         enabled: state,     // alias
@@ -2119,7 +2136,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             if (!confirm(`PERMANENT DELETION: Are you sure you want to scrub mission [${id}] from the record?`)) return;
             log(`DELETING CAPSULE [${id}]...`);
             try {
-                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'delete_content', pin: PIN, id: id }) });
+                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_content', pin: TM_PIN, id: id }) });
                 const j = await res.json();
                 if (j.status === "success") { log("CAPSULE DELETED.", "success"); fetchMissions(); } else log(j.message, "error");
             } catch (e) { log(e.message, "error"); }
@@ -2170,13 +2187,10 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         // FAILSAFE: Ensure UI renders even if handshake is slow
         window.onload = () => {
             log("BOOT SEQUENCE INITIATED...");
-
-            // Failsafe for Auth (in case script loaded before onload)
             if (typeof google !== 'undefined' && google.accounts) {
                 initGoogleAuth();
             }
-
-            fetchMissions();
+            setTimeout(fetchMissions, 1000);
             setInterval(fetchProgress, 30000);
         };
 
