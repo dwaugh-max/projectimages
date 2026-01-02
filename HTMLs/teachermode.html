@@ -2478,8 +2478,8 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             log(`DECRYPTED: Mission Capsule loaded from ${sourceLabel}.`, "success");
 
             // Jump to Birth Phase
-            currentPipelineIdx = forgePipeline.indexOf('birth');
-            if (currentPipelineIdx === -1) currentPipelineIdx = forgePipeline.length - 1;
+            currentPhaseIndex = forgePipeline.indexOf('birth');
+            if (currentPhaseIndex === -1) currentPhaseIndex = forgePipeline.length - 1;
 
             updateForgeUI();
 
