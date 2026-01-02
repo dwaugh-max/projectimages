@@ -2690,29 +2690,88 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
         function renderGlossaryEditor(data) {
             const container = document.getElementById('hosp-visual');
-            let h = `<h3 style="color:var(--forge-accent); margin-top:0;">INTELLIGENCE GLOSSARY</h3>`;
-            h += `<div style="font-size:0.7rem; color:#666; margin-bottom:10px;">Define key terms for the AI context.</div>`;
+            container.innerHTML = ''; // Clear
 
-            // Handle both array format [{term, definition}] and object format {key: value}
+            const header = document.createElement('h3');
+            header.style.cssText = 'color:var(--forge-accent); margin-top:0;';
+            header.innerText = 'INTELLIGENCE GLOSSARY';
+            container.appendChild(header);
+
+            const subhead = document.createElement('div');
+            subhead.style.cssText = 'font-size:0.7rem; color:#666; margin-bottom:15px;';
+            subhead.innerText = 'Define key terms for the AI context.';
+            container.appendChild(subhead);
+
+            // Handle array format [{term, definition}]
             if (Array.isArray(data)) {
                 data.forEach((item, i) => {
-                    const term = item.term || item.key || `Item ${i + 1}`;
-                    const def = item.definition || item.value || item.description || JSON.stringify(item);
-                    h += `<div class="med-input" style="display:flex; justify-content:space-between; gap:10px;">
-                            <span style="color:var(--forge-accent); flex-shrink:0;">${term}</span>
-                            <span style="color:#ccc; text-align:right;">${def}</span>
-                           </div>`;
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:grid; grid-template-columns: 150px 1fr; gap:10px; margin-bottom:10px; align-items:start;';
+
+                    const termInput = document.createElement('input');
+                    termInput.className = 'med-input';
+                    termInput.value = item.term || item.key || '';
+                    termInput.placeholder = 'Term';
+                    termInput.onchange = () => {
+                        data[i].term = termInput.value;
+                        syncGlossaryToCode();
+                    };
+
+                    const defInput = document.createElement('textarea');
+                    defInput.className = 'med-input';
+                    defInput.style.minHeight = '60px';
+                    defInput.value = item.definition || item.value || item.description || '';
+                    defInput.placeholder = 'Definition';
+                    defInput.onchange = () => {
+                        data[i].definition = defInput.value;
+                        syncGlossaryToCode();
+                    };
+
+                    row.appendChild(termInput);
+                    row.appendChild(defInput);
+                    container.appendChild(row);
                 });
+
+                // Add button
+                const addBtn = document.createElement('button');
+                addBtn.className = 'btn';
+                addBtn.style.cssText = 'margin-top:10px; font-size:0.7rem;';
+                addBtn.innerText = '+ ADD TERM';
+                addBtn.onclick = () => {
+                    data.push({ term: '', definition: '' });
+                    renderGlossaryEditor(data);
+                    syncGlossaryToCode();
+                };
+                container.appendChild(addBtn);
             } else if (typeof data === 'object' && data !== null) {
+                // Object format {key: value} - less common, convert to editable
                 Object.keys(data).forEach(key => {
-                    h += `<div class="med-input" style="display:flex; justify-content:space-between;">
-                            <span style="color:var(--forge-accent);">${key}</span>
-                            <span style="color:#ccc;">${data[key]}</span>
-                           </div>`;
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:grid; grid-template-columns: 150px 1fr; gap:10px; margin-bottom:10px;';
+
+                    const keyLabel = document.createElement('div');
+                    keyLabel.style.cssText = 'color:var(--forge-accent); padding:8px 0;';
+                    keyLabel.innerText = key;
+
+                    const valInput = document.createElement('input');
+                    valInput.className = 'med-input';
+                    valInput.value = data[key];
+                    valInput.onchange = () => {
+                        data[key] = valInput.value;
+                        syncGlossaryToCode();
+                    };
+
+                    row.appendChild(keyLabel);
+                    row.appendChild(valInput);
+                    container.appendChild(row);
                 });
             }
-            h += `<div style="margin-top:10px; color:#888; font-size:0.7rem;">(Use RAW JSON mode to edit keys)</div>`;
-            container.innerHTML = h;
+        }
+
+        function syncGlossaryToCode() {
+            document.getElementById('hosp-editor').value = JSON.stringify(
+                accumulatedData.intelligenceGlossary, null, 2
+            );
         }
 
         function renderSurgicalTheater(slide) {
@@ -2778,18 +2837,18 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             const inputPanel = document.createElement('div');
             inputPanel.className = 'data-input-panel';
 
-            // Tactical Tabs Headers
+            // Tactical Tabs Headers - show ALL tabs with their actual labels
             const tabsHeader = document.createElement('div');
             tabsHeader.className = 'tactical-tabs';
             const availableTabs = Object.keys(slide.tabs);
-            ['primary', 'legal', 'intel'].forEach(key => {
-                if (availableTabs.includes(key)) {
-                    const btn = document.createElement('div');
-                    btn.className = `t-tab ${activeTabKey === key ? 'active' : ''}`;
-                    btn.innerText = key.toUpperCase();
-                    btn.onclick = () => { activeTabKey = key; renderSurgicalTheater(slide); };
-                    tabsHeader.appendChild(btn);
-                }
+            availableTabs.forEach(key => {
+                const tabInfo = slide.tabs[key];
+                const btn = document.createElement('div');
+                btn.className = `t-tab ${activeTabKey === key ? 'active' : ''}`;
+                // Use the tab's label property if available, otherwise capitalize the key
+                btn.innerText = (tabInfo.label || key).toUpperCase();
+                btn.onclick = () => { activeTabKey = key; renderSurgicalTheater(slide); };
+                tabsHeader.appendChild(btn);
             });
             inputPanel.appendChild(tabsHeader);
 
