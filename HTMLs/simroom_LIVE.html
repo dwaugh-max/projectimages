@@ -610,8 +610,18 @@
             opacity: 0.8;
         }
 
+        #ref-narrative {
+            columns: 2 auto;
+            column-gap: 40px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-top: 30px;
+            color: #ccc;
+        }
+
         textarea {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.015);
+            /* More transparent */
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 20px;
@@ -823,7 +833,9 @@
                     <div id="debrief-panel"
                         style="display:none; background:rgba(255,255,255,0.02); padding:30px; border-left:4px solid var(--accent); margin-bottom:30px; font-size:1rem; border-radius:4px;">
                     </div>
-                    <div id="ref-narrative" style="font-size:1.1rem; line-height:1.8;"></div>
+                    <div id="ref-narrative"
+                        style="font-size:1rem; line-height:1.7; column-count:2; column-gap:50px; text-align:justify;">
+                    </div>
                     <div id="ref-q"
                         style="margin-top:40px; border-top:1px solid rgba(255,255,255,0.1); padding-top:40px; font-family:var(--font-h); font-size:1.3rem; letter-spacing:2px;">
                     </div>
