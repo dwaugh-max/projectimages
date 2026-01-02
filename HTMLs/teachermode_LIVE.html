@@ -827,7 +827,7 @@
             <button onclick="toggleLibrary()"
                 style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📚
                 HUB</button>
-            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.476</div>
+            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.478</div>
         </div>
     </div>
     <h1 style="margin:30px 40px; font-size:1.5rem;">COMMAND CENTER // MISSION CONTROL</h1>
@@ -914,7 +914,7 @@
                 <div
                     style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
                     MISSION CREATE</div>
-                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.476</div>
+                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.478</div>
             </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="resetForge()"
@@ -1254,7 +1254,7 @@
         let forgeModel = "xiaomi/mimo-v2-flash:free";
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v66.475), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v66.478), the multi-stage mission architect.
 LANGUAGE PROTOCOL: STRICTLY ENGLISH ONLY. Do not use Chinese characters or any non-English script. Translate all internal logic or model defaults to English immediately.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
@@ -1448,7 +1448,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             log(`Syncing Remote Capsule [${id}]...`);
             try {
                 const res = await fetch(url); const payload = await res.json();
-                const res2 = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: PIN, id: id, name: name, payload: payload }) });
+                const res2 = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: TM_PIN, id: id, name: name, payload: payload }) });
                 const j = await res2.json();
                 if (j.status === "success") { log(`Remote Capsule [${id}] committed to local record.`, "success"); fetchMissions(); alert(`Mission [${name}] successfully imported!`); }
                 else log(j.message, "error");
