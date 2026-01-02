@@ -1,4 +1,100 @@
 {
+    "UK": {
+        "GCSE": {
+            "Citizenship Studies": [
+                "Know and understand what democracy is, how parliamentary democracy operates within the constituent parts of the UK, how government works, and how democratic and non-democratic systems of government are different beyond the UK.",
+                "Know and understand the relationship between the state and citizens, the rights, responsibilities, and duties of citizens living and working in the UK, and how people participate in democracy.",
+                "Know and understand the role of the law in society, how laws are shaped and enforced, and how the justice system works in England and Wales.",
+                "Know and understand how taxes are raised and spent by governments, and how national economic and financial policies and decisions relate to individuals.",
+                "Use and apply knowledge and understanding of key citizenship ideas and concepts, including democracy, government, justice, equality, rights, responsibilities, participation, community, identity, and diversity, to think deeply and critically about political, social, economic, and ethical issues in local to global contexts.",
+                "Use and apply knowledge and understanding as they formulate citizenship enquiries, explore and research citizenship issues and actions, analyse and evaluate information, and interpret sources of evidence.",
+                "Use and apply citizenship knowledge and understanding to contribute to debates, show understanding of different viewpoints, make persuasive and reasoned arguments, and justify and substantiate their conclusions.",
+                "Use and apply citizenship knowledge, understanding, and skills in order to participate in responsible actions to address citizenship issues aimed at improving society and positively contributing to democracy and public life."
+            ],
+            "Sociology": [
+                "Apply sociological knowledge, skills, and understanding to develop an understanding of the tensions and relationships between individual agency and social structures within both a UK and global context.",
+                "Use evidence and critically analyse information to reach substantiated judgements, make informed arguments, and draw conclusions.",
+                "Apply knowledge and understanding of how social processes and structures influence power, social control, and inequality.",
+                "Utilize sociological theories to understand social debates, issues, continuities over time, and social changes.",
+                "Understand and evaluate various research methods and sociological methodology.",
+                "Appropriately use sociological terminology and create connections between key areas of the subject content."
+            ],
+            "Psychology": [
+                "Cognitive psychology: Understand and apply concepts related to memory and perception.",
+                "Social psychology: Investigate social influence, conformity, and obedience.",
+                "Developmental psychology: Understand child development and the various stages of growth.",
+                "Biological psychology: Explore the role of the brain and nervous system in explaining human behavior."
+            ],
+            "Economics": [
+                "Increase students' understanding of the world and enable them to engage more effectively with economic issues on local, national, and global scales.",
+                "Develop economic knowledge and skills, enabling students to read and comprehend articles written by leading economists.",
+                "Teach students to build logical economic arguments using appropriate terminology and concepts.",
+                "Enable students to understand how markets operate and the roles played by consumers, producers, and workers.",
+                "Enable students to understand how the national and global economy works, including the levers used by governments to achieve objectives.",
+                "Understand perspectives of different agents (producers, government, consumers) and consider moral, ethical, and sustainability issues.",
+                "Develop effective, self-motivated, critical, and reflective thinkers who can distinguish between fact and opinion in economic debate.",
+                "Apply economic knowledge to investigate situations and build arguments using quantitative evidence through interpretation of data."
+            ],
+            "History": [
+                "Understand the significance of historical events, the role of individuals in history, and the nature of change over time.",
+                "Gain a deeper understanding of the past through political, social, economic, and cultural perspectives.",
+                "Demonstrate knowledge and understanding of the key features and characteristics of the historical periods studied."
+            ],
+            "Geography": [
+                "Demonstrate knowledge of locations, places, processes, environments and different scales.",
+                "Demonstrate geographical understanding of concepts and how they are used in relation to places, environments and processes.",
+                "Apply knowledge and understanding to interpret, analyse and evaluate geographical information and issues to make judgements.",
+                "Select, adapt and use a variety of skills and techniques to investigate geographical questions and issues and communicate findings."
+            ],
+            "Social Studies (WJEC)": [
+                "Gather, justify, present, analyse, and evaluate a range of evidence related to society and social issues.",
+                "Demonstrate a growing ability to transfer existing skills and knowledge into new and increasingly unfamiliar contexts.",
+                "Identify and engage with social issues and explore various viewpoints relating to social action and social change.",
+                "Demonstrate knowledge and understanding of core terms, concepts (authority, governance, community), and evidence relevant to the study of society."
+            ]
+        },
+        "A Level": {
+            "Sociology": [
+                "Acquire knowledge and a critical understanding of contemporary social processes and social changes.",
+                "Appreciate the significance of theoretical and conceptual issues in sociological debate.",
+                "Understand and evaluate sociological methodology and a range of research methods through active involvement in the research process.",
+                "Develop skills that enable individuals to focus on their personal identity, roles, and responsibilities within society.",
+                "Develop a lifelong interest in social issues."
+            ],
+            "Psychology": [
+                "Develop a deep understanding of major fields including clinical, health, organizational, forensic, and neuroscience.",
+                "Engage with core areas of the discipline from a theoretical and empirical perspective.",
+                "Apply research methods and data analysis skills across various vocational contexts within and outside of psychology.",
+                "Present theoretical arguments and research results in a cogent and critical manner."
+            ],
+            "Economics": [
+                "Develop an interest and enthusiasm for economics and appreciate how it contributes to the wider economic and social environment.",
+                "Develop an understanding of a range of concepts and the ability to use those concepts across a variety of different contexts.",
+                "Use an enquiring, critical, and thoughtful approach to studies while developing the ability to think specifically as an economist.",
+                "Understand that economic behavior can be studied from a range of different perspectives.",
+                "Develop analytical and quantitative skills that prepare students for the challenges and responsibilities of future careers."
+            ],
+            "History": [
+                "Cover at least a 200 year period of history and more than one state to provide breadth and depth.",
+                "Explain and analyse historical events and periods studied using second-order historical concepts such as cause and consequence.",
+                "Analyse, evaluate and make substantiated judgements about interpretations, including how and why historians' views differ."
+            ],
+            "Geography": [
+                "Develop knowledge of locations, places, processes, and environments, at all geographical scales from local to global.",
+                "Develop an in-depth understanding of selected core and non-core processes in physical and human geography at a range of temporal and spatial scales.",
+                "Recognize and analyse the complexity of people-environment interactions and appreciate how these underpin understanding of key world issues.",
+                "Gain understanding of specialized concepts including systems, equilibrium, feedback, inequality, globalization, interdependence, mitigation, and resilience."
+            ],
+            "Politics": [
+                "Develop knowledge and an informed understanding of contemporary political structures and issues within their historical context.",
+                "Develop a critical awareness of the changing nature of politics and the specific relationships between political institutions and ideas.",
+                "Develop knowledge and an informed understanding of the various interests and influences that impact decisions in politics and government.",
+                "Encourage the development of knowledge regarding the rights and responsibilities of both groups and individuals.",
+                "Develop the ability to critically interpret, analyse, and evaluate political information to form arguments and make judgements.",
+                "Develop a student's interest in and engagement with contemporary politics."
+            ]
+        }
+    },
     "Canada": {
         "British Columbia": {
             "Social Studies 10": [

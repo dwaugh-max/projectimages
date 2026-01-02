@@ -2600,11 +2600,34 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         async function deleteMission(id) {
             if (!confirm(`PERMANENT DELETION: Are you sure you want to scrub mission [${id}] from the record?`)) return;
             log(`DELETING CAPSULE [${id}]...`);
+
+            const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
+
+            // --- 1. Supabase First (V72) ---
+            if (SupabaseBridge.client) {
+                try {
+                    log("Scrubbing from Supabase Cloud...");
+                    await SupabaseBridge.deleteMission(id, teacherId);
+                    log(`Supabase Delete Successful [${id}]`, "success");
+                } catch (e) {
+                    log(`Supabase Delete Failed: ${e.message}`, "error");
+                }
+            }
+
+            // --- 2. Google Sheets Fallback ---
             try {
-                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_content', pin: TM_PIN, id: id }) });
+                const res = await fetch(TM_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'delete_content', pin: TM_PIN, id: id })
+                });
                 const j = await res.json();
-                if (j.status === "success") { log("CAPSULE DELETED.", "success"); fetchMissions(); } else log(j.message, "error");
-            } catch (e) { log(e.message, "error"); }
+                if (j.status === "success") {
+                    log("Legacy Registry Scrubbed.", "success");
+                } else { throw new Error(j.message); }
+            } catch (e) {
+                log(`Legacy Delete Error: ${e.message}`, "error");
+            }
+            fetchMissions();
         }
 
         function renderMissions(missions) {

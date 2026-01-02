@@ -58,6 +58,18 @@ const SupabaseBridge = {
         }));
     },
 
+    async deleteMission(missionId, teacherId) {
+        if (!this.client) return false;
+        const { error } = await this.client
+            .from('missions')
+            .delete()
+            .eq('mission_id', missionId)
+            .eq('teacher_id', teacherId);
+
+        if (error) throw error;
+        return true;
+    },
+
     // --- CURRICULUM OPERATIONS ---
     async fetchOutcomes(country, region, course) {
         if (!this.client) return [];
