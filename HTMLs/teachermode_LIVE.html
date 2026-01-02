@@ -1132,7 +1132,7 @@
                 }).join(''));
 
                 googleUser = JSON.parse(jsonPayload);
-                console.log("Authenticated as:", googleUser.name);
+                console.log("Authenticated as:", googleUser.name, "Email:", googleUser.email);
 
                 // FADE OUT OVERLAY AND SHOW LANDING
                 const overlay = document.getElementById('auth-overlay');
@@ -1143,6 +1143,9 @@
                 }, 500);
 
                 log(`IDENTITY VERIFIED: Welcome, ${googleUser.name}`, "success");
+
+                // Re-render missions now that we know admin status
+                fetchMissions();
             } catch (e) {
                 document.getElementById('auth-status').style.color = "var(--err)";
             }
