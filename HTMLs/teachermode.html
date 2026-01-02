@@ -2358,22 +2358,36 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         function handleLocalImport(input) {
             const file = input.files[0];
             if (!file) return;
+
+            log(`Reading file: ${file.name} (${file.size} bytes)`, "success");
+
             const reader = new FileReader();
             reader.onload = function (e) {
                 try {
                     let raw = e.target.result.trim();
+                    console.log("RAW FILE LENGTH:", raw.length);
+                    console.log("FIRST 100 CHARS:", raw.substring(0, 100));
+                    console.log("LAST 100 CHARS:", raw.substring(raw.length - 100));
 
                     // Robust Isolate: Find first { and last } to strip potential markdown or noise
                     const start = raw.indexOf('{');
                     const end = raw.lastIndexOf('}');
+
+                    console.log("JSON BOUNDARIES:", { start, end, length: end - start + 1 });
+
                     if (start === -1 || end === -1) throw new Error("No JSON object found.");
 
                     const cleanJson = raw.substring(start, end + 1);
+                    console.log("CLEAN JSON LENGTH:", cleanJson.length);
+
                     const payload = JSON.parse(cleanJson);
+                    console.log("PARSE SUCCESS! Keys:", Object.keys(payload));
+
                     loadMissionIntoForge(payload, "FILE IMPORT");
                 } catch (err) {
+                    console.error("IMPORT FAILURE:", err);
                     log(`Import Error: ${err.message}`, "error");
-                    alert("FAILED: The file provided is not a valid Mission Capsule JSON.");
+                    alert(`FAILED: ${err.message}\n\nCheck browser console (F12) for details.`);
                 }
             };
             reader.readAsText(file);
@@ -2394,23 +2408,36 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         }
 
         function loadMissionIntoForge(payload, sourceLabel) {
-            if (!payload.metadata || !payload.slides) {
-                log("Import Warning: Mission structure seems non-standard.", "error");
+            // v73.SB: More permissive validation
+            if (!payload || typeof payload !== 'object') {
+                log("Import Error: Payload is not a valid object", "error");
+                alert("FAILED: The file does not contain valid mission data.");
+                return;
             }
+
+            // Log structure for debugging
+            console.log("IMPORT DEBUG:", {
+                hasMetadata: !!payload.metadata,
+                hasSlides: !!payload.slides,
+                slideCount: payload.slides ? payload.slides.length : 0,
+                keys: Object.keys(payload)
+            });
 
             accumulatedData = payload;
             log(`DECRYPTED: Mission Capsule loaded from ${sourceLabel}.`, "success");
 
-            // Jump to Birth Phase (Index 4 usually)
+            // Jump to Birth Phase
             currentPipelineIdx = forgePipeline.indexOf('birth');
             if (currentPipelineIdx === -1) currentPipelineIdx = forgePipeline.length - 1;
 
             updateForgeUI();
 
-            // Auto-open Hospital if detected
+            // Auto-open Hospital if slides detected
             if (payload.slides && payload.slides.length > 0) {
                 openHospital();
                 addForgeChat("ai", `!!! MISSION DATA RECOVERED [Source: ${sourceLabel}]. You are now in the Surgical Fine-Tuning mode. You can edit the JSON directly or re-birth the mission.`);
+            } else {
+                addForgeChat("ai", `Mission loaded from ${sourceLabel}. Note: No slides detected. You may need to manually configure the mission structure.`);
             }
         }
 
