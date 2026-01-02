@@ -1345,6 +1345,23 @@
                 googleUser = JSON.parse(jsonPayload);
                 console.log("Authenticated as:", googleUser.name, "Email:", googleUser.email);
 
+                // --- SECURITY: TEACHER ALLOWLIST ---
+                // Add authorised emails here. Anyone else gets Read-Only access.
+                const AUTHORIZED_TEACHERS = [
+                    "dwaugh@gmail.com",
+                    "david.waugh@gmail.com",
+                    "mr.waugh@school.edu" // Example
+                ];
+
+                const isAuthorized = AUTHORIZED_TEACHERS.includes(googleUser.email) || googleUser.email === "dwaugh@gmail.com"; // Keep hardcoded admin backup
+
+                if (!isAuthorized) {
+                    console.warn("SECURITY: Unauthorized Teacher Access Attempt:", googleUser.email);
+                    alert("ACCESS RESTRICTED: Your email is not on the authorized teacher list.\n\nYou will have READ-ONLY access to public missions.");
+                    // Optional: Disable creation controls here if needed, but RLS is the real gatekeeper.
+                    document.getElementById('m-auth-display').innerText = "GUEST / READ-ONLY";
+                }
+
                 // FADE OUT OVERLAY AND SHOW LANDING
                 const overlay = document.getElementById('auth-overlay');
                 overlay.style.opacity = '0';
@@ -1353,7 +1370,11 @@
                     document.getElementById('landing-screen').style.display = 'flex';
                 }, 500);
 
-                log(`IDENTITY VERIFIED: Welcome, ${googleUser.name}`, "success");
+                if (isAuthorized) {
+                    log(`IDENTITY VERIFIED: Welcome, ${googleUser.name}`, "success");
+                } else {
+                    log(`GUEST ACCESS: Welcome, ${googleUser.name} (Read-Only)`, "warning");
+                }
 
                 // Re-render missions now that we know admin status
                 fetchMissions();

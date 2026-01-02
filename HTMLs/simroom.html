@@ -1106,6 +1106,14 @@
             if (name.includes(" ")) return alert("SECURITY PROTOCOL: SPACES NOT PERMITTED IN CODENAMES.");
             if (pin.length < 4) return alert("SECURITY PROTOCOL: PIN MUST BE 4+ CHARACTERS.");
 
+            // RATE LIMIT CHECK
+            const lastAttempt = localStorage.getItem('RATE_LIMIT_TIMESTAMP');
+            const now = Date.now();
+            if (lastAttempt && (now - parseInt(lastAttempt) < 3000)) { // 3 seconds cooldown
+                return alert("SECURITY ALERT: WAIT 3 SECONDS BEFORE RETRYING.");
+            }
+            localStorage.setItem('RATE_LIMIT_TIMESTAMP', now.toString());
+
             document.getElementById('loading-screen').style.display = 'flex';
 
             try {
