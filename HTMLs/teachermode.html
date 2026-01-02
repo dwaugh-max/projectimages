@@ -16,10 +16,16 @@
             if (!localStorage.getItem('TM_BACKEND_PIN')) {
                 localStorage.setItem('TM_BACKEND_PIN', DEFAULT_PIN);
             }
+
+            // V72: Supabase Credentials (Empty by default)
+            if (!localStorage.getItem('TM_SUPABASE_URL')) localStorage.setItem('TM_SUPABASE_URL', '');
+            if (!localStorage.getItem('TM_SUPABASE_KEY')) localStorage.setItem('TM_SUPABASE_KEY', '');
         })();
 
         const TM_URL = localStorage.getItem('TM_BACKEND_URL');
         const TM_PIN = localStorage.getItem('TM_BACKEND_PIN');
+        const SB_URL = localStorage.getItem('TM_SUPABASE_URL');
+        const SB_KEY = localStorage.getItem('TM_SUPABASE_KEY');
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,6 +34,8 @@
     <script src="critical_crypto.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase_bridge.js"></script>
     <link rel="icon" type="image/png" href="images/logic_gear_logo.png">
     <style>
         :root {
@@ -1740,17 +1748,24 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             if (!isVisible) {
                 document.getElementById('set-url').value = localStorage.getItem('TM_BACKEND_URL') || "";
                 document.getElementById('set-pin').value = localStorage.getItem('TM_BACKEND_PIN') || "";
+                // V72 Supabase
+                document.getElementById('set-sb-url').value = localStorage.getItem('TM_SUPABASE_URL') || "";
+                document.getElementById('set-sb-key').value = localStorage.getItem('TM_SUPABASE_KEY') || "";
             }
         }
 
         function saveSettings() {
             const newUrl = document.getElementById('set-url').value.trim();
             const newPin = document.getElementById('set-pin').value.trim();
+            const sbUrl = document.getElementById('set-sb-url').value.trim();
+            const sbKey = document.getElementById('set-sb-key').value.trim();
 
-            if (!newUrl || !newPin) return alert("URL and PIN are mandatory for mission sync.");
+            if (!newUrl || !newPin) return alert("Legacy URL and PIN are mandatory for mission sync fallback.");
 
             localStorage.setItem('TM_BACKEND_URL', newUrl);
             localStorage.setItem('TM_BACKEND_PIN', newPin);
+            localStorage.setItem('TM_SUPABASE_URL', sbUrl);
+            localStorage.setItem('TM_SUPABASE_KEY', sbKey);
 
             alert("Settings Saved. Refreshing to apply changes.");
             location.reload();
@@ -2596,6 +2611,12 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         // FAILSAFE: Ensure UI renders even if handshake is slow
         window.onload = () => {
             log("BOOT SEQUENCE INITIATED...");
+
+            // V72 Supabase Init
+            if (SB_URL && SB_KEY) {
+                SupabaseBridge.init(SB_URL, SB_KEY);
+            }
+
             if (typeof google !== 'undefined' && google.accounts) {
                 initGoogleAuth();
             }
@@ -2713,6 +2734,14 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
             <label>Security PIN</label>
             <input type="text" id="set-pin" class="settings-input" placeholder="8812">
+
+            <div style="margin-top:20px; padding-top:15px; border-top:1px dashed #444;">
+                <h4 style="margin:0 0 10px; font-size:0.7rem; color:var(--accent);">v72 SUPABASE CLOUD (OPTIONAL)</h4>
+                <label>Supabase Project URL</label>
+                <input type="text" id="set-sb-url" class="settings-input" placeholder="https://xyz.supabase.co">
+                <label>Anon Public Key</label>
+                <input type="password" id="set-sb-key" class="settings-input" placeholder="eyJhbGciOiJIUzI1NiI...">
+            </div>
 
             <div style="font-size:0.5rem; color:#666; margin-bottom:20px; font-style:italic;">
                 * Settings are saved to local storage. Changes require a page refresh to fully propagate across all AI
