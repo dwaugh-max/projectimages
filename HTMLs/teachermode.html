@@ -3,44 +3,138 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>MISSION CONTROL // TEACHER MODE</title>
-    <script>const URL = "[[INJECT_URL_NOW]]"; const PIN = "[[INJECT_PIN_NOW]]";</script>
+    <title>MISSION CONTROL // SITUATION ROOM (v66.47)</title>
+    <script>
+        // --- BOOTSTRAP CONFIGURATION ---
+        (function bootstrap() {
+            const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbzO2zyVLbC6ZCUEFTnhzkmV7ogDOyowZFRR7ZPwcidIPkSPDDX5mQaeuChCL7DiNwvo/exec";
+            const DEFAULT_PIN = "0099";
+
+            if (!localStorage.getItem('TM_BACKEND_URL')) {
+                localStorage.setItem('TM_BACKEND_URL', DEFAULT_URL);
+            }
+            if (!localStorage.getItem('TM_BACKEND_PIN')) {
+                localStorage.setItem('TM_BACKEND_PIN', DEFAULT_PIN);
+            }
+        })();
+
+        const TM_URL = localStorage.getItem('TM_BACKEND_URL');
+        const TM_PIN = localStorage.getItem('TM_BACKEND_PIN');
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Oswald:wght@700&display=swap"
+        rel="stylesheet">
+    <script src="critical_crypto.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --bg: #f4f4f4;
-            --accent: #222;
-            --success: #28a745;
-            --err: #dc3545;
-            --terminal: #000;
-            --term-txt: #0f0;
+            --bg: #050505;
+            --accent: #00ffcc;
+            --accent-dim: rgba(0, 255, 204, 0.1);
+            --secondary: #0a2a2a;
+            --success: #00ff88;
+            --err: #ff3366;
+            --font-main: 'Inter', sans-serif;
+            --font-h: 'Oswald', sans-serif;
+            --font-tech: 'JetBrains Mono', monospace;
+            --forge-accent: #0088ff;
+        }
+
+        /* MEDICAL SCANLINE OVERLAY */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.01));
+            background-size: 100% 4px, 4px 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        /* NARROW TECH SCROLLBARS */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            font-family: 'Courier New', monospace;
-            padding: 40px;
-            background: var(--bg);
-            color: #333;
+            font-family: var(--font-main);
+            padding: 0;
             margin: 0;
+            background: radial-gradient(ellipse at top, #0a1a1a 0%, #050505 50%);
+            color: #fff;
+            min-height: 100vh;
         }
 
         #status-bar {
-            background: #1a1a1a;
-            color: #fff;
-            padding: 15px 25px;
-            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 5px solid var(--accent);
+            padding: 15px 40px;
+            background: linear-gradient(90deg, rgba(0, 255, 204, 0.08) 0%, rgba(0, 0, 0, 0.9) 50%, rgba(0, 136, 255, 0.08) 100%);
+            border-bottom: 1px solid var(--secondary);
+            font-size: 0.7rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
         }
 
         .status-light {
-            height: 12px;
-            width: 12px;
-            border-radius: 50%;
-            background: #666;
             display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
             margin-right: 10px;
+            background: #333;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .status-light.online {
+            background: var(--success);
+            box-shadow: 0 0 20px var(--success), 0 0 40px var(--success);
+        }
+
+        .status-light.offline {
+            background: var(--err);
+            box-shadow: 0 0 20px var(--err), 0 0 40px var(--err);
         }
 
         .status-light.online {
@@ -54,31 +148,36 @@
         }
 
         h1 {
+            font-family: var(--font-h);
             text-transform: uppercase;
-            letter-spacing: 5px;
+            letter-spacing: 8px;
             border-bottom: 2px solid var(--accent);
-            padding-bottom: 10px;
+            padding-bottom: 15px;
             margin-bottom: 30px;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
         }
 
         #console {
-            background: var(--terminal);
-            color: var(--term-txt);
-            padding: 15px;
+            background: #000;
+            color: var(--accent);
+            padding: 20px;
             height: 180px;
             overflow-y: auto;
-            font-size: 0.8rem;
-            border: 1px solid #333;
+            font-size: 0.75rem;
+            font-family: var(--font-tech);
+            border: 1px solid var(--secondary);
             margin-bottom: 30px;
         }
 
         .panel {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.02);
             padding: 30px;
-            border: 1px solid #ddd;
-            border-top: 5px solid var(--accent);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--secondary);
+            border-top: 3px solid var(--accent);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.05);
+            backdrop-filter: blur(5px);
         }
 
         .grid {
@@ -92,26 +191,41 @@
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--secondary);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
             font-family: inherit;
             box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
         }
 
         .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
+            background: none;
+            color: var(--accent);
+            border: 1px solid var(--accent);
             padding: 15px 25px;
             cursor: pointer;
-            font-weight: bold;
+            font-family: var(--font-h);
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             width: 100%;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
         }
 
         .btn:hover {
-            background: #444;
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 30px var(--accent);
         }
 
         .btn-del {
@@ -126,7 +240,8 @@
         }
 
         .btn-del:hover {
-            color: #8b0000;
+            color: #ff6699;
+            text-shadow: 0 0 10px var(--err);
         }
 
         table {
@@ -138,18 +253,19 @@
         th,
         td {
             padding: 12px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--secondary);
             text-align: left;
             font-size: 0.75rem;
             vertical-align: middle;
         }
 
         th {
-            background: var(--accent);
-            color: #fff;
+            background: linear-gradient(90deg, var(--accent), rgba(0, 255, 204, 0.3));
+            color: #000;
             text-transform: uppercase;
-            font-size: 0.6rem;
-            letter-spacing: 1px;
+            font-family: var(--font-h);
+            font-size: 0.65rem;
+            letter-spacing: 2px;
         }
 
         .thumb {
@@ -158,28 +274,563 @@
             background-size: cover;
             background-position: center;
             border-radius: 4px;
-            border: 1px solid #ddd;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
         }
 
         label {
             font-size: 0.6rem;
-            color: #888;
+            color: var(--accent);
             text-transform: uppercase;
             margin-bottom: 5px;
             display: block;
             font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* PROJECTOR MODE */
+        #projector-view {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #050505;
+            z-index: 2000;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        #projector-view.active {
+            display: block;
+        }
+
+        .proj-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #d2b48c;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .proj-header h1 {
+            margin: 0;
+            letter-spacing: 8px;
+            font-size: 2rem;
+            color: #d2b48c;
+            text-transform: uppercase;
+        }
+
+        .proj-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .proj-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 8px;
+            transition: 0.3s;
+        }
+
+        .proj-card.active {
+            border-color: #d2b48c;
+            box-shadow: 0 0 20px rgba(210, 180, 140, 0.1);
+        }
+
+        .proj-name {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #d2b48c;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .guidance-text {
+            font-size: 0.55rem;
+            color: #666;
+            margin-top: -8px;
+            margin-bottom: 10px;
+            font-style: italic;
+            line-height: 1.2;
+        }
+
+        #settings-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .settings-card label {
+            display: block;
+            font-size: 0.6rem;
+            color: var(--forge-accent);
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .settings-input {
+            width: 100%;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px;
+            font-size: 0.7rem;
+            margin-bottom: 20px;
+            font-family: var(--font-main);
+        }
+
+        .settings-toggle {
+            font-size: 0.6rem;
+            color: var(--forge-accent);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-bottom: 10px;
+            display: inline-block;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        #gen-settings-content {
+            display: none;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #222;
+            border-radius: 4px;
+        }
+
+        #gen-settings-content.active {
+            display: block;
+        }
+
+        .proj-class {
+            font-size: 0.55rem;
+            color: #d2b48c;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .proj-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            border-top: 1px solid #333;
+            padding-top: 6px;
+        }
+
+        .proj-bar {
+            height: 3px;
+            background: #222;
+            margin-top: 8px;
+        }
+
+        .proj-fill {
+            height: 100%;
+            background: #d2b48c;
+            transition: width 1s ease;
+        }
+
+        /* FORGE & HOSPITAL OVERLAY */
+        #forge-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #050505;
+            z-index: 4000;
+            flex-direction: column;
+            color: #eee;
+        }
+
+        #forge-overlay.active {
+            display: flex;
+        }
+
+        .forge-header {
+            padding: 20px 40px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .forge-main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2px;
+            background: #222;
+            overflow: hidden;
+        }
+
+        .forge-panel {
+            background: #050505;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .forge-output {
+            background: #080808;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #forge-chat {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .msg {
+            max-width: 85%;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .msg-ai {
+            background: #111;
+            border-left: 3px solid var(--forge-accent);
+        }
+
+        .msg-user {
+            background: #1a1a1a;
+            align-self: flex-end;
+            border-right: 3px solid #444;
+        }
+
+        .stepper {
+            display: flex;
+            gap: 15px;
+            padding: 15px 40px;
+            background: #080808;
+            border-bottom: 1px solid #222;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.3;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step-num {
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--forge-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: var(--forge-accent);
+        }
+
+        /* HOSPITAL STYLES */
+        #hospital-view {
+            display: none;
+            height: 100%;
+            grid-template-columns: 250px 1fr;
+            background: #080808;
+        }
+
+        .hosp-sidebar {
+            background: #111;
+            border-right: 1px solid #222;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .hosp-main {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hosp-tab {
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            font-size: 0.65rem;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .hosp-tab.active {
+            border-color: #00ffcc;
+            color: #00ffcc;
+        }
+
+        /* ENHANCED CONTROLS */
+        .forge-settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .settings-select {
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px;
+            font-size: 0.65rem;
+            width: 100%;
+        }
+
+        #f-outcomes label {
+            text-transform: none !important;
+        }
+
+        /* --- AUTH OVERLAY --- */
+        #auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: opacity 0.5s ease;
+        }
+
+        #login-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 40px;
+            text-align: center;
+            width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* LANDING SCREEN */
+        #landing-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #0a1a1a 0%, #050505 70%);
+            z-index: 4500;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .landing-logo {
+            font-family: 'Oswald', sans-serif;
+            font-size: 6rem;
+            font-weight: 700;
+            color: #00ffcc;
+            letter-spacing: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            text-shadow: 0 0 40px rgba(0, 255, 204, 0.4);
+            animation: glitch 5s infinite;
+        }
+
+        .landing-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: #00ffcc;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-bottom: 80px;
+            opacity: 0.7;
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0);
+            }
+
+            1% {
+                transform: translate(-2px, 2px);
+            }
+
+            2% {
+                transform: translate(2px, -2px);
+            }
+
+            3% {
+                transform: translate(0);
+            }
+
+            100% {
+                transform: translate(0);
+            }
+        }
+
+        .landing-actions {
+            display: flex;
+            gap: 40px;
+        }
+
+        .landing-btn {
+            width: 260px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #0a2a2a;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .landing-btn:hover {
+            background: rgba(0, 255, 204, 0.05);
+            border-color: #00ffcc;
+            transform: translateY(-10px);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
+        }
+
+        .landing-btn .icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .landing-btn .label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            color: #00ffcc;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .landing-btn .desc {
+            font-size: 0.6rem;
+            color: #666;
+            margin-top: 12px;
+            text-align: center;
+            max-width: 200px;
+            line-height: 1.5;
         }
     </style>
 </head>
 
 <body>
-    <div id="status-bar">
-        <div><span id="s-light" class="status-light"></span> <span id="s-text"
-                style="letter-spacing: 2px;">VINTAGE_LINK_OFFLINE</span></div>
-        <div style="font-size: 0.7rem; opacity: 0.7;">TEACHER MODE // v63.4</div>
+    <!-- AUTHENTICATION OVERLAY -->
+    <div id="auth-overlay">
+        <div id="login-card" style="width:520px;">
+            <h1 class="landing-logo" style="font-size:3rem; letter-spacing:10px; margin-bottom:20px;">SITUATION ROOM
+            </h1>
+            <div style="width:60px; height:2px; background:#00ffcc; margin:0 auto 25px;"></div>
+            <div
+                style="font-size:0.7rem; color:#00ffcc; letter-spacing:4px; margin-bottom:40px; text-transform:uppercase;">
+                Teacher Authorization Required</div>
+
+            <div id="google-signin-container" style="display:flex; justify-content:center; margin-bottom:25px;"></div>
+
+            <div id="auth-status" style="font-size:0.6rem; color:#666; margin-top:10px; letter-spacing:2px;">PENDING
+                IDENTITY VERIFICATION...</div>
+        </div>
     </div>
-    <h1 style="margin: 0 40px 30px 40px;">COMMAND CENTER // MISSION CONTROL</h1>
+
+    <!-- LANDING SCREEN -->
+    <div id="landing-screen">
+        <div class="landing-logo">THE SITUATION ROOM</div>
+        <div class="landing-subtitle">teachermode</div>
+        <div class="landing-actions">
+            <div class="landing-btn" onclick="enterCreate()">
+                <div class="icon">✨</div>
+                <div class="label">Create Sim</div>
+                <div class="desc">Build a new mission from scratch using AI-assisted workflows.</div>
+            </div>
+            <div class="landing-btn" onclick="enterManage()">
+                <div class="icon">🛠️</div>
+                <div class="label">Deploy / Manage</div>
+                <div class="desc">Upload, monitor progress, and manage your existing simulations.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="projector-view">
+        <header class="proj-header">
+            <h1>COMMAND PROGRESS BOARD</h1>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <select id="proj-class-filter" onchange="renderProjectorBoard()"
+                    style="padding:8px 12px; font-family:inherit; font-size:0.7rem; background:#222; color:#d2b48c; border:1px solid #444;">
+                    <option value="ALL">ALL CLASSES</option>
+                </select>
+                <select id="proj-mission-filter" onchange="renderProjectorBoard()"
+                    style="padding:8px 12px; font-family:inherit; font-size:0.7rem; background:#222; color:#d2b48c; border:1px solid #444;">
+                    <option value="ALL">ALL MISSIONS</option>
+                </select>
+                <span id="proj-sync" style="font-size:0.7rem; color:#888; letter-spacing:2px;">[SYNCING]</span>
+                <button onclick="toggleProjector()"
+                    style="background:#d2b48c; color:#000; border:none; padding:8px 15px; cursor:pointer; font-weight:bold; letter-spacing:1px; font-size:0.7rem;">EXIT
+                    PROJECTOR</button>
+            </div>
+        </header>
+        <div id="proj-board" class="proj-grid"></div>
+    </div>
+
+    <div id="status-bar">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <span
+                style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:#00ffcc; letter-spacing:3px; text-shadow:0 0 10px rgba(0,255,204,0.3);">SITUATION
+                ROOM</span>
+            <span style="color:#444;">|</span>
+            <span id="s-light" class="status-light"></span>
+            <button id="sync-btn" onclick="syncManager.toggle()"
+                style="background:none; border:none; color:#666; font-family:'Oswald',sans-serif; font-size:0.65rem; letter-spacing:2px; cursor:pointer;">[
+                ☁️ LOCAL_ONLY ]</button>
+        </div>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <button onclick="toggleProjector()"
+                style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📺
+                PROJECTOR</button>
+            <button onclick="toggleForge()"
+                style="background:var(--forge-accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">✨
+                CREATE</button>
+            <button onclick="toggleSettings()"
+                style="background:transparent; border:1px solid #444; color:#666; font-size:0.8rem; padding:5px 8px; cursor:pointer;">⚙️</button>
+            <button onclick="toggleLibrary()"
+                style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📚
+                HUB</button>
+            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v66.487</div>
+        </div>
+    </div>
+    <h1 style="margin:30px 40px; font-size:1.5rem;">COMMAND CENTER // MISSION CONTROL</h1>
     <div class="grid" style="grid-template-columns: 1fr 1.5fr 1fr; padding: 0 40px;">
         <div class="panel">
             <h3
@@ -203,7 +854,7 @@
         <div class="panel">
             <div
                 style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:20px;">
-                <h3 style="margin:0; letter-spacing:2px; font-size:0.8rem;">LIVE PROGRESS BOARD</h3>
+                <h3 style="margin:0; letter-spacing:2px; font-size:0.8rem;">STUDENT PROGRESS</h3>
                 <div id="sync-tick" style="font-size:0.55rem; color:#888;">[SYNC_IDLE]</div>
             </div>
             <div style="margin-bottom:15px; display:flex; gap:10px;">
@@ -232,8 +883,410 @@
             </div>
         </div>
     </div>
+
+    <div id="library-hub"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:3000; padding:60px; overflow-y:auto;">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:20px; margin-bottom:40px;">
+            <h1 style="margin:0; color:var(--accent); letter-spacing:5px; border-bottom:none;">COMMUNITY ARCHIVE HUB
+            </h1>
+            <div style="display:flex; gap:10px;">
+                <button onclick="fetchMissions()"
+                    style="background:none; border:1px solid #00ffcc; color:#00ffcc; padding:10px 20px; cursor:pointer; font-family:inherit;">[
+                    REFRESH ARCHIVE ]</button>
+                <button onclick="toggleLibrary()"
+                    style="background:transparent; border:1px solid #666; color:#666; padding:10px 20px; cursor:pointer; font-family:inherit;">[CLOSE_HUB]</button>
+            </div>
+        </div>
+        <div id="hub-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+            <div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5; color:#fff;">LOADING MISSION
+                CATALOG...</div>
+        </div>
+    </div>
+
+    <div id="forge-overlay">
+        <header class="forge-header">
+            <div style="display:flex; align-items:center; gap:20px;">
+                <span
+                    style="font-family:'Oswald',sans-serif; font-size:1rem; color:#00ffcc; letter-spacing:3px; opacity:0.8;">SITUATION
+                    ROOM</span>
+                <span style="color:#333;">|</span>
+                <div
+                    style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
+                    MISSION CREATE</div>
+                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v66.487</div>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="resetForge()"
+                    style="background:transparent; border:1px solid var(--forge-accent); color:var(--forge-accent); padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem; font-weight:bold;">RESTART</button>
+                <button onclick="toggleForge()"
+                    style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem;">EXIT</button>
+            </div>
+        </header>
+
+        <div class="stepper">
+            <div class="step active" id="step-1">
+                <div class="step-num">1</div>
+                <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Concept</div>
+            </div>
+            <div class="step" id="step-2">
+                <div class="step-num">2</div>
+                <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Intel</div>
+            </div>
+            <div class="step" id="step-3">
+                <div class="step-num">3</div>
+                <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Story</div>
+            </div>
+            <div class="step" id="step-4">
+                <div class="step-num">4</div>
+                <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Assets</div>
+            </div>
+            <div class="step" id="step-5">
+                <div class="step-num">5</div>
+                <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;">Birth</div>
+            </div>
+        </div>
+
+        <main class="forge-main">
+            <div class="forge-panel">
+                <div style="margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
+                        <label
+                            style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px; margin:0;">CURRENT
+                            PHASE</label>
+                        <div class="settings-toggle" onclick="toggleGenSettings()"
+                            style="margin:0; font-size:1rem; opacity:0.7; cursor:pointer;"
+                            title="Advanced Configuration">⚙️</div>
+                    </div>
+                    <h2 id="forge-title"
+                        style="margin:0; font-family:'Oswald',sans-serif; font-size:1.8rem; text-transform:uppercase; color:#fff; letter-spacing:3px;">
+                        <span style='font-size:1rem; opacity:0.7; letter-spacing:2px; display:block;'>PHASE 1:</span>
+                        BRAINSTORM
+                    </h2>
+                    <p id="forge-desc"
+                        style="font-size:0.7rem; color:#888; margin-top:5px; font-family:'Inter',sans-serif; line-height:1.4;">
+                        Bounce mission ideas off of the AI! Select (or add) your course outcomes to help tell the AI
+                        your class context. Then give the AI general direction in the text box below, and press
+                        submit.<br><br>Don't feel like you have to take its first choices! Spend some time refining ("a
+                        little more this, a little less that...") until you have a solid concept.</p>
+
+                    <div id="gen-settings-content"
+                        style="margin-top:10px; border-left:2px solid var(--forge-accent); background:rgba(0,0,0,0.3);">
+                        <div class="forge-settings" style="grid-template-columns:1fr; gap:5px;">
+                            <div style="display:flex; gap:10px;">
+                                <div style="flex:1;">
+                                    <label>Model</label>
+                                    <select id="f-model" class="settings-select">
+                                        <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2</option>
+                                        <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash</option>
+                                        <option value="google/learnlm-1.5-pro-experimental:free">LearnLM 1.5 Pro
+                                        </option>
+                                        <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B</option>
+                                    </select>
+                                </div>
+                                <div style="width:120px;">
+                                    <label>Complexity</label>
+                                    <select id="f-complexity" class="settings-select">
+                                        <option value="Low">Low</option>
+                                        <option value="Medium" selected>Standard</option>
+                                        <option value="High">Elite</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="curriculum-zone"
+                    style="background:rgba(255,255,255,0.03); padding:15px; border-radius:4px; border:1px solid #222;">
+                    <label
+                        style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">CHOOSE/ADD
+                        COURSE OUTCOMES</label>
+                    <div class="guidance-text" style="color:#888; font-style:italic; font-size:0.7rem; margin-top:3px;">
+                        Look for your class & outcomes here. The list is incomplete! Go ahead and add your own for your
+                        future reference.</div>
+                    <div id="f-favorites-shelf"
+                        style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px; border-bottom:1px solid #222; padding-bottom:10px; display:none;">
+                        <!-- Pinned favorites go here -->
+                    </div>
+
+                    <select id="f-country" onchange="updateForgeRegions()"
+                        style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px;">
+                        <option value="">-- SELECT COUNTRY --</option>
+                    </select>
+                    <select id="f-region" onchange="updateForgeCourses()"
+                        style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px; display:none;">
+                    </select>
+                    <div style="display:flex; gap:10px; margin-bottom:10px; width:100%;">
+                        <select id="f-course" onchange="updateForgeOutcomes()"
+                            style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-family:'Inter',sans-serif; font-size:0.7rem; flex:1; min-width:0; display:none;">
+                        </select>
+                        <button id="f-fav-btn" onclick="toggleFavorite()"
+                            style="flex:0 0 40px; background:transparent; border:1px solid #333; color:#444; padding:0; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; display:none; transition:all 0.2s;">⭐</button>
+                    </div>
+                    <div id="f-outcomes"
+                        style="max-height:400px; overflow-y:auto; font-size:0.65rem; color:#888; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
+                        <p style="text-align:center; opacity:0.4;">SELECT COURSE TO LOAD OUTCOMES</p>
+                    </div>
+
+                    <div id="custom-add-zone"
+                        style="margin-top:15px; border-top:1px solid #333; padding-top:10px; display:none;">
+                        <input id="custom-country" placeholder="COUNTRY (e.g. Canada)"
+                            style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
+                        <input id="custom-region" placeholder="REGION (e.g. Nova Scotia)"
+                            style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
+                        <input id="custom-course-name" placeholder="COURSE NAME"
+                            style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
+                        <textarea id="custom-outcomes-raw" placeholder="OUTCOMES (ONE PER LINE)"
+                            style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; height:60px; padding:5px;"></textarea>
+                        <button class="btn"
+                            style="background:var(--forge-accent); font-size:0.6rem; padding:5px; width:100%; margin-top:5px;"
+                            onclick="saveCustomCourse()">SAVE TO LOCAL LAB</button>
+                    </div>
+                    <div style="text-align:center; margin-top:10px;">
+                        <button id="custom-toggle-btn" onclick="toggleCustomAdd()"
+                            style="background:transparent; border:none; color:var(--forge-accent); font-size:0.55rem; cursor:pointer; text-decoration:underline;">+
+                            ADD CUSTOM COURSE</button>
+                    </div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <label
+                        style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">IDEA
+                        BOX</label>
+                    <div class="guidance-text" style="color:#666; font-style:italic; font-size:0.65rem;">What are we
+                        making today? Give the AI something to start with.</div>
+                    <textarea id="f-input"
+                        style="height:120px; flex:none; background:#111; border:1px solid #333; color:#fff; font-size:0.85rem; padding:15px; width:100%;"
+                        placeholder="ENTER COMMAND CONTEXT..."></textarea>
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" style="flex:1; background:#333; font-size:0.7rem; padding:12px;"
+                        onclick="forgeBack()">BACK</button>
+                    <button class="btn" id="f-submit"
+                        style="flex:2; background:var(--forge-accent); font-size:0.7rem; padding:12px;"
+                        onclick="processForge()">SUBMIT COMMAND</button>
+                </div>
+            </div>
+
+            <div class="forge-output">
+                <div id="forge-chat" style="font-size:0.75rem; line-height:1.6; color:#ccc;">
+                    <strong>CREATE SYSTEM ONLINE.</strong><br>
+                    Welcome to the integrated conceive-birth-finetune machine. Select your curriculum context to begin.
+                </div>
+            </div>
+
+            <!-- HOSPITAL INTERFACE -->
+            <div id="hospital-view">
+                <div class="hosp-sidebar" id="hosp-nav">
+                    <div
+                        style="font-size:0.6rem; color:var(--forge-accent); margin-bottom:15px; letter-spacing:1px; font-weight:bold;">
+                        SURGICAL NODES</div>
+                </div>
+                <div class="hosp-main">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <div id="hosp-path" style="font-family:var(--font-tech); font-size:0.7rem; color:#00ffcc;">
+                            NODE:
+                            SELECTION_REQUIRED</div>
+                        <button class="btn" onclick="saveHospEdit()"
+                            style="width:auto; padding:5px 15px; font-size:0.65rem; background:#00ffcc; color:#000;">STABILIZE
+                            NODE</button>
+                    </div>
+                    <textarea id="hosp-editor"
+                        style="flex:1; background:#050505; color:#eee; border:1px solid #222; font-family:var(--font-main); font-size:0.85rem; line-height:1.5; padding:20px; resize:none;"></textarea>
+                    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+                        <button class="btn"
+                            style="width:auto; background:transparent; border:1px solid #444; color:#888; padding:10px 20px; font-size:0.7rem;"
+                            onclick="downloadBirthedBlob()">DOWNLOAD .BLOB SOURCE</button>
+                        <button class="btn"
+                            style="width:auto; background:#ffcc00; color:#000; padding:12px 30px; font-size:0.8rem;"
+                            onclick="finalizeForge()">FINALIZE & PUSH TO COMMAND CENTER</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="forge-loader"
+                style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.8); flex-direction:column; align-items:center; justify-content:center; z-index:10;">
+                <div
+                    style="width:30px; height:30px; border:2px solid var(--forge-accent); border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;">
+                </div>
+                <div id="forge-loader-text"
+                    style="font-size:0.6rem; color:var(--forge-accent); margin-top:15px; letter-spacing:2px;">
+                    PROCESSING...</div>
+            </div>
+    </div>
+    </main>
+    </div>
     <script>
         let allProgress = [];
+        let googleUser = null;
+        let GOOGLE_CLIENT_ID = "503537759984-imeg79p1djl1csnselh3jaqqofmi5gem.apps.googleusercontent.com";
+
+        function handleCredentialResponse(response) {
+            try {
+                const base64Url = response.credential.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                googleUser = JSON.parse(jsonPayload);
+                console.log("Authenticated as:", googleUser.name, "Email:", googleUser.email);
+
+                // FADE OUT OVERLAY AND SHOW LANDING
+                const overlay = document.getElementById('auth-overlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.getElementById('landing-screen').style.display = 'flex';
+                }, 500);
+
+                log(`IDENTITY VERIFIED: Welcome, ${googleUser.name}`, "success");
+
+                // Re-render missions now that we know admin status
+                fetchMissions();
+            } catch (e) {
+                document.getElementById('auth-status').style.color = "var(--err)";
+            }
+        }
+
+        function enterCreate() {
+            document.getElementById('landing-screen').style.display = 'none';
+            toggleForge();
+        }
+
+        function enterManage() {
+            document.getElementById('landing-screen').style.display = 'none';
+        }
+
+        function initGoogleAuth() {
+            log("GSI_ENGINE: Establishing Secure Identity Link...");
+            try {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("google-signin-container"),
+                    { theme: "outline", size: "large", width: 250 }
+                );
+            } catch (e) {
+                console.error("GSI Init Error:", e);
+                document.getElementById('auth-status').innerText = "GSI_INITIALIZATION_ERROR";
+            }
+        }
+
+        // --- SYNC MANAGER ---
+        const syncManager = {
+            url: localStorage.getItem('TM_BACKEND_URL'),
+            pin: localStorage.getItem('TM_BACKEND_PIN'),
+
+            async toggle() {
+                if (!this.url) return alert("CONFIGURATION REQUIRED: Please set the Backend URL in Settings (⚙️).");
+                const mode = confirm("SYNC MANAGER\n\n[OK] = Upload Local Data to Cloud\n[CANCEL] = Download Cloud Data to Local") ? "UP" : "DOWN";
+                if (mode === "UP") await this.upload();
+                else await this.download();
+            },
+
+            async upload() {
+                log("SYNC_UP: Bundling local data...", "info");
+                const payload = {
+                    customCurriculum: getCustomOutcomes(),
+                    favorites: localStorage.getItem('TM_CURRICULUM_FAVORITES'),
+                    history: localStorage.getItem('TM_FORGE_HISTORY')
+                };
+
+                try {
+                    const res = await fetch(this.url, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'sync_user_data',
+                            subAction: 'put',
+                            pin: this.pin,
+                            uid: googleUser ? googleUser.email : "guest",
+                            payload: payload
+                        })
+                    });
+                    const j = await res.json();
+                    if (j.status === "success") {
+                        log("CLOUD SYNC COMPLETE: Data securely archived.", "success");
+                        localStorage.setItem('TM_LAST_SYNC', new Date().toISOString());
+                        document.getElementById('sync-btn').innerText = "[ ☁️ SYNCED ]";
+                    } else throw new Error(j.message);
+                } catch (e) { log("SYNC FAILED: " + e.message, "error"); }
+            },
+
+            async download() {
+                log("SYNC_DOWN: Fetching cloud profile...", "info");
+                try {
+                    const res = await fetch(this.url, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'sync_user_data',
+                            subAction: 'get',
+                            pin: this.pin,
+                            uid: googleUser ? googleUser.email : "guest"
+                        })
+                    });
+                    const j = await res.json();
+                    if (j.status === "success" && j.data) {
+                        if (j.data.customCurriculum) {
+                            localStorage.setItem('blob_custom_curriculum', JSON.stringify(j.data.customCurriculum));
+                        }
+                        if (j.data.favorites) {
+                            localStorage.setItem('TM_CURRICULUM_FAVORITES', j.data.favorites);
+                        }
+                        if (j.data.history) {
+                            // Optional: Merge history or overwrite? Overwrite for now.
+                            localStorage.setItem('TM_FORGE_HISTORY', j.data.history);
+                        }
+
+                        log("Cloud profile restored to local lab.", "success");
+                        fetchCurriculum(); // Reload UI
+                        updateForgeRegions(); // Refresh dropdowns
+                    } else throw new Error("No data found or sync error.");
+                } catch (e) { log("DOWNLOAD FAILED: " + e.message, "error"); }
+            }
+        };
+        const FORGE_PROXY = "https://nextjs-basic-lemon-one.vercel.app/api/chat";
+        let forgeStep = 1;
+        let forgeHistory = [];
+        let accumulatedData = {};
+        let curriculumData = {};
+        let forgeModel = "xiaomi/mimo-v2-flash:free";
+
+        const FORGE_SYSTEM_CORE = `
+You are the BLOB FACTORY COREGINE (v66.487), the multi-stage mission architect.
+LANGUAGE PROTOCOL: STRICTLY ENGLISH ONLY. Do not use Chinese characters or any non-English script. Translate all internal logic or model defaults to English immediately.
+GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
+STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
+SCHEMA: metadata, slides (id, type, title, content, mediaURL, intel: { primary, legal, intel }, interactionPrompt, options, outcomes), intelligenceGlossary.
+
+CALIBRATION RULES:
+1. BASELINE: Automatically calibrate narrative depth for the Grade Level of the course provided in COURSE CONTEXT.
+2. STUDENT OFFSET: Use the 'FORGE COMPLEXITY' variable to adjust for the specific students in that class:
+   - "Low": Foundational literacy, direct cause/effect, clear stakes.
+   - "Medium": Typical grade-level analysis and vocabulary.
+   - "High": Sophisticated nuance, complex ethical dilemmas, advanced reading level.
+
+PEDAGOGICAL DEPTH:
+Word count targets (e.g., 200-400 words) are NON-NEGOTIABLE pedagogical requirements for mission immersion. You MUST meet or exceed these targets for every section. "Per section" means the combined prose of the Slide Content and its associated Intelligence Tabs. Failure to meet volume targets is a failure of the architecture.
+
+STATE CONTINUITY:
+You MUST maintain strict continuity between phases. Use the provided ARCHIVE HISTORY to anchor your next steps. For example, if Concept C was chosen in Phase 1, Phase 2 MUST expand ONLY that concept. Do not invent new topics or switch contexts.
+
+Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
+`;
+
+        const FORGE_PROMPTS = {
+            1: "PHASE 1: CONCEPT ARRIVE. Identify SCO + Ethical Audit. Propose 3 detailed Scenario Concepts. Include 'THEMES TARGETING SELECTED OUTCOMES'. End with: 'WHICH CONCEPT SHALL WE CREATE?'",
+            2: "PHASE 2: DEEP SEARCH. Expand chosen concept into 10 Slide Titles and Intel data strategy. End with: 'SHALL WE PROCEED TO FULL STORY DRAFTING?'",
+            3: "PHASE 3: STORY CONFIRM. Draft FULL immersive prose. REQUIRED: 200-400 words MINIMUM per slide section (Combined Slide Text + Intel data). Do not summarize; expand. End with: 'READY TO SECURE ASSETS?'",
+            4: "PHASE 4: ASSET SECURE. Propose Visual Strategy. MANDATORY: You MUST provide a 6-column Markdown table [ID | Item Name | Context/Description | Visual Style | AI Prompt | Source (URL)]. INVENTORY: You MUST list exactly 19 images (1 Hero/Splash + 18 Exhibits for the 10 slides). End with: 'SHALL WE COMMENCE BLOB BIRTH CONTENTION?'",
+            5: "PHASE 5: BLOB BIRTH. Compile the fully realized mission into a valid JSON .blob package. CRITICAL: Output the RAW JSON block ONLY. Start with '{' and end with '}'. No conversational text, no markdown fences, no padding. This is a machine-to-machine transfer."
+        };
+        // --- END FORGE CONFIG ---
         const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
@@ -247,24 +1300,751 @@
             c.innerHTML += `<div style="color:${color}">[${new Date().toLocaleTimeString()}] ${m}</div>`;
             c.scrollTop = c.scrollHeight;
         }
-        function setStatus(s, t) { document.getElementById('s-light').className = "status-light " + s; document.getElementById('s-text').innerText = t; }
+        function setStatus(s, t) {
+            const light = document.getElementById('s-light');
+            const text = document.getElementById('s-text');
+            if (light) light.className = "status-light " + s;
+            if (text) text.innerText = t;
+        }
+
+        // COMMUNITY HUB LOGIC
+        const LIB_URL = "https://raw.githubusercontent.com/dwaugh-edsim/projectimages/main/capsule-library/index.json";
+        function toggleLibrary() {
+            const h = document.getElementById('library-hub');
+            const show = h.style.display === 'none';
+            h.style.display = show ? 'block' : 'none';
+            if (show) fetchLibrary();
+        }
+        // --- FORGE UI CONTROLS ---
+        function toggleForge() {
+            const f = document.getElementById('forge-overlay');
+            f.classList.toggle('active');
+            if (f.classList.contains('active')) {
+                if (!curriculumData.countries) fetchCurriculum();
+            }
+        }
+
+        function updateForgeUI() {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step-${forgeStep}`).classList.add('active');
+
+            const titles = {
+                1: "<span style='font-size:1rem; opacity:0.7; letter-spacing:2px; display:block;'>PHASE 1:</span> BRAINSTORM",
+                2: "Intelligence Framework",
+                3: "Narrative Drafting",
+                4: "Asset Procurement",
+                5: "Biological Birth"
+            };
+            const descs = {
+                1: "Bounce mission ideas off of the AI! Select (or add) your course outcomes to help tell the AI your class context. Then give the AI general direction in the text box below, and press submit.<br><br>Don't feel like you have to take its first choices! Spend some time refining (\"a little more this, a little less that...\") until you have a solid concept.",
+                2: "Establish the 10-slide architecture and technical data.",
+                3: "Generating full immersive prose and intelligence files.",
+                4: "Mapping visual keywords (Unsplash) for all nodes.",
+                5: "Compiling the final .blob mission package."
+            };
+
+            document.getElementById('forge-title').innerHTML = titles[forgeStep];
+            document.getElementById('forge-desc').innerHTML = descs[forgeStep];
+            document.getElementById('f-submit').innerText = forgeStep === 5 ? "BIRTH MISSION" : "SUBMIT COMMAND";
+
+            // Only show curriculum zone on step 1
+            document.getElementById('curriculum-zone').style.display = forgeStep === 1 ? 'block' : 'none';
+
+            if (forgeStep === 5) {
+                document.getElementById('f-submit').onclick = birthMission;
+            } else {
+                document.getElementById('f-submit').onclick = processForge;
+            }
+        }
+
+        function toggleGenSettings() {
+            const content = document.getElementById('gen-settings-content');
+            content.classList.toggle('active');
+        }
+
+        function resetForge() {
+            if (!confirm("Are you sure you want to RESTART? This will clear all AI progress and history for this mission.")) return;
+            forgeStep = 1;
+            forgeHistory = [];
+            accumulatedData = {};
+            const chat = document.getElementById('forge-chat');
+            chat.innerHTML = `
+                <div style="font-family:monospace; font-size:0.6rem; color:#888;">
+                    <strong>CREATE SYSTEM ONLINE.</strong><br>
+                    Welcome to the integrated conceive-birth-finetune machine. Select your curriculum context to begin.
+                </div>
+            `;
+            document.getElementById('f-input').value = "";
+            document.getElementById('hospital-view').style.display = 'none';
+            chat.style.display = 'flex';
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step-1').classList.add('active');
+            updateForgeUI();
+            log("FORGE_ENGINE: System Reset Complete.", "warning");
+        }
+
+        function forgeBack() {
+            if (forgeStep > 1) {
+                forgeStep--;
+                updateForgeUI();
+                addForgeChat("ai", `Reverting to Phase ${forgeStep}. Command parameters preserved.`);
+            }
+        }
+
+        function addForgeChat(side, msg) {
+            const c = document.getElementById('forge-chat');
+            const div = document.createElement('div');
+            div.className = `msg msg-${side}`;
+            div.innerHTML = typeof marked !== 'undefined' ? marked.parse(msg) : msg;
+            c.appendChild(div);
+            c.scrollTop = c.scrollHeight;
+        }
+
+        function setForgeLoading(show, txt = "PROCESSING...") {
+            const l = document.getElementById('forge-loader');
+            l.style.display = show ? 'flex' : 'none';
+            document.getElementById('forge-loader-text').innerText = txt;
+        }
+
+        function toggleSettings() {
+            const overlay = document.getElementById('settings-overlay');
+            const isVisible = overlay.style.display === 'flex';
+            overlay.style.display = isVisible ? 'none' : 'flex';
+
+            if (!isVisible) {
+                document.getElementById('set-url').value = localStorage.getItem('TM_BACKEND_URL') || "";
+                document.getElementById('set-pin').value = localStorage.getItem('TM_BACKEND_PIN') || "";
+            }
+        }
+
+        function saveSettings() {
+            const newUrl = document.getElementById('set-url').value.trim();
+            const newPin = document.getElementById('set-pin').value.trim();
+
+            if (!newUrl || !newPin) return alert("URL and PIN are mandatory for mission sync.");
+
+            localStorage.setItem('TM_BACKEND_URL', newUrl);
+            localStorage.setItem('TM_BACKEND_PIN', newPin);
+
+            alert("Settings Saved. Refreshing to apply changes.");
+            location.reload();
+        }
+
+        // --- END UI CONTROLS ---
+
+        async function fetchLibrary() {
+            try {
+                // Try backend first, fall back to static GitHub
+                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'list_hub', pin: TM_PIN }) });
+                const j = await res.json();
+                if (j.status === "success" && j.capsules && j.capsules.length > 0) {
+                    renderLibrary(j.capsules, true);
+                } else {
+                    // Fallback to GitHub static file
+                    const res2 = await fetch(LIB_URL);
+                    if (!res2.ok) throw new Error("No capsules found.");
+                    const j2 = await res2.json();
+                    renderLibrary(j2.capsules, false);
+                }
+            } catch (e) { document.getElementById('hub-grid').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:#888; padding:100px;">COMMUNITY_CATALOG_OFFLINE<br><br><span style="font-size:0.5rem; opacity:0.5;">Manual Import Recommended for now.</span></div>`; }
+        }
+        function renderLibrary(caps, fromBackend) {
+            const isUserAdmin = googleUser && ["dwaugh@gmail.com"].includes(googleUser.email);
+            let h = "";
+            caps.forEach(c => {
+                const removeBtn = (isUserAdmin && fromBackend) ? `<button onclick="removeFromHub('${c.id}')" style="font-size:0.5rem; padding:4px 8px; background:#c00; color:#fff; border:none; cursor:pointer; margin-top:5px; width:100%;">REMOVE FROM HUB</button>` : "";
+                const importBtn = c.downloadUrl ? `<button class="btn" onclick="importMission('${c.downloadUrl}', '${c.id}', '${c.title}')" style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px; font-size:0.6rem; width:100%; margin-top:10px;">IMPORT TO ARCHIVE</button>` : "";
+
+                h += `<div class="panel" style="border-top-color:#666;">
+                    <div style="height:150px; background-image:url('${c.thumb}'); background-size:cover; background-position:center; margin-bottom:15px; border-radius:4px; border:1px solid #333;"></div>
+                    <h4 style="margin:0; letter-spacing:1px; font-size:0.85rem;">${c.title}</h4>
+                    <div style="font-size:0.6rem; color:#888; margin-bottom:15px; text-transform:uppercase;">AUTHOR: ${c.author}</div>
+                    <p style="font-size:0.7rem; height:45px; overflow:hidden; opacity:0.7; line-height:1.4;">${c.description || 'An interactive educational simulation.'}</p>
+                    ${importBtn}
+                    ${removeBtn}
+                </div>`;
+            });
+            document.getElementById('hub-grid').innerHTML = h || "<div style='grid-column:1/-1; text-align:center; opacity:0.5; padding:100px; color:#fff;'>NO MISSIONS IN CATALOG.</div>";
+        }
+        async function publishToHub(id, title, thumb, description) {
+            if (!confirm(`Publish "${title}" to Community Hub?`)) return;
+            log(`Publishing [${id}] to Community Hub...`);
+            try {
+                const res = await fetch(TM_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'publish_to_hub',
+                        pin: TM_PIN,
+                        email: googleUser ? googleUser.email : "",
+                        id: id,
+                        title: title,
+                        author: googleUser ? googleUser.name : "Unknown",
+                        thumb: thumb,
+                        description: description || "An interactive educational simulation."
+                    })
+                });
+                const j = await res.json();
+                if (j.status === "success") {
+                    log(`[${id}] published to Community Hub!`, "success");
+                    alert(`${title} is now in the Community Hub!`);
+                } else {
+                    log(`Publish failed: ${j.message}`, "error");
+                }
+            } catch (e) { log(`Publish error: ${e.message}`, "error"); }
+        }
+        async function removeFromHub(id) {
+            if (!confirm(`Remove "${id}" from Community Hub?`)) return;
+            log(`Removing [${id}] from Community Hub...`);
+            try {
+                const res = await fetch(TM_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'remove_from_hub',
+                        pin: TM_PIN,
+                        email: googleUser ? googleUser.email : "",
+                        id: id
+                    })
+                });
+                const j = await res.json();
+                if (j.status === "success") {
+                    log(`[${id}] removed from Community Hub.`, "success");
+                    fetchLibrary();
+                } else {
+                    log(`Remove failed: ${j.message}`, "error");
+                }
+            } catch (e) { log(`Remove error: ${e.message}`, "error"); }
+        }
+        async function importMission(url, id, name) {
+            log(`Syncing Remote Capsule [${id}]...`);
+            try {
+                const res = await fetch(url); const payload = await res.json();
+                const res2 = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: TM_PIN, id: id, name: name, payload: payload }) });
+                const j = await res2.json();
+                if (j.status === "success") { log(`Remote Capsule [${id}] committed to local record.`, "success"); fetchMissions(); alert(`Mission [${name}] successfully imported!`); }
+                else log(j.message, "error");
+            } catch (e) { log(`Import failed: ${e.message}`, "error"); }
+        }
+
+        // --- FORGE AI ENGINE ---
+        async function processForge() {
+            const input = document.getElementById('f-input').value;
+            // Allow empty input if outcomes are selected or if the user wants to try "Auto-Pilot" Phase 1
+            if (!input && forgeStep === 1) {
+                const checks = document.querySelectorAll('#f-outcomes input[type="checkbox"]:checked');
+                if (checks.length === 0 && !confirm("No command context or outcomes selected. Proceed with pure course-based generation?")) {
+                    return;
+                }
+            }
+
+            const selectedModel = document.getElementById('f-model').value;
+            const selectedComplexity = document.getElementById('f-complexity').value;
+
+            setForgeLoading(true, `THINKING (PHASE ${forgeStep})...`);
+            addForgeChat("user", input || "(Proceed to next phase)");
+            document.getElementById('f-input').value = "";
+
+            let context = `${FORGE_SYSTEM_CORE}\n`;
+            context += `STUDENT OFFSET (FORGE COMPLEXITY): ${selectedComplexity}\n`;
+
+            // Add Course/Curriculum Context (Persistent)
+            const country = document.getElementById('f-country').value;
+            const region = document.getElementById('f-region').value;
+            const course = document.getElementById('f-course').value;
+            const checks = document.querySelectorAll('#f-outcomes input[type="checkbox"]:checked');
+            const selectedOutcomes = Array.from(checks).map(c => c.value);
+
+            context += `COURSE CONTEXT: ${course} (${region}, ${country})\n`;
+            context += `TARGET CURRICULUM OUTCOMES: ${selectedOutcomes.length > 0 ? selectedOutcomes.join(" | ") : "Drive purely from system knowledge."}\n\n`;
+
+            // Add History for continuity
+            if (forgeHistory.length > 0) {
+                context += `--- ARCHIVE HISTORY (DO NOT DEVIATE) ---\n`;
+                forgeHistory.forEach(msg => {
+                    context += `[${msg.role.toUpperCase()}]: ${msg.content}\n\n`;
+                });
+                context += `--- END HISTORY ---\n\n`;
+            }
+
+            context += `CURRENT PHASE: ${forgeStep}\nINSTRUCTION: ${FORGE_PROMPTS[forgeStep]}\n\nUSER INPUT: ${input || "(Proceed based on previous phase)"}`;
+
+            try {
+                const res = await fetch(FORGE_PROXY, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: context, model: selectedModel })
+                });
+                const data = await res.json();
+                const reply = data.choices[0].message.content;
+
+                addForgeChat("ai", reply);
+
+                // Store cleaned history
+                forgeHistory.push({ role: "user", content: input || "(Next Phase Request)" });
+                forgeHistory.push({ role: "assistant", content: reply });
+
+                if (forgeStep < 5) {
+                    forgeStep++;
+                    updateForgeUI();
+                }
+            } catch (e) {
+                addForgeChat("ai", `!! ERROR: ${e.message}. Check Vercel Proxy connectivity.`);
+            } finally {
+                setForgeLoading(false);
+            }
+        }
+
+        function getForgeContext(userInput) {
+            // [DEPRECATED - MERGED INTO processForge for better parameter sync]
+        }
+
+        // --- CURRICULUM HUB ---
+        function getCustomOutcomes() {
+            const stored = localStorage.getItem('blob_custom_curriculum');
+            return stored ? JSON.parse(stored) : {};
+        }
+
+        function saveCustomCourse() {
+            const country = document.getElementById('custom-country').value.trim() || "CUSTOM_LAB";
+            const region = document.getElementById('custom-region').value.trim() || "LOCAL";
+            const name = document.getElementById('custom-course-name').value.trim();
+            const raw = document.getElementById('custom-outcomes-raw').value;
+
+            if (!name || !raw) return alert("MISSING PARAMETERS: Course Name and Outcomes are required.");
+
+            const custom = getCustomOutcomes();
+
+            // Initialize structure if needed
+            if (!custom[country]) custom[country] = {};
+            if (!custom[country][region]) custom[country][region] = {};
+
+            // Save outcomes
+            custom[country][region][name] = raw.split("\n").map(o => o.trim()).filter(o => o.length > 0);
+
+            localStorage.setItem('blob_custom_curriculum', JSON.stringify(custom));
+
+            // Clear inputs
+            document.getElementById('custom-course-name').value = "";
+            document.getElementById('custom-outcomes-raw').value = "";
+            document.getElementById('custom-country').value = "";
+            document.getElementById('custom-region').value = "";
+
+            toggleCustomAdd();
+            fetchCurriculum(); // Reload and merge
+            log(`Custom Course [${name}] added to Local Lab under ${country}/${region}.`, "success");
+        }
+
+        function toggleCustomAdd() {
+            const zone = document.getElementById('custom-add-zone');
+            const btn = document.getElementById('custom-toggle-btn');
+            const show = zone.style.display === 'none';
+            zone.style.display = show ? 'block' : 'none';
+            btn.innerText = show ? "CANCEL" : "+ ADD CUSTOM COURSE";
+        }
+
+        async function fetchCurriculum() {
+            try {
+                const res = await fetch("curriculum.json?v=66.21");
+                curriculumData = await res.json();
+
+                // Merge Custom Lab (Deep Merge)
+                const custom = getCustomOutcomes();
+                Object.keys(custom).forEach(c => {
+                    // Check if it's a legacy flat course (array) or new hierarchy (object)
+                    if (Array.isArray(custom[c])) {
+                        // Legacy: Add to CUSTOM_LAB > LOCAL
+                        if (!curriculumData["CUSTOM_LAB"]) curriculumData["CUSTOM_LAB"] = { "LOCAL": {} };
+                        curriculumData["CUSTOM_LAB"]["LOCAL"][c] = custom[c];
+                    } else {
+                        // New Hierarchy: Merge Country
+                        if (!curriculumData[c]) curriculumData[c] = {};
+                        Object.keys(custom[c]).forEach(r => {
+                            // Merge Region
+                            if (!curriculumData[c][r]) curriculumData[c][r] = {};
+                            // Merge Courses
+                            Object.assign(curriculumData[c][r], custom[c][r]);
+                        });
+                    }
+                });
+
+                const cSel = document.getElementById('f-country');
+                cSel.innerHTML = '<option value="">-- SELECT COUNTRY --</option>';
+                Object.keys(curriculumData).forEach(c => {
+                    cSel.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+                log("Curriculum Hub synchronized.", "success");
+
+                // --- STICKY RESTORATION (v66.40 FIX) ---
+                window.isRestoringCurriculum = true;
+                const savedCountry = localStorage.getItem('TM_FORGE_COUNTRY');
+                if (savedCountry && curriculumData[savedCountry]) {
+                    cSel.value = savedCountry;
+                    updateForgeRegions();
+
+                    const savedRegion = localStorage.getItem('TM_FORGE_REGION');
+                    const rSel = document.getElementById('f-region');
+                    if (savedRegion && curriculumData[savedCountry][savedRegion]) {
+                        rSel.value = savedRegion;
+                        updateForgeCourses();
+
+                        const savedCourse = localStorage.getItem('TM_FORGE_COURSE');
+                        const crsSel = document.getElementById('f-course');
+                        if (savedCourse && curriculumData[savedCountry][savedRegion][savedCourse]) {
+                            crsSel.value = savedCourse;
+                            updateForgeOutcomes();
+                        }
+                    }
+                }
+                window.isRestoringCurriculum = false;
+                renderFavorites();
+            } catch (e) {
+                console.error("Failed to load curriculum", e);
+                log("CURRICULUM_LOAD_FAILURE: Check network or file integrity.", "error");
+            }
+        }
+
+        function updateForgeRegions() {
+            const country = document.getElementById('f-country').value;
+            if (!window.isRestoringCurriculum) {
+                localStorage.setItem('TM_FORGE_COUNTRY', country);
+                localStorage.removeItem('TM_FORGE_REGION');
+                localStorage.removeItem('TM_FORGE_COURSE');
+            }
+
+            const rSel = document.getElementById('f-region');
+            rSel.innerHTML = '<option value="">-- SELECT REGION --</option>';
+            rSel.style.display = country ? 'block' : 'none';
+            if (country && curriculumData[country]) {
+                Object.keys(curriculumData[country]).forEach(r => {
+                    rSel.innerHTML += `<option value="${r}">${r}</option>`;
+                });
+            }
+            // Clear children
+            if (!window.isRestoringCurriculum) {
+                document.getElementById('f-course').style.display = 'none';
+                document.getElementById('f-fav-btn').style.display = 'none';
+                document.getElementById('f-outcomes').innerHTML = "<p style='text-align:center; opacity:0.4;'>SELECT COURSE TO LOAD OUTCOMES</p>";
+            }
+        }
+
+        function updateForgeCourses() {
+            const country = document.getElementById('f-country').value;
+            const region = document.getElementById('f-region').value;
+            if (!window.isRestoringCurriculum) {
+                localStorage.setItem('TM_FORGE_REGION', region);
+                localStorage.removeItem('TM_FORGE_COURSE');
+            }
+
+            const cSel = document.getElementById('f-course');
+            cSel.innerHTML = '<option value="">-- SELECT COURSE --</option>';
+            cSel.style.display = region ? 'block' : 'none';
+            document.getElementById('f-fav-btn').style.display = 'none';
+
+            if (region && curriculumData[country] && curriculumData[country][region]) {
+                const courses = curriculumData[country][region];
+                Object.keys(courses).forEach(c => {
+                    cSel.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+            }
+            // Clear child
+            if (!window.isRestoringCurriculum) {
+                document.getElementById('f-outcomes').innerHTML = "<p style='text-align:center; opacity:0.4;'>SELECT COURSE TO LOAD OUTCOMES</p>";
+            }
+        }
+
+        function updateForgeOutcomes() {
+            const country = document.getElementById('f-country').value;
+            const region = document.getElementById('f-region').value;
+            const course = document.getElementById('f-course').value;
+            if (!window.isRestoringCurriculum) {
+                localStorage.setItem('TM_FORGE_COURSE', course);
+            }
+
+            const outDiv = document.getElementById('f-outcomes');
+            const favBtn = document.getElementById('f-fav-btn');
+
+            if (course && curriculumData[country] && curriculumData[country][region] && curriculumData[country][region][course]) {
+                favBtn.style.display = 'block';
+                updateFavBtnStyle();
+
+                const data = curriculumData[country][region][course];
+                const list = Array.isArray(data) ? data : (data.outcomes || []);
+
+                let h = `<div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid #222; padding-bottom:10px;">
+                            <label style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px; margin:0;">TARGET OUTCOMES</label>
+                            <button onclick="toggleAllOutcomes(true)" onmouseover="this.style.color='#00ffcc'" onmouseout="this.style.color='#666'" style="background:none; border:none; color:#666; font-size:0.6rem; cursor:pointer; text-decoration:none; font-family:'Inter',sans-serif; letter-spacing:1px; transition:color 0.2s;">[SELECT ALL]</button>
+                         </div>`;
+
+                list.forEach((o, i) => {
+                    h += `<label style="display:flex; gap:15px; padding:12px; border-bottom:1px solid #222; cursor:pointer; align-items:flex-start; transition:background 0.2s;">
+                            <input type="checkbox" value="${o}" class="outcome-check" style="margin-top:2px; width:auto; accent-color:var(--forge-accent);">
+                            <span style="font-size:0.65rem; color:#bbb; line-height:1.4; font-weight:normal;">${o}</span>
+                          </label>`;
+                });
+                outDiv.innerHTML = h;
+            } else {
+                favBtn.style.display = 'none';
+                outDiv.innerHTML = "<p style='text-align:center; opacity:0.4;'>SELECT COURSE TO LOAD OUTCOMES</p>";
+            }
+        }
+
+        // --- FAVORITES SYSTEM ---
+        function getFavorites() {
+            const f = localStorage.getItem('TM_CURRICULUM_FAVORITES');
+            return f ? JSON.parse(f) : [];
+        }
+
+        function toggleFavorite() {
+            const country = document.getElementById('f-country').value;
+            const region = document.getElementById('f-region').value;
+            const course = document.getElementById('f-course').value;
+            if (!country || !region || !course) return;
+
+            let favs = getFavorites();
+            const id = `${country}|${region}|${course}`;
+            const idx = favs.findIndex(f => f.id === id);
+
+            if (idx > -1) {
+                favs.splice(idx, 1);
+            } else {
+                favs.push({ id, country, region, course });
+            }
+
+            localStorage.setItem('TM_CURRICULUM_FAVORITES', JSON.stringify(favs));
+            updateFavBtnStyle();
+            renderFavorites();
+        }
+
+        function updateFavBtnStyle() {
+            const country = document.getElementById('f-country').value;
+            const region = document.getElementById('f-region').value;
+            const course = document.getElementById('f-course').value;
+            const favs = getFavorites();
+            const isFav = favs.some(f => f.country === country && f.region === region && f.course === course);
+            const btn = document.getElementById('f-fav-btn');
+            btn.style.color = isFav ? '#ffcc00' : '#444';
+            btn.style.borderColor = isFav ? '#ffcc00' : '#333';
+        }
+
+        function renderFavorites() {
+            const favs = getFavorites();
+            const shelf = document.getElementById('f-favorites-shelf');
+            if (favs.length === 0) {
+                shelf.style.display = 'none';
+                return;
+            }
+            shelf.style.display = 'flex';
+            let h = "";
+            favs.forEach(f => {
+                h += `<button class="btn" onclick="jumpToFavorite('${f.country}', '${f.region}', '${f.course}')" 
+                        style="font-size:0.55rem; padding:4px 8px; background:rgba(255,204,0,0.1); border:1px solid #ffcc00; color:#ffcc00; white-space:nowrap; border-radius:15px;">
+                        ⭐ ${f.course}
+                      </button>`;
+            });
+            shelf.innerHTML = h;
+        }
+
+        function jumpToFavorite(c, r, crs) {
+            window.isRestoringCurriculum = true;
+            document.getElementById('f-country').value = c;
+            updateForgeRegions();
+            document.getElementById('f-region').value = r;
+            updateForgeCourses();
+            document.getElementById('f-course').value = crs;
+            updateForgeOutcomes();
+            window.isRestoringCurriculum = false;
+        }
+
+        function toggleAllOutcomes(state) {
+            document.querySelectorAll('.outcome-check').forEach(c => c.checked = state);
+        }
+        // --- END CURRICULUM ---
+
+        // --- BIRTH & HOSPITAL ---
+        function birthMission() {
+            setForgeLoading(true, "STABILIZING BIOLOGICAL DATA...");
+            const lastReply = forgeHistory.filter(m => m.role === 'assistant').pop()?.content;
+            if (!lastReply) {
+                setForgeLoading(false);
+                return alert("NO BIOLOGICAL MATERIAL DETECTED.");
+            }
+
+            try {
+                // RESILIENT PARSING: Strip markdown fences if present, then find the main JSON object
+                let cleanStr = lastReply.trim();
+                if (cleanStr.includes("```")) {
+                    // Try to extract content between fences
+                    const match = cleanStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+                    if (match) cleanStr = match[1].trim();
+                }
+
+                // Final isolation: Find the first { and last }
+                const start = cleanStr.indexOf('{');
+                const end = cleanStr.lastIndexOf('}');
+
+                if (start === -1 || end === -1) throw new Error("No JSON object found in AI response.");
+
+                const jsonStr = cleanStr.substring(start, end + 1);
+                accumulatedData = JSON.parse(jsonStr);
+
+                // INJECT AUTH DATA
+                if (googleUser && accumulatedData.metadata) {
+                    accumulatedData.metadata.author = googleUser.name;
+                    accumulatedData.metadata.authorEmail = googleUser.email;
+                    log(`IDENTITY INJECTED: Mission authored by ${googleUser.name}`, "success");
+                }
+
+                addForgeChat("ai", "!!! BIRTH SUCCESSFUL. Initiating clinical review in the Surgical Hospital.");
+                openHospital();
+            } catch (e) {
+                console.error("Birth Error:", e);
+                addForgeChat("ai", `!! BIRTH TRAUMA: Parser failed. [Detail: ${e.message}]. Please ask the AI to re-output the RAW JSON block starting with { and ending with }.`);
+            } finally {
+                setForgeLoading(false);
+            }
+        }
+
+        function openHospital() {
+            document.getElementById('forge-chat').style.display = 'none';
+            document.getElementById('hospital-view').style.display = 'grid';
+            renderHospNodes();
+        }
+
+        function renderHospNodes() {
+            const nav = document.getElementById('hosp-nav');
+            let h = '<div style="font-size:0.6rem; color:var(--forge-accent); margin-bottom:15px; letter-spacing:1px; font-weight:bold;">SURGICAL NODES</div>';
+
+            // Metadata Node
+            h += `<div class="hosp-tab" onclick="editHospNode('metadata')">METADATA</div>`;
+
+            // Slide Nodes
+            if (accumulatedData.slides) {
+                accumulatedData.slides.forEach((s, i) => {
+                    h += `<div class="hosp-tab" id="hosp-tab-${i}" onclick="editHospNode(${i})">SLIDE ${i + 1}: ${s.title.substring(0, 15)}...</div>`;
+                });
+            }
+
+            // Glossary Node
+            h += `<div class="hosp-tab" onclick="editHospNode('glossary')">INTELLIGENCE GLOSSARY</div>`;
+
+            nav.innerHTML = h;
+        }
+
+        let currentHospNode = null;
+        function editHospNode(idx) {
+            currentHospNode = idx;
+            document.querySelectorAll('.hosp-tab').forEach(t => t.classList.remove('active'));
+
+            const editor = document.getElementById('hosp-editor');
+            const path = document.getElementById('hosp-path');
+
+            if (idx === 'metadata') {
+                path.innerText = "NODE: METADATA";
+                editor.value = JSON.stringify(accumulatedData.metadata, null, 2);
+            } else if (idx === 'glossary') {
+                path.innerText = "NODE: GLOSSARY";
+                editor.value = JSON.stringify(accumulatedData.intelligenceGlossary || {}, null, 2);
+            } else {
+                path.innerText = `NODE: SLIDE_${idx + 1}`;
+                editor.value = JSON.stringify(accumulatedData.slides[idx], null, 2);
+                const tab = document.getElementById(`hosp-tab-${idx}`);
+                if (tab) tab.classList.add('active');
+            }
+        }
+
+        function saveHospEdit() {
+            const val = document.getElementById('hosp-editor').value;
+            try {
+                const parsed = JSON.parse(val);
+                if (currentHospNode === 'metadata') {
+                    accumulatedData.metadata = parsed;
+                } else if (currentHospNode === 'glossary') {
+                    accumulatedData.intelligenceGlossary = parsed;
+                } else {
+                    accumulatedData.slides[currentHospNode] = parsed;
+                }
+                log("Surgical Node Stabilized.", "success");
+                renderHospNodes();
+            } catch (e) { alert("Surgical Error: Invalid JSON in editor."); }
+        }
+
+        function downloadBirthedBlob() {
+            if (!accumulatedData) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(accumulatedData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", (accumulatedData.metadata.id || "mission") + ".blob");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            log("Local Source Download Initiated.", "success");
+        }
+
+        async function finalizeForge() {
+            if (!confirm("Confirm Mission Deployment to Command Center?")) return;
+
+            const id = accumulatedData.metadata.id.toUpperCase().replace(/\s/g, '');
+            const name = accumulatedData.metadata.title;
+
+            log(`Injecting Birthed Capsule [${id}]...`);
+            try {
+                const res = await fetch(TM_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_content',
+                        pin: TM_PIN,
+                        id: id,
+                        name: name,
+                        payload: accumulatedData
+                    })
+                });
+                const j = await res.json();
+                if (j.status === "success") {
+                    log("INTEGRATED INJECTION SUCCESSFUL.", "success");
+                    toggleForge();
+                    fetchMissions();
+                    alert(`Mission [${name}] is now LIVE.`);
+                } else log(j.message, "error");
+            } catch (e) { log(e.message, "error"); }
+        }
+        // --- END HOSPITAL ---
 
         async function fetchMissions() {
             log("Pinging Archive Server...");
+
+            // --- CACHE LOAD ---
+            const cachedMissions = localStorage.getItem('TM_MISSION_CACHE');
+            if (cachedMissions) {
+                try {
+                    renderMissions(JSON.parse(cachedMissions));
+                } catch (e) { }
+            }
+
             try {
-                const res = await fetchWithTimeout(URL + "?action=list_missions");
+                // CACHE BUSTER: Add timestamp to URL to bypass browser/proxy caching
+                const bustUrl = TM_URL + (TM_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+                console.log("DIAGNOSTIC: Requesting Archive handover from:", bustUrl);
+
+                const res = await fetchWithTimeout(bustUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'list_missions', pin: TM_PIN })
+                });
+                console.log("DIAGNOSTIC: Handshake response received. Status:", res.status);
                 if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
                 const j = await res.json();
+
                 if (j.status === "success") {
                     setStatus("online", "ENCRYPTED_LINK_ACTIVE");
-                    renderMissions(j.missions); fetchProgress();
-                    log("Handshake successful. Directory synchronized.", "success");
+                    log(`Handshake successful [Backend: ${j.version || 'v1'}]. Found ${j.missions ? j.missions.length : 0} mission(s).`, "success");
+                    localStorage.setItem('TM_MISSION_CACHE', JSON.stringify(j.missions));
+                    renderMissions(j.missions);
+                    fetchProgress();
                 } else { throw new Error(j.message || "Unknown server error"); }
             } catch (e) {
                 setStatus("offline", "CONNECTION_FAILURE");
                 log(`CRITICAL: ${e.message}`, "error");
+                console.error("DIAGNOSTIC: Full error object:", e);
                 log("HINT: Ensure the Apps Script URL and TEACHER_PIN are correctly configured.");
-                renderMissions([]); // Show empty table so UI isn't empty
+                // Failover to cache already rendered, or show empty if no cache
             }
         }
 
@@ -273,7 +2053,7 @@
             if (!id || !name || !raw) return log("ABORTED: Missing required parameters.", "error");
             log(`Opening stream for Capsule [${id}]...`);
             try {
-                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: PIN, id: id, name: name, payload: JSON.parse(raw) }) });
+                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: TM_PIN, id: id, name: name, payload: JSON.parse(raw) }) });
                 const j = await res.json();
                 if (j.status === "success") {
                     log("CAPSULE COMMITTED TO RECORD.", "success");
@@ -307,7 +2087,7 @@
         async function fetchProgress() {
             document.getElementById('sync-tick').innerText = "[SYNC_BUSY]";
             try {
-                const res = await fetchWithTimeout(URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_progress', pin: PIN }) });
+                const res = await fetchWithTimeout(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_progress', pin: TM_PIN }) });
                 const j = await res.json();
                 if (j.status === "success") {
                     allProgress = j.progress;
@@ -334,19 +2114,21 @@
             const filtered = filter === "ALL" ? allProgress : allProgress.filter(p => p.class === filter);
             let h = "";
             filtered.forEach(p => {
-                const missions = Object.keys(p.missionData);
+                const missions = Object.keys(p.missionData || {});
+                // Strip any trailing PIN from name (e.g., "Dave 2188" becomes "Dave")
+                const displayName = p.name.replace(/\s+\d+$/, '');
                 missions.forEach(mid => {
                     const st = p.missionData[mid]; if (!st) return;
                     const decs = st.dec ? Object.keys(st.dec).length : 0;
                     const pre = st.preDone ? "✓" : "×";
 
                     h += `<div style="padding:6px 10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                            <div style="flex:1; min-width:0;">
-                                <div style="font-size:0.7rem; font-weight:bold;">${p.name} <span style="color:#888; font-weight:normal; font-size:0.65rem;">${p.class}</span></div>
-                                <div style="color:#666; font-size:0.6rem; margin-top:2px;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre}</div>
-                            </div>
-                            <button class="btn" style="padding:5px 10px; font-size:0.6rem; background:#c00; color:#fff; white-space:nowrap; flex-shrink:0; width:auto !important;" onclick="deleteStudent('${p.id}', '${p.name}')">DELETE</button>
-                          </div>`;
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:0.7rem; font-weight:bold;">${displayName} <span style="color:#888; font-weight:normal; font-size:0.65rem;">${p.class}</span></div>
+                            <div style="color:#666; font-size:0.6rem; margin-top:2px;">MISSION: ${mid} | STEP: ${decs} | BRIEF: ${pre}</div>
+                        </div>
+                        <button class="btn" style="padding:5px 10px; font-size:0.6rem; background:#c00; color:#fff; white-space:nowrap; flex-shrink:0; width:auto !important;" onclick="deleteStudent('${p.id}', '${displayName}')">DEL</button>
+                      </div>`;
                 });
             });
             document.getElementById('progress-list').innerHTML = h || "<p style='color:#ccc; padding:20px; font-size:0.65rem;'>No student data detected.</p>";
@@ -356,7 +2138,7 @@
             if (!confirm(`DELETE STUDENT: ${name}?\n\nThis will permanently remove all progress data. This action cannot be undone.`)) return;
             log(`Deleting student [${name}]...`);
             try {
-                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'delete_student', pin: PIN, id: id }) });
+                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_student', pin: TM_PIN, id: id }) });
                 const j = await res.json();
                 if (j.status === "success") {
                     log(`Student [${name}] deleted.`, "success");
@@ -365,69 +2147,258 @@
             } catch (e) { log(e.message, "error"); }
         }
 
+        async function runAI(uid, mid) {
+            log(`Initiating AI Analysis for Archive [${uid}]...`);
+            // Find student data
+            const student = allProgress.find(p => p.id === uid); if (!student) return log("User not found", "error");
+            const mData = student.missionData[mid]; if (!mData) return log("Mission data not found", "error");
+
+            try {
+                const res = await fetch(TM_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'generate_ai_feedback',
+                        pin: TM_PIN,
+                        rationales: mData.rat,
+                        context: { title: mid }
+                    })
+                });
+                const j = await res.json();
+                if (j.status === "success") {
+                    log("AI Feedback generated successfully.", "success");
+                    // Save feedback back to student state
+                    mData.aiFeedback = j.feedback;
+                    await fetch(TM_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'save_state',
+                            id: uid,
+                            missionId: mid,
+                            state: mData
+                        })
+                    });
+                    log("Feedback committed to student record.", "success");
+                    fetchProgress();
+                } else log(j.message, "error");
+            } catch (e) { log(e.message, "error"); }
+        }
+
+        async function toggleAI(id, state) {
+            log(`Updating AI Protocols for [${id}]...`);
+            try {
+                // SHOTGUN APPROACH: Send multiple property names to try and hit the correct backend handler
+                const res = await fetch(TM_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'toggle_ai',
+                        pin: TM_PIN,
+                        id: id,
+                        state: state,       // boolean
+                        enabled: state,     // alias
+                        val: state ? 1 : 0  // numeric
+                    })
+                });
+                const j = await res.json();
+                if (j.status === "success") {
+                    log(`Simulation AI for [${id}] updated.`, "success");
+                    await fetchMissions();
+                } else {
+                    log(`Backend Error: ${j.message}`, "error");
+                    alert("Remote toggle failed. Please update 'enableAIFeedback' in your .blob file and re-upload.");
+                    fetchMissions(); // Revert
+                }
+            } catch (e) { log(e.message, "error"); fetchMissions(); }
+        }
+
         async function deleteMission(id) {
             if (!confirm(`PERMANENT DELETION: Are you sure you want to scrub mission [${id}] from the record?`)) return;
             log(`DELETING CAPSULE [${id}]...`);
             try {
-                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'delete_content', pin: PIN, id: id }) });
+                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_content', pin: TM_PIN, id: id }) });
                 const j = await res.json();
                 if (j.status === "success") { log("CAPSULE DELETED.", "success"); fetchMissions(); } else log(j.message, "error");
             } catch (e) { log(e.message, "error"); }
         }
 
-        async function toggleAI(id, currentState) {
-            const newState = !currentState;
-            log(`Updating AI Permissions for [${id}] to ${newState ? "ENABLED" : "DISABLED"}...`);
-            try {
-                const res = await fetch(URL, { method: 'POST', body: JSON.stringify({ action: 'toggle_ai', pin: PIN, id: id, enabled: newState }) });
-                const j = await res.json();
-                if (j.status === "success") {
-                    log(`AI Status for [${id}] updated: ${j.enabled ? "LIVE" : "OFFLINE"}`, "success");
-                    fetchMissions(); // Refresh to update UI
-                } else log(j.message, "error");
-            } catch (e) { log(e.message, "error"); }
-        }
+        function renderMissions(missions) {
+            console.log("DEBUG: Missions Payload:", missions); // DEBUG INSPECTION
+            const list = document.getElementById('library-list');
+            if (!missions || missions.length === 0) {
+                list.innerHTML = "<div style='color:#ccc; padding:20px; font-size:0.65rem;'>No missions in archive.</div>";
+                document.getElementById('lib-log').innerText = "Archive empty.";
+                return;
+            }
+            document.getElementById('lib-log').innerText = `${missions.length} mission(s) loaded.`;
+            const isUserAdmin = googleUser && ["dwaugh@gmail.com"].includes(googleUser.email);
 
-        function renderMissions(ms) {
-            document.getElementById('lib-log').innerText = `${ms.length} Capsules Detected.`;
-            let h = "<table><tr><th>Visual</th><th>Dossier Name</th><th>ID</th><th>AI Status</th><th>Action</th></tr>";
-            ms.forEach(m => {
-                // Determine if AI is enabled (requires fetching full payload really, but list_missions might need to return it)
-                // Assuming list_missions is updated to return metadata soon, but for now we might need to parse it client side or update list_missions
-                // Wait, list_missions only returns id/name/thumb. We need to update list_missions in code.gs to return metadata or AI status.
-                // Let's assume list_missions returns aiEnabled. I will need to update code.gs for this or fetch it.
-                // Actually, let's keep it simple: We need to see the status. 
-                // Updating list_missions in code.gs is cleaner. 
-                // For now, I'll add the UI and I will update code.gs in the next step to return the ai info.
+            let h = `<table style="width:100%; font-size:0.65rem; border-collapse:collapse;">
+                    <thead><tr style="border-bottom:1px solid #ddd; text-align:left;">
+                        <th style="padding:8px; width:50px;">VISUAL</th>
+                        <th style="padding:8px;">ID</th>
+                        <th style="padding:8px;">NAME</th>
+                    <th style="padding:8px; text-align:center;">AI Qs</th>
+                        <th style="padding:8px; text-align:center;">ACTION</th>
+                    </tr></thead><tbody>`;
 
-                // TEMP FIX: We will just toggle blindly for now, but ideally we show state.
-                // Let's check m.aiEnabled if I add it to code.gs
-                const aiState = m.aiEnabled ? "🟢 LIVE" : "🔴 OFF";
-                const btnColor = m.aiEnabled ? "#dc3545" : "#28a745";
-                const btnText = m.aiEnabled ? "DISABLE AI" : "ENABLE AI";
+            missions.forEach(m => {
+                const thumb = m.thumb || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=200&auto=format&fit=crop";
+                const desc = (m.description || "").replace(/'/g, "\\'").substring(0, 200);
+                const publishBtn = isUserAdmin ? `<button onclick="publishToHub('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${thumb}', '${desc}')" style="font-size:0.5rem; padding:3px 6px; background:#00ffcc; color:#000; border:none; cursor:pointer; margin-right:4px;">PUB</button>` : "";
 
-                const thumb = m.thumb || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop";
-                h += `<tr>
-                        <td><div class="thumb" style="background-image:url('${thumb}')"></div></td>
-                        <td><strong>${m.name}</strong></td>
-                        <td><code>${m.id}</code></td>
-                        <td>
-                           <div style="font-size:0.6rem; font-weight:bold; margin-bottom:5px;">${aiState}</div>
-                           <button class="btn" style="padding:5px; font-size:0.55rem; width:auto; background:${btnColor}" onclick="toggleAI('${m.id}', ${m.aiEnabled})">${btnText}</button>
-                        </td>
-                        <td><button class="btn-del" onclick="deleteMission('${m.id}')">SCRUB RECORD</button></td>
-                      </tr>`;
+                h += `<tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:8px;">
+                        <div style="width:40px; height:25px; background-image:url('${thumb}'); background-size:cover; background-position:center; border-radius:2px; border:1px solid #ccc;"></div>
+                    </td>
+                    <td style="padding:8px; font-weight:bold;">${m.id}</td>
+                    <td style="padding:8px;">${m.name}</td>
+                    <td style="padding:8px; text-align:center;">
+                        <label style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
+                            <input type="checkbox" ${m.aiEnabled ? 'checked' : ''} onchange="toggleAI('${m.id}', this.checked)" style="cursor:pointer; transform:scale(1.2);">
+                        </label>
+                    </td>
+                    <td style="padding:8px; text-align:center;">
+                        ${publishBtn}<button class="btn-del" onclick="deleteMission('${m.id}')" style="font-size:0.6rem; padding:4px 8px; background:none; border:1px solid #c00; color:#c00; cursor:pointer;">DEL</button>
+                    </td>
+                  </tr>`;
             });
-            document.getElementById('library-list').innerHTML = (ms.length > 0) ? h + "</table>" : "<p style='color:#ccc; padding:20px;'>No missions found.</p>";
+            h += `</tbody></table>`;
+            list.innerHTML = h;
         }
 
         // FAILSAFE: Ensure UI renders even if handshake is slow
         window.onload = () => {
             log("BOOT SEQUENCE INITIATED...");
-            fetchMissions();
+            if (typeof google !== 'undefined' && google.accounts) {
+                initGoogleAuth();
+            }
+            setTimeout(fetchMissions, 1000);
             setInterval(fetchProgress, 30000);
         };
+
+        // PROJECTOR VIEW
+        function toggleProjector() {
+            const pv = document.getElementById('projector-view');
+            pv.classList.toggle('active');
+            if (pv.classList.contains('active')) renderProjectorBoard();
+        }
+
+        function renderProjectorBoard() {
+            const board = document.getElementById('proj-board');
+            const classFilter = document.getElementById('proj-class-filter');
+            const missionFilter = document.getElementById('proj-mission-filter');
+            document.getElementById('proj-sync').innerText = "[LOG_ACTIVE]";
+
+            // Build entries list
+            const entries = [];
+            const allClasses = new Set();
+            const allMissions = new Set();
+
+            allProgress.forEach(p => {
+                Object.keys(p.missionData || {}).forEach(mid => {
+                    const st = p.missionData[mid];
+                    if (st) {
+                        entries.push({ name: p.name, class: p.class, mission: mid, steps: st.dec ? Object.keys(st.dec).length : 0, brief: st.preDone ? "READY" : "BRIEFING" });
+                        allClasses.add(p.class);
+                        allMissions.add(mid);
+                    }
+                });
+            });
+
+            // Populate filter dropdowns (preserve selection)
+            const currentClass = classFilter.value;
+            const currentMission = missionFilter.value;
+
+            classFilter.innerHTML = '<option value="ALL">ALL CLASSES</option>';
+            [...allClasses].sort().forEach(c => {
+                classFilter.innerHTML += `<option value="${c}" ${c === currentClass ? 'selected' : ''}>${c}</option>`;
+            });
+
+            missionFilter.innerHTML = '<option value="ALL">ALL MISSIONS</option>';
+            [...allMissions].sort().forEach(m => {
+                missionFilter.innerHTML += `<option value="${m}" ${m === currentMission ? 'selected' : ''}>${m}</option>`;
+            });
+
+            // Apply filters
+            let filtered = entries;
+            if (classFilter.value !== 'ALL') {
+                filtered = filtered.filter(e => e.class === classFilter.value);
+            }
+            if (missionFilter.value !== 'ALL') {
+                filtered = filtered.filter(e => e.mission === missionFilter.value);
+            }
+
+            // Sort and render
+            filtered.sort((a, b) => (a.class > b.class) ? 1 : (a.name > b.name) ? 1 : -1);
+
+            let h = "";
+            filtered.forEach(e => {
+                const pct = (e.steps / 18) * 100;
+                h += `<div class="proj-card ${e.steps > 0 ? 'active' : ''}">
+                <div class="proj-name">${e.name}</div>
+                <div class="proj-class">${e.class} // ${e.mission}</div>
+                <div class="proj-stats">
+                    <div><div style="color:#d2b48c; font-size:0.5rem; text-transform:uppercase; margin-bottom:2px;">Exhibit</div><div style="font-size:0.75rem; color:#fff;">${e.steps}</div></div>
+                    <div><div style="color:#d2b48c; font-size:0.5rem; text-transform:uppercase; margin-bottom:2px;">Status</div><div style="font-size:0.65rem; color:${e.brief === 'READY' ? '#0f0' : '#ff0'};">${e.brief}</div></div>
+                </div>
+                <div class="proj-bar"><div class="proj-fill" style="width:${pct}%"></div></div>
+            </div>`;
+            });
+
+            document.getElementById('proj-sync').innerText = `[${filtered.length} AGENTS]`;
+            board.innerHTML = h || "<div style='grid-column:1/-1; text-align:center; opacity:0.3; padding:100px; color:#d2b48c;'>WAITING FOR FIELD AGENTS...</div>";
+        }
+
+        // BATCH AI ANALYSIS
+        async function analyzeAll() {
+            const candidates = [];
+            allProgress.forEach(p => {
+                Object.keys(p.missionData || {}).forEach(mid => {
+                    const st = p.missionData[mid];
+                    if (st && st.preDone && !st.aiFeedback) candidates.push({ uid: p.id, mid: mid, name: p.name });
+                });
+            });
+            if (candidates.length === 0) return log("No students ready for AI analysis.", "info");
+            if (!confirm(`Generate AI feedback for ${candidates.length} student(s)? This may take 1-2 minutes.`)) return;
+
+            log(`Starting batch AI analysis for ${candidates.length} students...`);
+            let processed = 0;
+            for (const c of candidates) {
+                await runAI(c.uid, c.mid);
+                processed++;
+                log(`Progress: ${processed}/${candidates.length} (${c.name})`, "info");
+                if (processed < candidates.length) await new Promise(r => setTimeout(r, 4000)); // Rate limit: 15 RPM
+            }
+            log(`Batch complete. ${processed} students analyzed.`, "success");
+            fetchProgress();
+        }
     </script>
+    <!-- SETTINGS OVERLAY -->
+    <div id="settings-overlay">
+        <div class="settings-card">
+            <h3
+                style="color:#fff; font-family:var(--font-main); font-weight:700; font-size:0.9rem; margin-top:0; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:20px;">
+                CONNECTION SETTINGS</h3>
+
+            <label>Google Apps Script URL (Macro)</label>
+            <input type="text" id="set-url" class="settings-input"
+                placeholder="https://script.google.com/macros/s/.../exec">
+
+            <label>Security PIN</label>
+            <input type="text" id="set-pin" class="settings-input" placeholder="8812">
+
+            <div style="font-size:0.5rem; color:#666; margin-bottom:20px; font-style:italic;">
+                * Settings are saved to local storage. Changes require a page refresh to fully propagate across all AI
+                services.
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn" onclick="saveSettings()"
+                    style="flex:2; background:var(--forge-accent); font-size:0.7rem;">SAVE CONFIG</button>
+                <button class="btn" onclick="toggleSettings()"
+                    style="flex:1; background:#333; font-size:0.7rem;">CANCEL</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

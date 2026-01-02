@@ -4,51 +4,117 @@
 <head>
     <meta charset="UTF-8">
     <title>SITUATION ROOM</title>
-    <script>const API_URL = "[[INJECT_URL_NOW]]";</script>
+    <script>const API_URL = "https://script.google.com/macros/s/AKfycbzO2zyVLbC6ZCUEFTnhzkmV7ogDOyowZFRR7ZPwcidIPkSPDDX5mQaeuChCL7DiNwvo/exec";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Oswald:wght@700&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+    <script src="critical_crypto.js"></script>
+    <script src="social_history_sim_engine.js"></script>
     <style>
         :root {
-            --bg: #0c0c0c;
-            --accent: #d2b48c;
+            --bg: #020202;
+            --accent: #00ffea;
+            --accent-dim: rgba(0, 255, 234, 0.2);
+            --accent-glow: rgba(0, 255, 234, 0.6);
             --text: #e0e0e0;
-            --card: #ffffff;
-            --font-p: 'Georgia', serif;
-            --font-h: 'Courier New', monospace;
+            --card: rgba(10, 10, 10, 0.85);
+            --font-p: 'Inter', sans-serif;
+            --font-h: 'Oswald', sans-serif;
+            --font-tech: 'JetBrains Mono', monospace;
+            --font-logo: 'Oswald', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: #000;
+            text-shadow: none;
+        }
+
+        input,
+        button,
+        textarea,
+        select {
+            margin: 0;
+            font-family: var(--font-p);
         }
 
         body {
             margin: 0;
-            min-height: 100vh;
+            font-family: var(--font-p);
             display: flex;
-            font-family: var(--font-h);
+            height: 100vh;
+            overflow: hidden;
             background: var(--bg);
             color: var(--text);
-            overflow-x: hidden;
+        }
+
+        /* PREMIUM SCANLINE OVERLAY */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.6;
+            animation: scanlineScroll 10s linear infinite;
+        }
+
+        @keyframes scanlineScroll {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 0 100px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border: 1px solid #000;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
         }
 
         .sidebar {
-            width: 260px;
-            background: #000;
-            padding: 15px;
+            width: 220px;
+            min-width: 220px;
+            background: rgba(5, 5, 5, 0.95);
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #333;
-        }
-
-        .nav-container {
-            flex: 1;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-
-        .nav-container::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .nav-container::-webkit-scrollbar-thumb {
-            background: var(--accent);
+            border-right: 1px solid rgba(0, 255, 234, 0.15);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            box-shadow: 20px 0 60px rgba(0, 0, 0, 0.9);
         }
 
         .main {
@@ -56,13 +122,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: #111;
-            perspective: 1000px;
-            padding: 20px;
+            perspective: 2000px;
+            padding: 50px;
             position: relative;
             min-height: 100vh;
             overflow-y: auto;
             scroll-behavior: smooth;
+            background: radial-gradient(circle at 50% 0%, #0d2828 0%, #020202 70%);
         }
 
         .footer {
@@ -70,44 +136,149 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.95);
-            border-top: 1px solid #333;
-            padding: 10px 20px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 100%);
+            border-top: 1px solid rgba(0, 255, 234, 0.1);
+            padding: 20px 40px;
             display: flex;
             justify-content: space-between;
-            font-size: 0.6rem;
-            color: #666;
+            font-size: 0.7rem;
+            color: #555;
             z-index: 100;
             pointer-events: none;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* BLING: INTENSE GLITCH */
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff0055;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim 4s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #0055ff, 2px 2px #ff0055;
+            animation: glitch-anim2 2s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% {
+                clip: rect(10px, 9999px, 80px, 0);
+                transform: skew(0.5deg);
+            }
+
+            5% {
+                clip: rect(60px, 9999px, 10px, 0);
+                transform: skew(0.1deg);
+            }
+
+            100% {
+                clip: rect(40px, 9999px, 90px, 0);
+                transform: skew(0);
+            }
+        }
+
+        @keyframes glitch-anim2 {
+            0% {
+                clip: rect(80px, 9999px, 10px, 0);
+                transform: skew(0);
+            }
+
+            50% {
+                clip: rect(10px, 9999px, 80px, 0);
+                transform: skew(0.8deg);
+            }
+
+            100% {
+                clip: rect(30px, 9999px, 40px, 0);
+                transform: skew(0.2deg);
+            }
+        }
+
+        /* BLING: AGGRESSIVE NEON PULSE */
+        .neon-pulse {
+            animation: neonPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes neonPulse {
+
+            0%,
+            100% {
+                text-shadow: 0 0 20px var(--accent-dim), 0 0 40px var(--accent-dim), 0 0 10px var(--accent-dim);
+                opacity: 0.9;
+            }
+
+            50% {
+                text-shadow: 0 0 30px var(--accent), 0 0 60px var(--accent), 0 0 90px var(--accent-glow);
+                opacity: 1;
+            }
         }
 
         .mission-header {
             font-family: var(--font-h);
-            color: #fff;
-            font-size: 0.95rem;
+            color: var(--accent);
+            font-size: 0.9rem;
             text-transform: uppercase;
-            margin-bottom: 5px;
-            border-left: 4px solid var(--accent);
-            padding-left: 10px;
-            line-height: 1.2;
-            letter-spacing: 1px;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--accent);
+            padding-left: 20px;
+            line-height: 1;
+            letter-spacing: 5px;
+            font-weight: 700;
+            text-shadow: 0 0 20px var(--accent-dim);
         }
 
+        .situation-room-logo {
+            font-family: var(--font-logo);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -4px;
+            display: inline-block;
+            line-height: 0.8;
+            transform: scaleY(1.3);
+            transform-origin: bottom;
+            color: var(--accent);
+            filter: drop-shadow(0 0 15px var(--accent-dim));
+        }
+
+        /* HOLOGRAPHIC CARD */
         .card-container {
             width: 100%;
-            max-width: 1100px;
+            height: 100%;
             display: flex;
-            flex-direction: column;
-            margin: 0;
+            justify-content: center;
+            align-items: center;
+            max-width: 1800px;
+            /* Increased from 1400px */
+            margin: 0 auto;
+            z-index: 10;
         }
 
         .card {
-            background: transparent;
+            width: 95%;
+            height: 90%;
             display: none;
             flex-direction: column;
-            animation: fadeIn 0.5s ease;
-            width: 100%;
+            animation: cardEnter 0.6s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         .card.active {
@@ -117,21 +288,25 @@
         /* SPLIT VIEW EXHIBIT */
         .exhibit-frame {
             display: flex;
-            background: var(--card);
-            color: #000;
-            border-radius: 4px;
-            min-height: 400px;
-            max-height: 450px;
+            background: rgba(0, 0, 0, 0.6);
+            height: 70vh;
+            /* Allowed to grow taller */
             overflow: hidden;
-            border: 1px solid #999;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .exhibit-frame:hover {
+            border-color: var(--accent-dim);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 1), 0 0 20px var(--accent-dim);
         }
 
         .exhibit-left {
-            flex: 1.1;
+            flex: 0.8;
             background: #000;
             position: relative;
-            border-right: 1px solid #ddd;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .exhibit-left img,
@@ -142,132 +317,174 @@
             object-fit: cover;
             display: block;
             border: 0;
+            filter: contrast(1.1) saturate(1.1);
         }
 
         .img-label {
             position: absolute;
-            bottom: 15px;
-            left: 15px;
-            background: rgba(0, 0, 0, 0.8);
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
             color: var(--accent);
-            padding: 6px 10px;
-            font-size: 0.55rem;
+            padding: 8px 15px;
+            font-size: 0.6rem;
             text-transform: uppercase;
             border: 1px solid var(--accent);
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             z-index: 10;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
 
         .exhibit-right {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.02);
             overflow: hidden;
         }
 
         .tab-bar {
             display: flex;
-            background: #f4f4f4;
-            border-bottom: 1px solid #ddd;
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .tab {
             flex: 1;
-            padding: 10px;
+            padding: 15px;
             cursor: pointer;
             text-align: center;
-            font-size: 0.6rem;
-            border-right: 1px solid #ddd;
-            color: #999;
-            font-weight: bold;
-            transition: 0.2s;
-            letter-spacing: 1px;
+            font-size: 0.7rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            color: #777;
+            font-weight: 700;
+            transition: 0.3s;
+            letter-spacing: 2px;
+            font-family: var(--font-h);
+            text-transform: uppercase;
         }
 
         .tab.active {
-            background: #fff;
-            color: #000;
+            background: rgba(0, 255, 234, 0.05);
+            color: var(--accent);
             opacity: 1;
+            text-shadow: 0 0 10px var(--accent-dim);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.03);
+            color: #ccc;
         }
 
         .tab-content-scroll {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            line-height: 1.5;
+            padding: 30px;
+            line-height: 1.7;
             font-family: var(--font-p);
-            text-align: justify;
-            color: #333;
-            font-size: 0.9rem;
+            text-align: left;
+            color: #ccc;
+            font-size: 1rem;
         }
 
         .tab-content-scroll h2 {
             font-family: var(--font-h);
-            font-size: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 400;
             margin-top: 0;
-            color: #888;
+            color: var(--accent);
             text-transform: uppercase;
             letter-spacing: 2px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
         }
 
         /* INTERACTION AREA */
         .interaction-block {
-            background: #222;
+            background: rgba(0, 0, 0, 0.6);
             color: #fff;
-            border-top: 4px solid var(--accent);
-            padding: 15px;
-            margin-top: 10px;
+            border-top: 2px solid var(--accent);
+            padding: 25px;
+            margin-top: 25px;
             border-radius: 4px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
         .interaction-prompt {
-            font-style: italic;
-            font-size: 0.85rem;
+            font-style: normal;
+            font-size: 1rem;
             color: var(--accent);
-            margin-bottom: 10px;
-            line-height: 1.4;
+            margin-bottom: 20px;
+            line-height: 1.5;
             border-left: 3px solid var(--accent);
-            padding-left: 12px;
+            padding-left: 20px;
+            background: linear-gradient(90deg, var(--accent-dim) 0%, transparent 100%);
+            padding: 15px 20px;
         }
 
         .btn {
-            background: #333;
-            color: #fff;
-            border: 1px solid #555;
-            padding: 10px;
+            background: linear-gradient(90deg, transparent 0%, transparent 100%);
+            background-size: 200% 100%;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 20px 40px;
             cursor: pointer;
-            font-family: inherit;
-            transition: 0.2s;
-            font-size: 0.7rem;
+            font-family: var(--font-h);
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 4px;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 2px;
+            font-size: 1rem;
+            text-shadow: 0 0 10px var(--accent-dim);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         .btn:hover {
-            background: #444;
-            border-color: var(--accent);
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 60px var(--accent), 0 0 30px var(--accent);
+            transform: translateY(-3px) scale(1.02);
+            text-shadow: none;
+            border-color: var(--accent-glow);
         }
 
         .btn.active {
-            background: var(--accent) !important;
-            color: #000 !important;
+            position: relative;
+            background: none !important;
+            /* Managed by pseudo to allow opacity on var(--accent) */
+            color: #fff !important;
             font-weight: bold;
+            box-shadow: 0 0 40px var(--accent-dim);
+            text-shadow: 0 0 5px var(--accent);
             border-color: var(--accent);
+            z-index: 1;
+        }
+
+        .btn.active::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--accent);
+            opacity: 0.15;
+            z-index: -1;
         }
 
         .btn.locked {
-            opacity: 0.3;
+            opacity: 0.15;
             cursor: not-allowed;
+            pointer-events: none;
+            filter: grayscale(1);
         }
 
         .choice-row {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 30px;
+            margin-top: 40px;
         }
 
         .choice-row .btn {
@@ -282,6 +499,21 @@
             pointer-events: none;
         }
 
+        .watermark {
+            position: fixed;
+            bottom: 40px;
+            left: 30px;
+            font-size: 0.7rem;
+            color: var(--accent);
+            opacity: 0.5;
+            letter-spacing: 5px;
+            z-index: 100;
+            pointer-events: none;
+            text-transform: uppercase;
+            font-family: var(--font-tech);
+            text-shadow: 0 0 10px var(--accent-dim);
+        }
+
         /* SCROLLABLE SPLASH */
         #splash {
             position: fixed;
@@ -292,97 +524,130 @@
             z-index: 999;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 100px 20px 100px 20px;
             overflow-y: auto;
+            align-items: center;
         }
 
         #splash-overlay {
             position: fixed;
             inset: 0;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.9));
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.95) 100%);
             z-index: -1;
         }
 
         .splash-inner {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             display: flex;
             flex-direction: column;
             align-items: center;
             z-index: 10;
             position: relative;
+            margin: auto;
+            /* Safe centering */
+            padding: 40px 20px;
+            min-height: min-content;
+            /* Ensure it takes up space */
         }
 
         .briefing-dossier {
             width: 100%;
-            max-width: 400px;
+            max-width: 1200px;
             background: rgba(0, 0, 0, 0.85);
-            border: 1px solid #333;
-            border-top: 5px solid var(--accent);
-            padding: 30px;
-            margin-top: 20px;
-            max-height: 45vh;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 1);
-            color: #eee;
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 4px solid var(--accent);
+            padding: 50px;
+            margin-top: 40px;
+            max-height: none;
+            overflow-y: visible;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.9);
+            color: #ddd;
             font-family: var(--font-p);
-            line-height: 1.7;
-            text-align: justify;
+            line-height: 1.8;
+            font-size: 1.1rem;
         }
 
-        #ref-modal {
-            display: none;
-            flex-direction: column;
-            align-items: center;
+        #login-step {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
             width: 100%;
+            max-width: 550px;
+            animation: fadeIn 1s ease;
+        }
+
+        #login-step input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 16px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        #login-step input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 20px var(--accent-dim);
+            outline: none;
         }
 
         #mission-title-big {
-            font-size: 2.5rem;
+            font-family: var(--font-logo);
+            font-size: clamp(3rem, 5vw, 5rem);
             text-transform: uppercase;
-            letter-spacing: 5px;
-            font-weight: bold;
+            letter-spacing: 10px;
+            font-weight: 700;
             color: #fff;
-            text-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
-            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
             text-align: center;
-            line-height: 1.2;
-            max-width: 800px;
+            line-height: 1;
+            opacity: 0;
+            transform: translateY(20px);
         }
 
         #ref-title {
             color: var(--accent);
-            font-size: 1rem;
+            font-size: 1.2rem;
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: 6px;
             margin-bottom: 30px;
-            opacity: 0.9;
             font-weight: bold;
+            opacity: 0.8;
         }
 
-        #ref-q {
-            margin: 20px 0;
-            font-size: 1.1rem;
-            color: var(--accent);
-            font-weight: bold;
+        #ref-narrative {
+            columns: 2 auto;
+            column-gap: 60px;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-top: 30px;
+            color: #ccc;
         }
 
         textarea {
-            background: #111;
+            background: rgba(255, 255, 255, 0.015);
+            /* More transparent */
             color: #fff;
-            border: 1px solid #444;
-            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
             width: 100%;
-            font-family: inherit;
-            margin-bottom: 10px;
+            font-family: var(--font-p);
+            margin-bottom: 15px;
             box-sizing: border-box;
             outline: none;
-            font-size: 0.9rem;
-            height: 80px;
-            line-height: 1.5;
+            font-size: 1rem;
+            height: 120px;
+            line-height: 1.6;
+            border-radius: 4px;
         }
 
         .word-count {
@@ -396,34 +661,39 @@
         .mission-item {
             display: flex;
             align-items: center;
-            background: #111;
-            border: 1px solid #333;
-            padding: 15px;
-            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            margin-bottom: 20px;
             cursor: pointer;
             width: 100%;
             box-sizing: border-box;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            border-radius: 4px;
         }
 
         .mission-item:hover {
             border-color: var(--accent);
-            background: #1a1a1a;
+            background: rgba(0, 255, 204, 0.05);
+            transform: translateX(10px);
+            box-shadow: 0 0 30px var(--accent-dim);
         }
 
         .mission-thumb {
-            width: 52px;
-            height: 52px;
+            width: 100px;
+            height: 60px;
             border-radius: 4px;
             background-size: cover;
             background-position: center;
-            border: 1px solid #333;
-            margin-right: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-right: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            transition: 0.3s;
         }
 
         .mission-item:hover .mission-thumb {
             border-color: var(--accent);
+            transform: scale(1.05);
         }
 
         #glossary-panel {
@@ -435,7 +705,7 @@
             max-height: 85vh;
             background: #000;
             border: 1px solid var(--accent);
-            z-index: 2000;
+            z-index: 9999;
             padding: 25px;
             overflow-y: auto;
             box-shadow: 0 0 30px rgba(0, 0, 0, 1);
@@ -482,6 +752,19 @@
             z-index: 100;
             pointer-events: none;
         }
+
+        .situation-room-logo {
+            font-family: var(--font-logo);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            display: inline-block;
+            line-height: 0.85;
+            transform: scaleY(1.2);
+            transform-origin: bottom;
+            text-shadow: 0 0 30px var(--accent-dim);
+            font-size: clamp(3rem, 6vw, 6.5rem);
+        }
     </style>
 </head>
 
@@ -489,7 +772,8 @@
     <div class="watermark">SECURE CONNECTION // ENCRYPTED LINK Active</div>
     <div id="tsparticles"></div>
     <div id="loading-screen"
-        style="position:fixed; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; color:var(--accent); z-index:1001; font-weight:bold; letter-spacing:5px;">
+        style="position:fixed; inset:0; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; color:var(--accent); z-index:1001; font-weight:bold; letter-spacing:8px; font-family:var(--font-h); font-size:1.5rem;"
+        class="neon-pulse">
         SYNCHRONIZING ARCHIVES...</div>
 
     <div id="glossary-panel">
@@ -503,61 +787,78 @@
     </div>
 
     <div id="splash">
+        <div id="splash-version"
+            style="position:fixed; top:20px; left:20px; font-size:0.75rem; color:var(--accent); opacity:0.4; letter-spacing:2px; z-index:1000; font-family:var(--font-tech);">
+            v66.492</div>
         <div id="splash-overlay"></div>
         <div class="splash-inner">
-            <div id="login-step" style="width:380px; text-align:center;">
-                <h1 style="color:var(--accent); letter-spacing:8px; font-size:2.2rem; margin-bottom:40px;">SITUATION
-                    ROOM</h1>
+            <div id="login-step" style="width:100%; max-width:550px; text-align:center;">
+                <h1 class="situation-room-logo glitch neon-pulse" data-text="THE SITUATION ROOM"
+                    style="color:var(--accent); margin-bottom:40px;">
+                    THE SITUATION ROOM</h1>
                 <p
-                    style="font-size:0.7rem; opacity:0.5; margin-bottom:30px; text-transform:uppercase; letter-spacing:2px;">
-                    Credential Verification Required</p>
-                <input id="username" placeholder="NAME / CODENAME"><input id="pin" type="password"
-                    placeholder="ACCESS PIN">
+                    style="font-size:0.9rem; opacity:0.6; margin-bottom:50px; text-transform:uppercase; letter-spacing:5px; font-weight:bold;">
+                    Critical Juncture Authorization Required</p>
+                <input id="username" placeholder="NAME / CODENAME">
+                <input id="pin" type="password" placeholder="ACCESS PIN">
                 <input id="class-code" placeholder="CLASS CODE (e.g. PER-01)">
-                <button class="btn"
-                    style="text-align:center; background:var(--accent); color:#000; font-weight:bold; width:100%; margin-top:20px;"
-                    onclick="login()">AUTHORIZE ACCESS</button>
+                <button class="btn" style="width:100%; margin-top:20px;" onclick="login()">AUTHORIZE ACCESS</button>
+                <div
+                    style="margin-top:50px; font-size:0.8rem; opacity:0.4; text-transform:uppercase; letter-spacing:6px; font-family:var(--font-h);">
+                    "The Critical Moment Where Everything Hangs on a Decision"
+                </div>
             </div>
 
-            <div id="lobby-step" style="width:420px; display:none; text-align:left;">
+            <div id="lobby-step" style="width:100%; max-width:1000px; display:none; text-align:left;">
                 <h3
-                    style="color:var(--accent); letter-spacing:3px; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:20px;">
+                    style="color:var(--accent); font-family:var(--font-h); font-size:1.8rem; letter-spacing:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px; margin-bottom:40px; text-transform:uppercase;">
                     ACTIVE DOSSIERS</h3>
-                <div id="mission-list"></div>
-                <div style="margin-top:30px; padding:25px; background:rgba(0,0,0,0.5); border:1px solid #333;">
+                <div id="mission-list"
+                    style="display:grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap:20px;"></div>
+                <div
+                    style="margin-top:60px; padding:40px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); backdrop-filter:blur(10px);">
                     <p
-                        style="font-size:0.6rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; text-align:center;">
-                        Manual Capsule Injection</p>
-                    <div style="display:flex; gap:10px; margin-bottom:10px;">
-                        <input id="mission-code" placeholder="MISSION CODE"
-                            style="flex:1; text-align:center; letter-spacing:5px; margin:0;">
-                        <button class="btn" style="background:#fff; color:#000; width:auto; padding:0 20px;"
+                        style="font-size:0.8rem; color:var(--accent); text-transform:uppercase; letter-spacing:4px; margin-bottom:30px; text-align:center; font-weight:bold; opacity:0.7;">
+                        PROTOCOL: JUNCTURE AUTHORIZATION REQUIRED</p>
+                    <div style="display:flex; gap:20px; margin-bottom:20px;">
+                        <input id="mission-code" placeholder="ENTER MISSION CODE"
+                            style="flex:1; text-align:center; letter-spacing:8px; margin:0; font-family:var(--font-h); font-size:1.2rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:4px;">
+                        <button class="btn"
+                            style="background:#fff; color:#000; width:auto; padding:0 40px; border:none;"
                             onclick="joinMission()">JOIN</button>
                     </div>
-                    <div style="border:1px dashed #444; padding:10px; text-align:center; cursor:pointer;"
+                    <div style="border:1px dashed rgba(255,255,255,0.2); padding:20px; text-align:center; cursor:pointer; border-radius:4px; transition:0.3s;"
+                        onmouseover="this.style.borderColor='var(--accent)'"
+                        onmouseout="this.style.borderColor='rgba(255,255,255,0.2)'"
                         onclick="document.getElementById('blob-input').click()">
-                        <span style="font-size:0.7rem; color:#888;">OR DROP .BLOB FILE HERE</span>
+                        <span style="font-size:0.8rem; color:#888; letter-spacing:2px;">OR UPLOAD SECURE CAPSULE
+                            (.BLOB)</span>
                         <input type="file" id="blob-input" accept=".blob" style="display:none"
                             onchange="ingest(this.files[0])">
                     </div>
                 </div>
             </div>
 
-            <div id="ref-modal">
+            <div id="ref-modal" style="display:none; width:100%; max-width:1400px;">
                 <div id="mission-title-big">MISSION_ID</div>
-                <div id="ref-title">MISSION BRIEFING</div>
-                <div class="briefing-dossier">
+                <div id="ref-title">CROSSROADS BRIEFING</div>
+                <div class="briefing-dossier"
+                    style="background:rgba(0,0,0,0.8); border:1px solid rgba(255,255,255,0.05); border-top:5px solid var(--accent); border-radius:4px; padding:40px;">
                     <div id="debrief-panel"
-                        style="display:none; background:#000; padding:20px; border-left:4px solid var(--accent); margin-bottom:20px; font-size:0.8rem;">
+                        style="display:none; background:rgba(255,255,255,0.02); padding:30px; border-left:4px solid var(--accent); margin-bottom:30px; font-size:1rem; border-radius:4px;">
                     </div>
-                    <div id="ref-narrative"></div>
-                    <div id="ref-q" style="margin-top:20px; border-top:1px solid #333; padding-top:20px;"></div>
-                    <textarea id="ref-a" style="margin-top:10px;"></textarea>
-                    <div id="ref-wc" class="word-count"></div>
+                    <div id="ref-narrative"
+                        style="font-size:1rem; line-height:1.7; column-count:2; column-gap:50px; text-align:justify;">
+                    </div>
+                    <div id="ref-q"
+                        style="margin-top:40px; border-top:1px solid rgba(255,255,255,0.1); padding-top:40px; font-family:var(--font-h); font-size:1.3rem; letter-spacing:2px;">
+                    </div>
+                    <textarea id="ref-a" style="margin-top:20px;" placeholder="ENTER RATIONALE..."></textarea>
+                    <button id="ref-btn" class="btn"
+                        style="width:100%; margin-top:10px; padding:12px; font-weight:bold; border:none; background:var(--accent); color:#000; box-shadow:0 0 20px var(--accent-dim); font-size:0.9rem;"
+                        onclick="nextRef()">INITIALIZE MISSION</button>
+                    <div id="ref-wc" class="word-count" style="margin-top:10px; text-align:right;"></div>
                 </div>
-                <button id="ref-btn" class="btn"
-                    style="background:var(--accent); color:#000; text-align:center; width:100%; max-width:400px; font-weight:bold; margin-top:30px; padding:20px; box-shadow:0 0 30px rgba(0,0,0,0.5);"
-                    onclick="nextRef()">CONFIRM AND LAUNCH</button>
             </div>
         </div>
     </div>
@@ -567,54 +868,210 @@
         <div id="p-tracker"
             style="font-size:0.6rem; opacity:0.7; color:var(--accent); letter-spacing:1px; margin-bottom:20px;">0/18
             EVIDENCE POINTS</div>
+
+        <!-- VITALS HUD [v65.71] -->
+        <div id="vitals-hud" style="margin-bottom:20px; border-top:1px solid #333; padding-top:15px; display:none;">
+            <div
+                style="font-size:0.55rem; color:var(--accent); letter-spacing:2px; margin-bottom:10px; font-weight:bold;">
+                PERSONAL VITALS</div>
+
+            <div style="margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.5rem; margin-bottom:3px;">
+                    <span>HEALTH</span><span id="stat-health-val">100%</span>
+                </div>
+                <div style="height:3px; background:#222; width:100%;">
+                    <div id="stat-health-bar" style="height:100%; background:#4f4; width:100%; transition: 0.5s;"></div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.5rem; margin-bottom:3px;">
+                    <span>MORALE</span><span id="stat-morale-val">100%</span>
+                </div>
+                <div style="height:3px; background:#222; width:100%;">
+                    <div id="stat-morale-bar"
+                        style="height:100%; background:var(--accent); width:100%; transition: 0.5s;"></div>
+                </div>
+            </div>
+
+            <div id="trust-container" style="display:none;">
+                <div style="display:flex; justify-content:space-between; font-size:0.5rem; margin-bottom:3px;">
+                    <span>COMMUNITY TRUST</span><span id="stat-trust-val">50%</span>
+                </div>
+                <div style="height:3px; background:#222; width:100%;">
+                    <div id="stat-trust-bar" style="height:100%; background:#4af; width:50%; transition: 0.5s;"></div>
+                </div>
+            </div>
+        </div>
         <div id="nav-container" class="nav-container"></div>
         <button class="btn" onclick="toggleGlossary()"
-            style="margin-top:20px; border-color:var(--accent); font-size:0.7rem; text-align:center; background:transparent;">OPEN
-            INTELLIGENCE GLOSSARY</button>
+            style="margin-top:20px; border-color:var(--accent); font-size:0.75rem; text-align:center; background:transparent; display:block; width:100%; letter-spacing:3px;">
+            GLOSSARY</button>
     </nav>
     <main class="main">
         <div id="card-container" class="card-container"></div>
     </main>
     <footer class="footer">
-        <div id="f-left">SITUATION ROOM PROTOCOL | v62.2</div>
-        <div id="f-outcomes"
-            style="font-size:0.55rem; opacity:0.5; flex:1; text-align:center; text-transform:uppercase; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-        </div>
-        <div id="f-right">SITUATION ROOM | OPEN-SOURCE LICENSE</div>
+        <div id="f-left" style="cursor:pointer; pointer-events:auto; font-family:var(--font-tech);"
+            onclick="showVersionInfo()">SITUATION ROOM PROTOCOL | v66.492 [STABLE]</div>
+        <div id="f-outcomes-btn"
+            style="cursor:pointer; pointer-events:auto; color:var(--accent); text-shadow: 0 0 10px var(--accent-dim);"
+            onclick="toggleOutcomes()">[ACCESS COGNITIVE OUTCOMES]</div>
+        <div id="f-right" style="pointer-events:auto; font-family:var(--font-tech);">AUTHORIZATION: LEVEL 4</div>
     </footer>
+
+    <!-- OUTCOMES PANEL -->
+    <div id="outcomes-panel"
+        style="display:none; position:fixed; bottom:50px; left:50%; transform:translateX(-50%); width:90%; max-width:600px; max-height:40vh; overflow-y:auto; background:rgba(0,0,0,0.95); border:1px solid var(--accent); padding:20px; z-index:999;">
+        <div
+            style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+            <span id="outcomes-title"
+                style="color:var(--accent); font-size:0.8rem; font-weight:bold; letter-spacing:2px;">LEARNING
+                OUTCOMES</span>
+            <span onclick="toggleOutcomes()" style="cursor:pointer; opacity:0.5;">[CLOSE]</span>
+        </div>
+        <div id="outcomes-content" style="font-size:0.85rem; color:#ccc; line-height:1.6;"></div>
+    </div>
+
+    <!-- VERSION INFO PANEL -->
+    <div id="version-panel"
+        style="display:none; position:fixed; bottom:50px; left:20px; width:300px; background:rgba(0,0,0,0.95); border:1px solid var(--accent); padding:20px; z-index:999;">
+        <div
+            style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+            <span style="color:var(--accent); font-size:0.8rem; font-weight:bold; letter-spacing:2px;">VERSION
+                INFO</span>
+            <span onclick="toggleVersionPanel()" style="cursor:pointer; opacity:0.5;">[CLOSE]</span>
+        </div>
+        <div id="version-content" style="font-size:0.75rem; color:#ccc; line-height:1.8;"></div>
+    </div>
+
+    <!-- HISTORICAL REVEAL PANEL -->
+    <div id="historical-panel"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; max-width:700px; background:rgba(0,0,0,0.98); border:2px solid var(--accent); padding:30px; z-index:2000; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+        <div
+            style="color:var(--accent); font-size:1rem; font-weight:bold; letter-spacing:3px; margin-bottom:20px; text-align:center; text-transform:uppercase;">
+            Historical Outcome
+        </div>
+        <div id="historical-content"
+            style="font-size:1rem; color:#eee; line-height:1.6; margin-bottom:30px; font-family:var(--font-p);"></div>
+        <div style="text-align:center;">
+            <button class="btn" onclick="toggleHistoricalPanel(false)"
+                style="background:var(--accent); color:#000; font-weight:bold; padding:10px 30px;">PROCEED</button>
+        </div>
+    </div>
 
     <script>
         window.DATA = null; let user = { id: null, name: null, pin: null, missions: {} };
         let currentMission = null; let refMode = "pre"; let refIdx = 0; let missionsAvailable = [];
+        let currentLayout = null;
+
+        // LAYOUT PRESETS LIBRARY
+        const LAYOUTS = {
+            classic: {
+                sidebarWidth: "200px",
+                sidebarPadding: "15px",
+                imageFlex: 1.1,
+                textFlex: 1,
+                textFontSize: "0.9rem",
+                textPadding: "20px",
+                textLineHeight: "1.5"
+            },
+            compact: {
+                sidebarWidth: "145px",
+                sidebarPadding: "10px",
+                imageFlex: 0.7,
+                textFlex: 1,
+                textFontSize: "0.8rem",
+                textPadding: "15px",
+                textLineHeight: "1.4"
+            },
+            immersive: {
+                sidebarWidth: "120px",
+                sidebarPadding: "8px",
+                imageFlex: 1.3,
+                textFlex: 1,
+                textFontSize: "0.85rem",
+                textPadding: "18px",
+                textLineHeight: "1.45"
+            }
+        };
 
         async function login() {
             const name = document.getElementById('username').value.trim();
             const pin = document.getElementById('pin').value.trim();
-            const classCode = document.getElementById('class-code').value.trim().toUpperCase() || "DEFAULT";
-            if (!name || !pin) return;
+            const classCode = document.getElementById('class-code').value.trim().toUpperCase();
+
+            if (!name || !pin || !classCode) return alert("CORRUPT PACKET: ALL CREDENTIALS (NAME, PIN, CLASS CODE) REQUIRED.");
+            if (name.includes(" ")) return alert("SECURITY PROTOCOL: SPACES NOT PERMITTED IN CODENAMES.");
+            if (pin.length < 4) return alert("SECURITY PROTOCOL: PIN MUST BE 4+ CHARACTERS.");
+
             document.getElementById('loading-screen').style.display = 'flex';
-            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_user', name: name, pin: pin, classCode: classCode }) });
-            const j = await res.json();
-            if (j.status === "success") {
-                user = { id: j.id, name: name, pin: pin, missions: j.missions };
-                const mRes = await fetch(API_URL + "?action=list_missions");
-                const mData = await mRes.json(); missionsAvailable = mData.missions;
-                showLobby();
-            } else alert(j.message);
-            document.getElementById('loading-screen').style.display = 'none';
+
+            try {
+                const cleanName = name.replace(/\s+/g, '');
+
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'fetch_user', name: cleanName, pin: pin, classCode: classCode })
+                });
+                const j = await res.json();
+
+                if (j.status === "success") {
+                    user = { id: j.id, name: cleanName, pin: pin, missions: j.missions, class: classCode };
+
+                    // [E2EE v65.67] Derive encryption key from CLASS CODE only (master key approach)
+                    // We use classCode as both password and salt for deterministic derivation across devices
+                    user.encryptionKey = await CriticalCrypto.deriveKey(classCode, classCode);
+
+                    // Cinematic Entry v65.41
+                    gsap.to("#login-step", {
+                        opacity: 0, y: -20, duration: 0.5, onComplete: () => {
+                            showLobby();
+                            gsap.from("#lobby-step", { opacity: 0, y: 20, duration: 0.5 });
+                        }
+                    });
+                } else {
+                    alert(j.message);
+                }
+            } catch (e) {
+                console.error("LOGIN_ERROR:", e);
+                alert("COMMUNICATION FAILURE: Check network or API configuration.");
+            } finally {
+                document.getElementById('loading-screen').style.display = 'none';
+            }
         }
 
-        function showLobby() {
-            document.getElementById('login-step').style.display = 'none'; document.getElementById('lobby-step').style.display = 'block';
+        async function showLobby() {
+            document.getElementById('login-step').style.display = 'none';
+            document.getElementById('lobby-step').style.display = 'block';
+
+            // BLING: Header Entry
+            gsap.from("#lobby-step h3", { opacity: 0, x: -50, duration: 1, ease: "power4.out" });
+            gsap.from("#lobby-step div:last-child", { opacity: 0, y: 50, duration: 1.2, delay: 0.3, ease: "power3.out" });
+
+            // Fetch available missions from backend
+            const mRes = await fetch(API_URL + "?action=list_missions");
+            const mData = await mRes.json();
+            missionsAvailable = mData.missions || [];
+
+            // [Fix v65.71] Only show missions the user has actually joined
+            const activeMissions = missionsAvailable.filter(m => user.missions && user.missions[m.id]);
+
+            // Populate mission list
             let h = "";
-            missionsAvailable.forEach(m => {
+            activeMissions.forEach(m => {
                 const thumb = m.thumb || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop";
                 h += `<div class="mission-item" onclick="launch('${m.id}')">
                     <div class="mission-thumb" style="background-image:url('${thumb}')"></div>
-                    <div><strong style="color:var(--accent);">${m.name}</strong><br><span style="font-size:0.6rem; color:#666;">AUTHORIZATION ID: ${m.id}</span></div>
+                    <div style="flex:1;">
+                        <span style="font-size:0.55rem; color:var(--accent); text-transform:uppercase; letter-spacing:2px; font-weight:bold; opacity:0.6;">CLASSIFIED DOSSIER</span>
+                        <div style="color:#fff; font-family:var(--font-h); font-size:1.3rem; letter-spacing:1px; text-transform:uppercase; margin:4px 0;">${m.name}</div>
+                        <span style="font-size:0.6rem; color:#666; font-family:var(--font-tech); text-transform:uppercase;">SERIAL: ${m.id}</span>
+                    </div>
+                    <div style="font-family:var(--font-tech); font-size:0.6rem; color:var(--accent); opacity:0.4;">[ACCESS]</div>
                 </div>`;
             });
-            document.getElementById('mission-list').innerHTML = h || "<p style='color:#444; font-size:0.7rem;'>No dossiers found.</p>";
+            document.getElementById('mission-list').innerHTML = h || "<p style='color:#444; font-size:0.7rem; padding:40px; text-align:center;'>No dossiers found.</p>";
         }
 
         async function joinMission() { const code = document.getElementById('mission-code').value.trim().toUpperCase(); if (code) launch(code); }
@@ -622,16 +1079,16 @@
         function ingest(file) {
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 try {
                     const j = JSON.parse(e.target.result);
-                    processData(j);
+                    await processData(j);
                 } catch (ex) { alert("INVALID CAPSULE DATA."); }
             };
             reader.readAsText(file);
         }
 
-        function processData(j, idOverride) {
+        async function processData(j, idOverride) {
             let data = j.data || j; // Handle wrapped or raw
             // SCHEMA NORMALIZER v60.5
             if (!data.metadata && data.meta) data.metadata = data.meta;
@@ -653,12 +1110,36 @@
                 data.slides.forEach(s => {
                     if (!s.shortTitle && s.title) s.shortTitle = s.title;
                     if (!s.longTitle && s.shortTitle) s.longTitle = s.shortTitle;
-                    if (Array.isArray(s.tabs)) {
+
+                    // Normalize Tabs (Array OR Object)
+                    let tRaw = s.tabs;
+                    if (tRaw && !Array.isArray(tRaw)) {
+                        // Convert Object to Normalized Object with 'body'
                         const newTabs = {};
-                        s.tabs.forEach((t, idx) => {
+                        Object.keys(tRaw).forEach(k => {
+                            const t = tRaw[k];
+                            // FIX v65.6: Consolidate all media keys (video, videoURL, media) into mediaURL so they aren't lost
+                            newTabs[k.toLowerCase()] = {
+                                body: t.content || t.body || "",
+                                image: t.imageURL || t.image || "",
+                                credit: t.credit || 'FIELD RECORD',
+                                mediaType: t.mediaType,
+                                mediaURL: t.mediaURL || t.media_url || t.videoURL || t.video || t.media || ""
+                            };
+                        });
+                        s.tabs = newTabs;
+                    } else if (Array.isArray(tRaw)) {
+                        const newTabs = {};
+                        tRaw.forEach((t, idx) => {
                             const labels = ['primary', 'legal', 'intel'];
                             const key = t.label ? t.label.split(":")[0].trim().toLowerCase() : labels[idx] || `tab_${idx}`;
-                            newTabs[key] = { body: t.content || t.body, image: t.imageURL || t.image, credit: t.credit || 'FIELD RECORD' };
+                            newTabs[key] = {
+                                body: t.content || t.body || "",
+                                image: t.imageURL || t.image || "",
+                                credit: t.credit || 'FIELD RECORD',
+                                mediaType: t.mediaType,
+                                mediaURL: t.mediaURL || t.media_url || t.videoURL || t.video || t.media || ""
+                            };
                         });
                         s.tabs = newTabs;
                     }
@@ -667,7 +1148,21 @@
 
             window.DATA = data;
             currentMission = data.metadata.id || idOverride || "LOCAL_INJECT";
-            user.state = user.missions[currentMission] || { last: 0, ans: {}, dec: {}, rat: {} };
+
+            // [E2EE v65.67] Decrypt state if rejoining
+            let rawState = user.missions[currentMission];
+            if (rawState && typeof rawState === 'string') {
+                try {
+                    const decrypted = await CriticalCrypto.decrypt(rawState, user.encryptionKey);
+                    user.state = JSON.parse(decrypted);
+                } catch (e) {
+                    console.error("DECRYPTION_FAILED", e);
+                    user.state = { last: 0, ans: {}, dec: {}, rat: {} };
+                }
+            } else {
+                user.state = rawState || { last: 0, ans: {}, dec: {}, rat: {} };
+            }
+
             applyTheme(); initParticles(); renderGlossary();
             if (!user.state.preDone) startRef("pre"); else { document.getElementById('splash').style.display = 'none'; init(); }
         }
@@ -677,24 +1172,48 @@
             try {
                 const r = await fetch(API_URL + "?action=fetch_content&id=" + id); const j = await r.json();
                 if (j.status === "error") throw new Error(j.message);
-                processData(j, id);
+                await processData(j, id);
                 document.getElementById('loading-screen').style.display = 'none';
             } catch (e) { console.error(e); alert(e.message); document.getElementById('loading-screen').style.display = 'none'; }
         }
 
         function applyTheme() {
             const t = window.DATA.theme; document.documentElement.style.setProperty('--accent', t.accent);
-            document.documentElement.style.setProperty('--font-p', t.fontP); document.documentElement.style.setProperty('--font-h', t.fontH);
+            // GLOBAL SANITIZER v65.45: Forcibly strip legacy serif strings from theme variables
+            document.documentElement.style.setProperty('--font-p', "'Inter', sans-serif");
+
+            let hFont = t.fontH || 'Courier New, monospace';
+            if (hFont.toLowerCase().includes('serif') || hFont.toLowerCase().includes('georgia') || hFont.toLowerCase().includes('times')) {
+                hFont = 'Courier New, monospace';
+            }
+            document.documentElement.style.setProperty('--font-h', hFont);
+
+            const simVer = 'v65.71';
+            if (document.getElementById('splash-version')) document.getElementById('splash-version').innerText = simVer;
+
+            const m = window.DATA.metadata || {};
             if (t.splashHeroURL) {
                 const s = document.getElementById('splash'); s.style.backgroundImage = `url('${t.splashHeroURL}')`;
                 s.style.backgroundSize = "cover"; s.style.backgroundPosition = "center";
             }
-            const m = window.DATA.metadata || {};
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerText = `${m.title || currentMission} | ${m.author || 'FIELD COMMAND'}`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v65.71`;
 
-            const outcomes = m.learningOutcomes || m.outcomes || [];
-            document.getElementById('f-outcomes').innerText = outcomes.length > 0 ? "OBJECTIVES: " + outcomes.join(" | ") : "";
+            // Populate the outcomes panel (popup) instead of inline text
+            populateOutcomes();
+
+            // APPLY LAYOUT PRESET
+            const layoutName = (t.layout || "compact").toLowerCase();
+            currentLayout = LAYOUTS[layoutName] || LAYOUTS.compact;
+            console.log("[LAYOUT] Applying preset: " + layoutName);
+
+            // Apply sidebar settings
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.style.width = currentLayout.sidebarWidth;
+                sidebar.style.minWidth = currentLayout.sidebarWidth;
+                sidebar.style.padding = currentLayout.sidebarPadding;
+            }
         }
 
         function renderGlossary() {
@@ -711,7 +1230,48 @@
         }
         function toggleGlossary() { const p = document.getElementById('glossary-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
 
-        function startRef(m) { refMode = m; refIdx = 0; document.getElementById('lobby-step').style.display = 'none'; document.getElementById('ref-modal').style.display = 'flex'; renderRef(); }
+        // OUTCOMES PANEL
+        function toggleOutcomes() {
+            const p = document.getElementById('outcomes-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        }
+        function populateOutcomes() {
+            const m = window.DATA.metadata || {};
+            const outcomes = m.learningOutcomes || m.outcomes || [];
+            const title = m.title || 'MISSION';
+            document.getElementById('outcomes-title').innerText = title.toUpperCase() + ' OUTCOMES';
+            let h = '';
+            if (outcomes.length > 0) {
+                outcomes.forEach((o, i) => { h += `<div style="margin-bottom:10px; padding-left:15px; border-left:2px solid var(--accent);">${i + 1}. ${o}</div>`; });
+            } else {
+                h = '<div style="opacity:0.5;">No learning outcomes defined for this mission.</div>';
+            }
+            document.getElementById('outcomes-content').innerHTML = h;
+        }
+
+        // VERSION INFO PANEL
+        function toggleVersionPanel() {
+            const p = document.getElementById('version-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        }
+        function showVersionInfo() {
+            const m = window.DATA ? window.DATA.metadata : {};
+            const blobVersion = m.version || 'Unknown';
+            const blobAuthor = m.author || 'Unknown';
+            const simVersion = 'v65.71';
+            let h = `
+                <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
+                <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
+                <div><strong style="color:var(--accent);">CAPSULE AUTHOR:</strong> ${blobAuthor}</div>
+                <div style="margin-top:10px; opacity:0.5; font-size:0.65rem;">PROTOCOLS: Managed by Situation Room</div>
+                <button class="btn" style="background:#400; color:#fff; border-color:#800; margin-top:15px; width:100%; font-size: 0.65rem;" onclick="resetAICache()">RESET AI CACHE</button>
+            `;
+            document.getElementById('version-content').innerHTML = h;
+            toggleVersionPanel();
+        }
+
+
+        function startRef(m) { refMode = m; refIdx = 0; document.getElementById('splash').style.display = 'flex'; document.getElementById('lobby-step').style.display = 'none'; document.getElementById('ref-modal').style.display = 'flex'; renderRef(); }
         function renderRef() {
             if (refMode === 'epilogue') { renderEpilogue(); return; }
             const qs = window.DATA.reflections[refMode] || [];
@@ -731,17 +1291,30 @@
                 document.getElementById('ref-btn').innerText = 'SUBMIT TO RECORD';
             }
 
-            document.getElementById('ref-narrative').innerHTML = parseMD(narrative);
+            if (narrative === "NO BRIEFING DATA RECORDED." || (refMode === 'post' && user.state.aiFeedback)) {
+                document.getElementById('ref-narrative').style.display = 'none';
+            } else {
+                document.getElementById('ref-narrative').style.display = 'block';
+                document.getElementById('ref-narrative').innerHTML = parseMD(narrative);
+            }
             if (refMode === 'post' && refIdx === 0) renderDebrief(); else document.getElementById('debrief-panel').style.display = 'none';
 
             if (qs.length > 0 && qs[refIdx]) {
                 document.getElementById('ref-q').innerText = qs[refIdx];
-                document.getElementById('ref-q').style.display = 'block';
+                document.getElementById('ref-q').style.display = (refMode === 'post' && user.state.aiFeedback) ? 'none' : 'block';
             } else if (refMode === 'pre') {
                 document.getElementById('ref-q').style.display = 'none';
             } else {
                 document.getElementById('ref-q').innerText = "END OF LOG. No further questions required.";
+                document.getElementById('ref-q').style.display = (refMode === 'post' && user.state.aiFeedback) ? 'none' : 'block';
                 document.getElementById('ref-a').style.display = 'none';
+            }
+
+            // Hide fallback text box if AI exists
+            if (refMode === 'post' && user.state.aiFeedback) {
+                document.getElementById('ref-a').style.display = 'none';
+            } else if (refMode !== 'pre' && !(qs.length > 0 && refIdx >= qs.length)) {
+                document.getElementById('ref-a').style.display = 'block';
             }
             document.getElementById('ref-a').value = (user.state.ans && user.state.ans[refMode + "_" + refIdx]) || "";
         }
@@ -765,11 +1338,143 @@
             document.getElementById('ref-narrative').innerHTML = h;
         }
 
-        function renderDebrief() {
+        async function renderDebrief() {
             const d = document.getElementById('debrief-panel'); d.style.display = 'block';
-            let h = `<h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">INTERNAL LOG SUMMARY</h3>`;
-            window.DATA.slides.forEach((s, i) => { h += `<div style="margin-bottom:8px;"><strong>${i + 1}</strong>: ${user.state.dec[i] || 'PENDING'}</div>`; });
+            let h = `<h3 style="color:var(--accent); margin-top:0; font-size:0.6rem; letter-spacing:2px; opacity:0.6;">INTERNAL LOG SUMMARY</h3>`;
+            window.DATA.slides.forEach((s, i) => { h += `<div style="margin-bottom:5px; border-bottom:1px solid #111; padding-bottom:3px; font-size:0.7rem; opacity:0.8;"><strong>${i + 1}</strong>: ${user.state.dec[i] || 'PENDING'}</div>`; });
+
+            const staticContent = (window.DATA.epilogue && window.DATA.epilogue.staticDebrief)
+                ? window.DATA.epilogue.staticDebrief
+                : "Mission analysis complete. Review your command log above.";
+
+            const aiEnabled = window.DATA.metadata && window.DATA.metadata.enableAIFeedback;
+
+            if (user.state.aiFeedback && user.state.aiFeedback.toUpperCase().includes("OFFLINE") && location.protocol !== 'file:') {
+                user.state.aiFeedback = null; user.state.aiRequested = false; save();
+            }
+
+            if (user.state.aiFeedback) {
+                const parts = user.state.aiFeedback.split("[QUESTIONS]");
+                const analysis = parts[0] || "";
+                const questionsRaw = parts[1] || "";
+
+                h += `<div style="margin-top:15px; border-top:2px solid var(--accent); padding-top:15px;">
+                        <h3 style="color:var(--accent); margin-top:0; font-size:0.65rem; letter-spacing:2px;">AI COMMAND ANALYSIS</h3>
+                        <div style="font-family:var(--font-p); font-size:0.85rem; line-height:1.5; color:#99ff99; opacity:0.9;">${parseMD(analysis)}</div>
+                      </div>`;
+
+                if (questionsRaw) {
+                    const qList = questionsRaw.split("\n").filter(line => line.trim().length > 5);
+                    h += `<div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+                            <h3 style="color:var(--accent); margin-top:0; font-size:0.65rem; letter-spacing:2px;">FOLLOW-UP INTERROGATION</h3>`;
+                    qList.forEach((q, idx) => {
+                        const cleanQ = q.replace(/^\d+\.\s*/, "").trim();
+                        const savedAns = (user.state.ans && user.state.ans['ai_q_' + idx]) || "";
+                        h += `<div style="margin-bottom:20px;">
+                                <div style="font-size:0.75rem; color:var(--accent); margin-bottom:8px; line-height:1.4;">${idx + 1}. ${cleanQ}</div>
+                                <textarea oninput="user.state.ans['ai_q_${idx}']=this.value; save();" 
+                                          style="width:100%; height:80px; background:#111; border:1px solid #333; color:#eee; padding:10px; font-family:var(--font-p); font-size:0.8rem;"
+                                          placeholder="Enter response to record...">${savedAns}</textarea>
+                              </div>`;
+                    });
+                    h += `</div>`;
+                }
+            } else if (aiEnabled) {
+                h += `<div id="ai-container" style="margin-top:20px; border-top:1px solid #333; padding-top:20px; opacity:0.8; font-size:0.75rem;">
+                        <div id="ai-status" style="text-align:center; color:var(--accent); animation: blink 1s infinite;">ENCRYPTING TRANSMISSION TO ANALYST...</div>
+                      </div>`;
+                if (!user.state.aiRequested) setTimeout(() => requestAIFeedback(staticContent), 100);
+            } else {
+                h += `<div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+                        <h3 style="color:var(--accent); margin-top:0; font-size:0.65rem; letter-spacing:2px;">COMMAND DEBRIEF</h3>
+                        <div style="font-family:var(--font-p); font-size:0.85rem; line-height:1.5; opacity:0.9;">${parseMD(staticContent)}</div>
+                      </div>`;
+            }
             d.innerHTML = h;
+        }
+
+        async function requestAIFeedback(staticContent) {
+            if (user.state.aiRequested) return;
+            user.state.aiRequested = true;
+            try {
+                const rationales = window.DATA.reflections['pre'].map((q, i) => ({ question: q, answer: user.state.ans['pre_' + i] }));
+                const postQs = window.DATA.reflections['post'] || [];
+                postQs.forEach((q, i) => { rationales.push({ question: q, answer: user.state.ans['post_' + i] }); });
+                if (rationales.length === 0) rationales.push({ question: "General Performance", answer: "Student provided no specific text rationales." });
+
+                const fullPrompt = `You are a professional history educator evaluating a 15-year-old student's performance in a ${window.DATA.metadata.title} simulation. 
+Speak directly to the student in the SECOND PERSON (using "You"). Use language clear and engaging for a high schooler.
+Student Rationales (including questions): ${JSON.stringify(rationales)}
+Evaluate on: 1. Historical Reasoning, 2. Perspective-Taking, 3. Strategic Thinking.
+Provide a concise assessment (150 words) using markdown. 
+CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then generate TWO specific, short, open-ended follow-up questions (one per line) to challenge the student further.`;
+
+                const TARGET_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
+                let res;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                try {
+                    res = await fetch(TARGET_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: fullPrompt }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                } catch (directErr) {
+                    clearTimeout(timeoutId);
+                    console.log("Direct AI Connection Failed. Attempting Proxy...");
+                    const proxyController = new AbortController();
+                    const ptId = setTimeout(() => proxyController.abort(), 15000);
+                    try {
+                        res = await fetch('https://corsproxy.io/?' + encodeURIComponent(TARGET_URL), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: fullPrompt }),
+                            signal: proxyController.signal
+                        });
+                        clearTimeout(ptId);
+                    } catch (proxyErr) {
+                        clearTimeout(ptId);
+                        throw new Error(`Connection Failed: ${directErr.message} / Proxy: ${proxyErr.message}`);
+                    }
+                }
+
+                const data = await res.json();
+                const reply = data.choices ? (data.choices[0]?.message?.content) : data.reply;
+
+                if (reply) {
+                    user.state.aiFeedback = reply; save(); renderRef(); // Refresh entire panel to hide fallback
+                } else {
+                    throw new Error("No feedback returned (Invalid structure). See log.");
+                }
+            } catch (err) {
+                console.log("AI Service Unavailable.", err);
+                const d = document.getElementById('debrief-panel');
+
+                // Bypass for local development
+                if (location.protocol === 'file:') {
+                    user.state.aiFeedback = "***[OFFLINE SIMULATION]***\n\n" + staticContent + "\n\n*(Note: Live AI unavailable in local file mode.)*";
+                    save(); renderRef(); return;
+                }
+
+                // Real Network Error
+                user.state.aiRequested = false; save();
+                d.innerHTML += `
+                    <div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+                        <h3 style="color:var(--accent); margin-top:0; font-size:0.7rem; letter-spacing:2px;">COMMAND DEBRIEF (SYSTEM OFFLINE)</h3>
+                        <div style="font-family:var(--font-p); font-size:0.95rem; line-height:1.6; opacity:0.9;">${parseMD(staticContent)}</div>
+                    </div>
+                    <div style="background:#200; padding:15px; font-family:monospace; font-size:0.7rem; color:#ff9999; margin-top:20px; border:1px solid #500; border-radius:4px;">
+                        <div style="margin-bottom:5px; border-bottom:1px solid #500; padding-bottom:5px; font-weight:bold;">NETWORK_DEBUG_LOG</div>
+                        <strong>ERROR:</strong> ${err.message}<br>
+                        <strong>TARGET:</strong> https://nextjs-basic-lemon-one.vercel.app/api/chat<br>
+                        <strong>PROTOCOL:</strong> ${location.protocol}<br>
+                        <strong>VER:</strong> v65.71<br>
+                        <strong>STEPS:</strong> 1. UI Loaded. 2. Fetch Triggered. 3. ${err.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR'}.
+                    </div>`;
+            }
         }
 
         async function nextRef() {
@@ -813,9 +1518,10 @@
                 const isLocked = i > 0 && (!user.state.dec || !user.state.dec[i - 1]);
                 const b = document.createElement('button');
                 b.className = "btn" + (isLocked ? " locked" : "");
-                b.style.marginBottom = "10px"; b.style.width = "100%"; b.style.textAlign = "left"; b.style.padding = "15px";
-                if (user.state.dec && user.state.dec[i]) b.style.borderLeft = "5px solid var(--accent)";
-                b.innerHTML = `<span style="opacity:0.4; font-size:0.6em; text-transform:uppercase; letter-spacing:1px;">EXHIBIT 0${i + 1}</span><br><span style="white-space: normal; line-height: 1.3; display: block; margin-top: 5px;">${s.shortTitle || 'UNTITLED'}</span>`;
+                b.style.marginBottom = "15px"; b.style.width = "100%"; b.style.textAlign = "left"; b.style.padding = "15px 12px"; b.style.fontSize = "0.6rem";
+                b.style.borderWidth = "0 0 0 1px";
+                if (user.state.dec && user.state.dec[i]) b.style.borderLeft = "3px solid var(--accent)";
+                b.innerHTML = `<span style="color:var(--accent); font-size:0.55rem; text-transform:uppercase; letter-spacing:2px; font-weight:bold; opacity:0.8;">EXHIBIT 0${i + 1}</span><br><span style="white-space: normal; line-height: 1.3; display: block; margin-top: 5px; font-size: 0.75rem; color:#fff; font-family:var(--font-h); letter-spacing:1px; text-transform:uppercase;">${s.shortTitle || 'UNTITLED'}</span>`;
                 if (!isLocked) b.onclick = () => go(i); c.appendChild(b); b.id = `btn-${i}`;
             });
         }
@@ -830,7 +1536,7 @@
                 <div class="card active">
                     <div class="exhibit-frame">
                         <div id="exhibit-left" class="exhibit-left"></div>
-                        <div class="exhibit-right">
+                        <div id="exhibit-right" class="exhibit-right">
                             <div class="tab-bar">
                                 <div class="tab active" onclick="tab(this,'primary')">PRIMARY</div>
                                 <div class="tab" onclick="tab(this,'legal')">LEGAL</div>
@@ -841,6 +1547,21 @@
                     </div>
                     <div id="interaction-z" class="interaction-block"></div>
                 </div>`;
+
+            // APPLY LAYOUT TO EXHIBIT PANELS
+            if (currentLayout) {
+                const left = document.getElementById('exhibit-left');
+                const right = document.getElementById('exhibit-right');
+                const tabScroll = document.getElementById('tab-scroll');
+                if (left) left.style.flex = currentLayout.imageFlex;
+                if (right) right.style.flex = currentLayout.textFlex;
+                if (tabScroll) {
+                    tabScroll.style.fontSize = currentLayout.textFontSize;
+                    tabScroll.style.padding = currentLayout.textPadding;
+                    tabScroll.style.lineHeight = currentLayout.textLineHeight;
+                }
+            }
+
             tab(document.querySelector('.tab'), 'primary');
             renderInteraction(s, i);
             save();
@@ -849,7 +1570,9 @@
 
         function parseMD(text) {
             if (!text) return "";
-            return text
+            // Fix double escaping and literal newlines v65.40
+            let clean = text.replace(/\\n/g, '\n').replace(/\\N/g, '\n');
+            return clean
                 .replace(/^## (.*$)/gm, '<h2>$1</h2>')
                 .replace(/^### (.*$)/gm, '<h3>$1</h3>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -858,34 +1581,123 @@
         }
 
         function tab(el, tName) {
-            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active');
-            const s = window.DATA.slides[user.state.last]; const c = s.tabs[tName];
-            let url = c.image || c.mediaURL || "";
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            if (!window.DATA || !window.DATA.slides) return;
+            const s = window.DATA.slides[user.state.last];
+            if (!s || !s.tabs) return;
+
+            const c = s.tabs[tName];
+            if (!c) {
+                document.getElementById('exhibit-left').innerHTML = `<div style="padding:40px; color:#333; text-align:center;">TAB DATA MISSING</div>`;
+                document.getElementById('tab-scroll').innerHTML = `<div>[DATA REDACTED]</div>`;
+                return;
+            }
+
+            // Expanded key support for maximum compatibility
+            let url = (c.image || c.mediaURL || c.media_url || c.videoURL || c.video || c.media || "").trim();
             let type = c.mediaType || (url ? "image" : "none");
             let credit = c.credit || 'FIELD RECORD';
-            if (url.includes(",")) { const p = url.split(","); url = p[0].trim(); credit = p[1].trim(); }
 
-            let h = "";
-            if (type === "pdf") h = `<embed src="${url}" type="application/pdf" style="width:100%;height:100%;">`;
-            else if (type === "video") h = `<iframe src="${url}" allowfullscreen></iframe>`;
-            else if (type === "audio") h = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;"><audio controls src="${url}"></audio></div>`;
-            else if (url) h = `<img src="${url}">`;
-            else h = `<div style="padding:40px; color:#333; text-align:center;">NO MEDIA DATA</div>`;
+            // Handle comma-separated credits (Legacy support)
+            if (url.includes(",")) {
+                const p = url.split(",");
+                url = p[0].trim();
+                if (p[1]) credit = p[1].trim();
+            }
 
-            document.getElementById('exhibit-left').innerHTML = h + (url ? `<div class="img-label">${credit}</div>` : "");
-            document.getElementById('tab-scroll').innerHTML = `<h2>${tName.toUpperCase()} ANALYSIS</h2><div>${parseMD(c.body)}</div>`;
+            const lowerUrl = url.toLowerCase();
+            const isYouTube = lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be");
+            const exhibitLeft = document.getElementById('exhibit-left');
+
+            // CLEAR PREVIOUS CONTENT
+            exhibitLeft.innerHTML = '';
+
+            if (isYouTube) {
+                // DOM CREATION (Blob Hospital Pattern) [v65.66 Fix]
+                const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                if (ytMatch && ytMatch[1]) {
+                    const container = document.createElement('div');
+                    container.style.cssText = 'position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:4px;';
+                    container.innerHTML = `<iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`;
+                    exhibitLeft.appendChild(container);
+                } else {
+                    exhibitLeft.innerHTML = `<div style="padding:20px; color:var(--err); text-align:center;">INVALID YOUTUBE ID</div>`;
+                }
+            } else if (type === "pdf" || lowerUrl.endsWith(".pdf")) {
+                exhibitLeft.innerHTML = `<embed src="${url}" type="application/pdf" style="width:100%;height:100%;">`;
+            } else if (type === "video" || lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".webm") || lowerUrl.endsWith(".mov")) {
+                exhibitLeft.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;">
+                        <video controls src="${url}" style="width:100%;height:100%;outline:none;border:none;"></video>
+                     </div>`;
+            } else if (type === "audio" || lowerUrl.endsWith(".mp3") || lowerUrl.endsWith(".wav")) {
+                exhibitLeft.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#000;padding:40px;">
+                        <audio controls src="${url}" style="width:100%;"></audio>
+                     </div>`;
+            } else if (url) {
+                exhibitLeft.innerHTML = `<img src="${url}">`;
+            } else {
+                exhibitLeft.innerHTML = `<div style="padding:40px; color:#333; text-align:center;">NO MEDIA DATA</div>`;
+            }
+
+            // ADD CREDIT LABEL
+            if (url) {
+                const label = document.createElement('div');
+                label.className = 'img-label';
+                label.textContent = credit;
+                exhibitLeft.appendChild(label);
+            }
+
+            // FAILSAFE RENDERER
+            let rawTxt = c.body || c.content || "";
+            let finalHtml = parseMD(rawTxt);
+            if (!finalHtml && rawTxt) finalHtml = `<div style="white-space:pre-wrap; font-family:var(--font-p);">${rawTxt}</div>`;
+            if (!finalHtml) finalHtml = `<div style="padding:20px; opacity:0.5;">[DATA REDACTED]</div>`;
+
+            document.getElementById('tab-scroll').innerHTML = `<h2>${tName.toUpperCase()} ANALYSIS</h2><div>${finalHtml}</div>`;
             document.getElementById('tab-scroll').scrollTop = 0;
         }
 
+        // SOCIAL HISTORY DM UI [v65.71]
+        function updateVitalsHUD() {
+            if (!SocialHistorySim.state) return;
+            const h = SocialHistorySim.state.health || 0;
+            const m = SocialHistorySim.state.morale || 0;
+            const t = SocialHistorySim.state.trust || 0;
+
+            document.getElementById('stat-health-val').innerText = h + '%';
+            document.getElementById('stat-health-bar').style.width = h + '%';
+            document.getElementById('stat-health-bar').style.background = h < 30 ? '#f44' : (h < 60 ? '#fa0' : '#4f4');
+
+            document.getElementById('stat-morale-val').innerText = m + '%';
+            document.getElementById('stat-morale-bar').style.width = m + '%';
+
+            if (window.DATA.metadata.enableTrustStat) {
+                document.getElementById('trust-container').style.display = 'block';
+                document.getElementById('stat-trust-val').innerText = t + '%';
+                document.getElementById('stat-trust-bar').style.width = t + '%';
+            }
+
+            document.getElementById('vitals-hud').style.display = 'block';
+        }
+
         function renderInteraction(s, i) {
+            const isSocialHist = window.DATA.metadata.simulationType === 'social_history';
+
+            if (isSocialHist) {
+                renderSocialHistoryInteraction(s, i);
+                return;
+            }
+
             const dec = user.state.dec[i], rat = user.state.rat[i];
             const prompt = s.interactionPrompt || "[NO COMMAND PROTOCOL SPECIFIED]";
             const options = s.options || ["PROCEED"];
 
-            let h = `<h3>EXHIBIT 0${i + 1} COMMAND PROTOCOL</h3><div class="interaction-prompt">${prompt}</div>`;
+            let h = `<h3>EXHIBIT 0${i + 1} RECOMMENDATION PROTOCOL</h3><div class="interaction-prompt">${prompt}</div>`;
             if (rat) {
                 h += `<div style="background:rgba(255,255,255,0.05); padding:20px; border-left:4px solid var(--accent); margin-bottom:20px;">
-                        <strong style="color:var(--accent); font-size:0.7rem; text-transform:uppercase;">COMMAND LOG DATA</strong><br>
+                        <strong style="color:var(--accent); font-size:0.7rem; text-transform:uppercase;">RECOMMENDATION LOG</strong><br>
                         <p style="margin-top:10px; font-size:1rem; opacity:0.8; font-family:var(--font-p);">${rat}</p>
                       </div>`;
             } else {
@@ -899,7 +1711,90 @@
                 h += `<button class="btn ${sel ? 'active' : ''}" ${dec ? 'disabled' : ''} onclick="decide(${i},'${o}')">${o}</button>`;
             });
             h += `</div>`;
+
+            // Manual Debrief Trigger (Safety Net)
+            if (dec && i === window.DATA.slides.length - 1) {
+                h += `<div style="margin-top:30px; border-top:1px solid #333; padding-top:20px; text-align:center;">
+                        <button class="btn" style="background:var(--accent); color:#000; font-weight:bold; width:100%; padding:15px;" onclick="startRef('post')">ACCESS MISSION DEBRIEF</button>
+                      </div>`;
+            }
             document.getElementById('interaction-z').innerHTML = h;
+        }
+
+        function renderSocialHistoryInteraction(s, i) {
+            updateVitalsHUD();
+            const lastTurn = user.state.simLog ? user.state.simLog[user.state.simLog.length - 1] : null;
+            const prompt = lastTurn ? lastTurn.next_choice_prompt : (s.interactionPrompt || "What is your next move?");
+
+            let h = `<h3>SOCIAL HISTORY // DM INTERACTIVE</h3>`;
+
+            if (lastTurn) {
+                h += `<div style="background:rgba(0,0,0,0.3); border:1px solid #333; padding:20px; margin-bottom:20px; font-family:var(--font-p); line-height:1.6;">
+                        <div style="font-size:0.6rem; color:var(--accent); text-transform:uppercase; margin-bottom:10px; opacity:0.6;">RECENT EVENTS</div>
+                        ${parseMD(lastTurn.narrative)}
+                        <div style="margin-top:15px; font-size:0.75rem; color:#aaa; font-style:italic;">${lastTurn.consequences}</div>
+                         <div style="margin-top:15px; border-top:1px dashed #444; padding-top:10px; font-size:0.7rem; color:var(--accent);">
+                          💡 HISTORICAL REALITY: ${lastTurn.historical_fact}
+                        </div>
+                      </div>`;
+            }
+
+            h += `<div class="interaction-prompt">${prompt}</div>
+                  <strong>COMMANDER'S INTENT:</strong>
+                  <textarea id="rat-i" placeholder="Describe your action or response..."></textarea>
+                  <div class="choice-row">
+                    <button id="sim-submit-btn" class="btn active" style="width:100%;" onclick="processSimTurn(${i})">TRANSMIT ACTION</button>
+                  </div>`;
+
+            document.getElementById('interaction-z').innerHTML = h;
+        }
+
+        async function processSimTurn(i) {
+            const input = document.getElementById('rat-i').value.trim();
+            if (!input) return alert("You must provide an action.");
+
+            const btn = document.getElementById('sim-submit-btn');
+            btn.innerText = "PROCESSING...";
+            btn.disabled = true;
+
+            try {
+                // Initialize if not done
+                if (!SocialHistorySim.systemPrompt) {
+                    // Load system prompt from metadata or fallback to content of vietnam_system_prompt.md (mocked here as string)
+                    const promptText = window.DATA.metadata.systemPromptRaw || "";
+                    SocialHistorySim.init(window.DATA.metadata.historicalContext, promptText);
+
+                    // OVERRIDE: Link engine to existing fetch infrastructure
+                    SocialHistorySim.callOpenRouter = async (system, userMsg) => {
+                        const TARGET_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
+                        const res = await fetch(TARGET_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ system: system, message: userMsg })
+                        });
+                        const data = await res.json();
+                        return data.reply || data.choices[0].message.content;
+                    };
+                }
+
+                if (user.state.simState) SocialHistorySim.state = user.state.simState;
+
+                const response = await SocialHistorySim.processTurn(input);
+
+                // Persistence
+                if (!user.state.simLog) user.state.simLog = [];
+                user.state.simLog.push(response);
+                user.state.simState = SocialHistorySim.state;
+                user.state.dec[i] = "ACTION_TAKEN";
+
+                save();
+                go(i);
+            } catch (err) {
+                console.error(err);
+                alert("Communication Error. Check Protocol.");
+                btn.innerText = "TRANSMIT ACTION";
+                btn.disabled = false;
+            }
         }
 
         function decide(i, l) {
@@ -907,12 +1802,120 @@
             if (!r || r.trim().split(/\s+/).length < 50) return alert("Formal analysis (min 50 words) required before decision.");
             user.state.rat[i] = r; user.state.dec[i] = l;
             save(); renderNav(); go(i);
-            if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 1000);
+
+            // HISTORICAL REVEAL LOGIC
+            const s = window.DATA.slides[i];
+            if (s.historicalOutcome) {
+                toggleHistoricalPanel(true, parseMD(s.historicalOutcome));
+            }
+
+            if (i === window.DATA.slides.length - 1 && !s.historicalOutcome) setTimeout(() => startRef("post"), 1000);
         }
 
-        async function save() { if (user.id && currentMission) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save_state', id: user.id, missionId: currentMission, state: user.state }) }); }
-        async function initParticles() { await tsParticles.load("tsparticles", { particles: { number: { value: 30 }, size: { value: 2 }, move: { speed: 0.5 }, opacity: { value: 0.3 } } }); }
+        async function toggleHistoricalPanel(show, content) {
+            const p = document.getElementById('historical-panel');
+            if (show && content) {
+                // Encrypted Reveal Effect v65.41
+                const target = document.getElementById('historical-content');
+                target.innerText = "";
+                p.style.display = 'block';
+                p.style.opacity = 0;
+                gsap.to(p, { opacity: 1, duration: 0.5 });
+
+                const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+                const words = content.replace(/<[^>]*>/g, '').split(' ');
+                let currentWordIndex = 0;
+
+                // Simple scramble effect for the first few seconds
+                const scramble = setInterval(() => {
+                    target.innerText = words.map((w, i) => i < currentWordIndex ? w : chars[Math.floor(Math.random() * chars.length)].repeat(w.length)).join(' ');
+                }, 50);
+
+                const reveal = setInterval(() => {
+                    currentWordIndex++;
+                    if (currentWordIndex >= words.length) {
+                        clearInterval(scramble);
+                        clearInterval(reveal);
+                        target.innerHTML = content; // Restore formatting
+                    }
+                }, 30);
+            } else {
+                gsap.to(p, {
+                    opacity: 0, duration: 0.3, onComplete: () => {
+                        p.style.display = 'none';
+                        const i = user.state.last;
+                        if (i === window.DATA.slides.length - 1) setTimeout(() => startRef("post"), 500);
+                    }
+                });
+            }
+        }
+
+        async function save() {
+            if (user.id && currentMission) {
+                // [E2EE v65.67] Encrypt state before sending to backend
+                const encryptedState = await CriticalCrypto.encrypt(JSON.stringify(user.state), user.encryptionKey);
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'save_state',
+                        id: user.id,
+                        missionId: currentMission,
+                        state: encryptedState  // Send encrypted blob instead of plaintext
+                    })
+                });
+            }
+        }
+        async function initParticles() {
+            await tsParticles.load("tsparticles", {
+                particles: {
+                    number: { value: 80, density: { enable: true, value_area: 800 } },
+                    color: { value: "#00ffcc" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.2, random: true },
+                    size: { value: 1.5, random: true },
+                    links: { enable: true, distance: 150, color: "#00ffcc", opacity: 0.1, width: 1 },
+                    move: { enable: true, speed: 0.6, direction: "none", random: true, straight: false, out_mode: "out" }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+                    modes: { grab: { distance: 200, line_linked: { opacity: 0.3 } } }
+                }
+            });
+        }
+        initParticles();
+
+        // BLING: Staggered entry for mission list items
+        const listObserver = new MutationObserver((mutations) => {
+            mutations.forEach((m) => {
+                if (m.addedNodes.length) {
+                    const found = Array.from(m.addedNodes).some(n => n.id === 'mission-list' || (n.querySelectorAll && n.querySelectorAll('.mission-item').length));
+                    if (found) {
+                        gsap.from(".mission-item", {
+                            opacity: 0,
+                            y: 30,
+                            stagger: 0.1,
+                            duration: 1,
+                            ease: "power3.out",
+                            clearProps: "all"
+                        });
+                    }
+                }
+            });
+        });
+        listObserver.observe(document.body, { childList: true, subtree: true });
+
+        function resetAICache() {
+            if (!confirm("CLEAR AI FEEDBACK? This will force a fresh fetch from the server.")) return;
+            user.state.aiFeedback = null;
+            user.state.aiRequested = false;
+            save();
+            location.reload();
+        }
     </script>
+
+    <!-- DEBUG MODAL (DEPRECATED) -->
+    <div id="debug-modal" class="modal" style="display:none;"></div>
 </body>
 
 </html>
