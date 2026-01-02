@@ -161,7 +161,7 @@ const SupabaseBridge = {
         return data;
     },
 
-    async saveCustomOutcome(country, region, course, description, teacherId) {
+    async saveCustomOutcome(country, region, course, description) {
         if (!this.client) return false;
         const { data, error } = await this.client
             .from('curriculum_outcomes')
@@ -170,11 +170,29 @@ const SupabaseBridge = {
                 region,
                 course,
                 description,
-                teacher_id: teacherId, // Track who created it
                 is_favorite: false
             })
             .select();
 
+        if (error) throw error;
+        return data;
+    },
+
+    async fetchAllOutcomes() {
+        if (!this.client) return [];
+        const { data, error } = await this.client
+            .from('curriculum_outcomes')
+            .select('*')
+            .order('country, region, course');
+        if (error) throw error;
+        return data;
+    },
+
+    async bulkInsertOutcomes(outcomes) {
+        if (!this.client) return false;
+        const { data, error } = await this.client
+            .from('curriculum_outcomes')
+            .insert(outcomes);
         if (error) throw error;
         return data;
     },

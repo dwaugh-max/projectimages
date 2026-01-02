@@ -2035,10 +2035,31 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
         async function fetchCurriculum() {
             try {
+                // 1. Load static curriculum.json (fast, cached)
                 const res = await fetch("curriculum.json?v=66.21");
                 curriculumData = await res.json();
 
-                // Merge Custom Lab (Deep Merge)
+                // 2. Fetch from Supabase (extended library)
+                if (SupabaseBridge.client) {
+                    try {
+                        log("Fetching extended curriculum from Supabase...");
+                        const outcomes = await SupabaseBridge.fetchAllOutcomes();
+
+                        // Convert flat array to nested structure
+                        outcomes.forEach(o => {
+                            if (!curriculumData[o.country]) curriculumData[o.country] = {};
+                            if (!curriculumData[o.country][o.region]) curriculumData[o.country][o.region] = {};
+                            if (!curriculumData[o.country][o.region][o.course]) curriculumData[o.country][o.region][o.course] = [];
+                            curriculumData[o.country][o.region][o.course].push(o.description);
+                        });
+
+                        log(`Supabase: Loaded ${outcomes.length} extended outcomes.`, "success");
+                    } catch (e) {
+                        log(`Supabase curriculum fetch failed: ${e.message}`, "error");
+                    }
+                }
+
+                // 3. Merge Custom Lab (Deep Merge)
                 const custom = getCustomOutcomes();
                 Object.keys(custom).forEach(c => {
                     // Check if it's a legacy flat course (array) or new hierarchy (object)

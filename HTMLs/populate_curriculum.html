@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Curriculum Population Tool</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase_bridge.js"></script>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #00ffcc;
+        }
+
+        button {
+            background: #00ffcc;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background: #00ff00;
+        }
+
+        #log {
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            margin-top: 20px;
+        }
+
+        .success {
+            color: #00ff00;
+        }
+
+        .error {
+            color: #ff0000;
+        }
+
+        .info {
+            color: #00ffcc;
+        }
+
+        input {
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px;
+            width: 400px;
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>📚 CURRICULUM POPULATION TOOL</h1>
+    <p>This tool bulk-inserts curriculum outcomes for US states and Canadian provinces into Supabase.</p>
+
+    <div>
+        <label>Supabase URL:</label><br>
+        <input type="text" id="sb-url" placeholder="https://xyz.supabase.co"><br>
+        <label>Supabase Anon Key:</label><br>
+        <input type="text" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."><br>
+        <button onclick="initSupabase()">CONNECT</button>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <button onclick="populateUSStates()">POPULATE US STATES (Common Core)</button>
+        <button onclick="populateCanada()">POPULATE CANADA (Provincial)</button>
+        <button onclick="clearLog()">CLEAR LOG</button>
+    </div>
+
+    <div id="log"></div>
+
+    <script>
+        function log(msg, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div class="${type}">[${timestamp}] ${msg}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function initSupabase() {
+            const url = document.getElementById('sb-url').value.trim();
+            const key = document.getElementById('sb-key').value.trim();
+
+            if (!url || !key) {
+                log("ERROR: Missing credentials", "error");
+                return;
+            }
+
+            const success = SupabaseBridge.init(url, key);
+            if (success) {
+                log("✓ Supabase connected successfully", "success");
+            } else {
+                log("✗ Supabase connection failed", "error");
+            }
+        }
+
+        async function populateUSStates() {
+            if (!SupabaseBridge.client) {
+                log("ERROR: Connect to Supabase first", "error");
+                return;
+            }
+
+            log("Starting US States population...", "info");
+
+            const usStates = [
+                "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
+                "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+                "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
+                "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+                "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+                "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+                "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia",
+                "Wisconsin", "Wyoming"
+            ];
+
+            const commonCoreOutcomes = [
+                "Analyze primary and secondary sources to understand historical events",
+                "Evaluate the causes and effects of major historical developments",
+                "Compare and contrast different perspectives on historical events",
+                "Construct arguments using historical evidence",
+                "Identify patterns of continuity and change over time"
+            ];
+
+            const outcomes = [];
+            for (const state of usStates) {
+                for (const outcome of commonCoreOutcomes) {
+                    outcomes.push({
+                        country: "United States",
+                        region: state,
+                        course: "High School History",
+                        description: outcome,
+                        is_favorite: false
+                    });
+                }
+            }
+
+            try {
+                log(`Inserting ${outcomes.length} outcomes...`, "info");
+                await SupabaseBridge.bulkInsertOutcomes(outcomes);
+                log(`✓ Successfully inserted ${outcomes.length} US outcomes`, "success");
+            } catch (e) {
+                log(`✗ Error: ${e.message}`, "error");
+            }
+        }
+
+        async function populateCanada() {
+            if (!SupabaseBridge.client) {
+                log("ERROR: Connect to Supabase first", "error");
+                return;
+            }
+
+            log("Starting Canada population...", "info");
+
+            const provinces = [
+                "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador",
+                "Northwest Territories", "Nova Scotia", "Nunavut", "Ontario", "Prince Edward Island",
+                "Quebec", "Saskatchewan", "Yukon"
+            ];
+
+            const canadianOutcomes = [
+                "Analyze the impact of historical events on Canadian identity",
+                "Evaluate the development of Canadian political institutions",
+                "Examine the relationship between Canada and Indigenous peoples",
+                "Assess Canada's role in international affairs",
+                "Investigate social and economic changes in Canadian society"
+            ];
+
+            const outcomes = [];
+            for (const province of provinces) {
+                for (const outcome of canadianOutcomes) {
+                    outcomes.push({
+                        country: "Canada",
+                        region: province,
+                        course: "Social Studies 10",
+                        description: outcome,
+                        is_favorite: false
+                    });
+                }
+            }
+
+            try {
+                log(`Inserting ${outcomes.length} outcomes...`, "info");
+                await SupabaseBridge.bulkInsertOutcomes(outcomes);
+                log(`✓ Successfully inserted ${outcomes.length} Canadian outcomes`, "success");
+            } catch (e) {
+                log(`✗ Error: ${e.message}`, "error");
+            }
+        }
+    </script>
+</body>
+
+</html>
