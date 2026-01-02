@@ -454,11 +454,24 @@
         }
 
         .btn.active {
-            background: rgba(0, 255, 234, 0.15) !important;
+            position: relative;
+            background: none !important;
+            /* Managed by pseudo to allow opacity on var(--accent) */
             color: #fff !important;
             font-weight: bold;
-            box-shadow: 0 0 40px var(--accent-dim), inset 0 0 10px rgba(0, 255, 234, 0.2);
+            box-shadow: 0 0 40px var(--accent-dim);
             text-shadow: 0 0 5px var(--accent);
+            border-color: var(--accent);
+            z-index: 1;
+        }
+
+        .btn.active::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--accent);
+            opacity: 0.15;
+            z-index: -1;
         }
 
         .btn.locked {
