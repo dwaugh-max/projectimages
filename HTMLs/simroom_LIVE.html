@@ -454,10 +454,11 @@
         }
 
         .btn.active {
-            background: var(--accent) !important;
-            color: #000 !important;
+            background: rgba(0, 255, 234, 0.15) !important;
+            color: #fff !important;
             font-weight: bold;
-            box-shadow: 0 0 80px var(--accent-dim), inset 0 0 20px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 40px var(--accent-dim), inset 0 0 10px rgba(0, 255, 234, 0.2);
+            text-shadow: 0 0 5px var(--accent);
         }
 
         .btn.locked {
@@ -891,8 +892,8 @@
         </div>
         <div id="nav-container" class="nav-container"></div>
         <button class="btn" onclick="toggleGlossary()"
-            style="margin-top:20px; border-color:var(--accent); font-size:0.7rem; text-align:center; background:transparent;">OPEN
-            INTELLIGENCE GLOSSARY</button>
+            style="margin-top:20px; border-color:var(--accent); font-size:0.75rem; text-align:center; background:transparent; display:block; width:100%; letter-spacing:3px;">
+            GLOSSARY</button>
     </nav>
     <main class="main">
         <div id="card-container" class="card-container"></div>
