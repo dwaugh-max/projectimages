@@ -1149,7 +1149,7 @@
             </div>
 
             <main class="forge-main">
-                <div class="forge-panel">
+                <div id="forge-panel" class="forge-panel">
                     <div style="margin-bottom:20px;">
                         <div
                             style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
@@ -1276,7 +1276,7 @@
                     </div>
                 </div>
 
-                <div class="forge-output">
+                <div id="forge-output" class="forge-output">
                     <div id="forge-chat" style="font-size:0.75rem; line-height:1.6; color:#ccc;">
                         <strong>CREATE SYSTEM ONLINE.</strong><br>
                         Welcome to the integrated conceive-birth-finetune machine. Select your curriculum context to
@@ -2365,29 +2365,18 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             reader.onload = function (e) {
                 try {
                     let raw = e.target.result.trim();
-                    console.log("RAW FILE LENGTH:", raw.length);
-                    console.log("FIRST 100 CHARS:", raw.substring(0, 100));
-                    console.log("LAST 100 CHARS:", raw.substring(raw.length - 100));
 
                     // Robust Isolate: Find first { and last } to strip potential markdown or noise
                     const start = raw.indexOf('{');
                     const end = raw.lastIndexOf('}');
-
-                    console.log("JSON BOUNDARIES:", { start, end, length: end - start + 1 });
-
                     if (start === -1 || end === -1) throw new Error("No JSON object found.");
 
                     const cleanJson = raw.substring(start, end + 1);
-                    console.log("CLEAN JSON LENGTH:", cleanJson.length);
-
                     const payload = JSON.parse(cleanJson);
-                    console.log("PARSE SUCCESS! Keys:", Object.keys(payload));
-
                     loadMissionIntoForge(payload, "FILE IMPORT");
                 } catch (err) {
-                    console.error("IMPORT FAILURE:", err);
                     log(`Import Error: ${err.message}`, "error");
-                    alert(`FAILED: ${err.message}\n\nCheck browser console (F12) for details.`);
+                    alert("FAILED: The file provided is not a valid Mission Capsule JSON.");
                 }
             };
             reader.readAsText(file);
