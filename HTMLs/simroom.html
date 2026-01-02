@@ -11,6 +11,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Oswald:wght@700&family=JetBrains+Mono&display=swap"
         rel="stylesheet">
+    <!-- v73 UDL: Readability Support -->
+    <link href="https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/css/opendyslexic.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
@@ -35,6 +37,49 @@
         * {
             box-sizing: border-box;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* v73 UDL PROTECTOR PROTOCOLS */
+        body.static-mode::before {
+            display: none !important;
+        }
+
+        /* Disable Scanlines */
+        body.static-mode .glitch::before,
+        body.static-mode .glitch::after {
+            display: none !important;
+        }
+
+        /* Disable Glitch */
+        body.static-mode .neon-pulse {
+            animation: none !important;
+            text-shadow: none !important;
+            color: var(--accent) !important;
+        }
+
+        body.dyslexia-mode {
+            font-family: 'OpenDyslexic', sans-serif !important;
+            --font-p: 'OpenDyslexic', sans-serif;
+            --font-h: 'OpenDyslexic', sans-serif;
+        }
+
+        body.dyslexia-mode #ref-narrative {
+            text-align: left !important;
+            column-count: 1 !important;
+            font-size: 1.1rem !important;
+        }
+
+        body.dyslexia-mode * {
+            letter-spacing: normal !important;
+            text-transform: none !important;
+        }
+
+        /* Focus Indicators for Action/Expression */
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 4px;
         }
 
         ::selection {
@@ -858,7 +903,9 @@
                     <div id="ref-q"
                         style="margin-top:40px; border-top:1px solid rgba(255,255,255,0.1); padding-top:40px; font-family:var(--font-h); font-size:1.3rem; letter-spacing:2px;">
                     </div>
-                    <textarea id="ref-a" style="margin-top:20px;" placeholder="ENTER RATIONALE..."></textarea>
+                    <div style="position:relative;">
+                        <textarea id="ref-a" style="margin-top:20px;" placeholder="ENTER RATIONALE..."></textarea>
+                    </div>
                     <button id="ref-btn" class="btn"
                         style="width:100%; margin-top:10px; padding:12px; font-weight:bold; border:none; background:var(--accent); color:#000; box-shadow:0 0 20px var(--accent-dim); font-size:0.9rem;"
                         onclick="nextRef()">INITIALIZE MISSION</button>
@@ -912,13 +959,18 @@
         <button class="btn" onclick="toggleGlossary()"
             style="margin-top:20px; border-color:var(--accent); font-size:0.75rem; text-align:center; background:transparent; display:block; width:100%; letter-spacing:3px;">
             GLOSSARY</button>
+
+        <!-- v73 UDL: Tactical Settings Access -->
+        <button class="btn" onclick="toggleUDLSettings()"
+            style="margin-top:10px; border-color:#555; font-size:0.6rem; text-align:center; background:rgba(255,255,255,0.05); display:block; width:100%; letter-spacing:2px; color:#888;">
+            ⚙️ TACTICAL SETTINGS</button>
     </nav>
     <main class="main">
         <div id="card-container" class="card-container"></div>
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto; font-family:var(--font-tech);"
-            onclick="showVersionInfo()">SITUATION ROOM PROTOCOL | v66.492 [STABLE]</div>
+            onclick="showVersionInfo()">SITUATION ROOM PROTOCOL | v73.SB.UDL [STABLE]</div>
         <div id="f-outcomes-btn"
             style="cursor:pointer; pointer-events:auto; color:var(--accent); text-shadow: 0 0 10px var(--accent-dim);"
             onclick="toggleOutcomes()">[ACCESS COGNITIVE OUTCOMES]</div>
@@ -950,19 +1002,31 @@
         <div id="version-content" style="font-size:0.75rem; color:#ccc; line-height:1.8;"></div>
     </div>
 
-    <!-- HISTORICAL REVEAL PANEL -->
-    <div id="historical-panel"
-        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; max-width:700px; background:rgba(0,0,0,0.98); border:2px solid var(--accent); padding:30px; z-index:2000; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+    </div>
+
+    <div id="udl-panel"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; max-width:400px; background:rgba(5,5,5,0.98); border:1px solid #444; padding:30px; z-index:3000; box-shadow: 0 0 50px rgba(0,0,0,0.9); backdrop-filter:blur(20px);">
         <div
-            style="color:var(--accent); font-size:1rem; font-weight:bold; letter-spacing:3px; margin-bottom:20px; text-align:center; text-transform:uppercase;">
-            Historical Outcome
+            style="color:var(--accent); font-family:var(--font-h); font-size:1rem; letter-spacing:3px; margin-bottom:25px; border-bottom:1px solid #333; padding-bottom:10px; text-transform:uppercase;">
+            Tactical Protocols</div>
+
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <span style="font-size:0.8rem; letter-spacing:1px;">STATIC FILTER (Disable Animations)</span>
+                <input type="checkbox" id="udl-static" onchange="applyUDL()"
+                    style="width:20px; height:20px; cursor:pointer;">
+            </label>
+
+            <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <span style="font-size:0.8rem; letter-spacing:1px;">CLARIFICATION (Readability Font)</span>
+                <input type="checkbox" id="udl-dyslexia" onchange="applyUDL()"
+                    style="width:20px; height:20px; cursor:pointer;">
+            </label>
         </div>
-        <div id="historical-content"
-            style="font-size:1rem; color:#eee; line-height:1.6; margin-bottom:30px; font-family:var(--font-p);"></div>
-        <div style="text-align:center;">
-            <button class="btn" onclick="toggleHistoricalPanel(false)"
-                style="background:var(--accent); color:#000; font-weight:bold; padding:10px 30px;">PROCEED</button>
-        </div>
+
+        <button class="btn" onclick="toggleUDLSettings()"
+            style="width:100%; margin-top:30px; background:#333; color:#fff; border:none; font-size:0.7rem;">CLOSE
+            SETTINGS</button>
     </div>
 
     <script>
@@ -1000,6 +1064,38 @@
                 textLineHeight: "1.45"
             }
         };
+
+        // v73 UDL LOGIC
+        function toggleUDLSettings() {
+            const p = document.getElementById('udl-panel');
+            p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+        }
+
+        function applyUDL() {
+            const isStatic = document.getElementById('udl-static').checked;
+            const isDyslexia = document.getElementById('udl-dyslexia').checked;
+
+            document.body.classList.toggle('static-mode', isStatic);
+            document.body.classList.toggle('dyslexia-mode', isDyslexia);
+
+            // Persist
+            localStorage.setItem('ST_UDL_STATIC', isStatic);
+            localStorage.setItem('ST_UDL_DYSLEXIA', isDyslexia);
+
+            console.log(`[UDL_UPDATE] Static: ${isStatic}, Dyslexia: ${isDyslexia}`);
+        }
+
+        // Load UDL on init
+        function loadUDL() {
+            const isStatic = localStorage.getItem('ST_UDL_STATIC') === 'true';
+            const isDyslexia = localStorage.getItem('ST_UDL_DYSLEXIA') === 'true';
+
+            document.getElementById('udl-static').checked = isStatic;
+            document.getElementById('udl-dyslexia').checked = isDyslexia;
+
+            document.body.classList.toggle('static-mode', isStatic);
+            document.body.classList.toggle('dyslexia-mode', isDyslexia);
+        }
 
         async function login() {
             const name = document.getElementById('username').value.trim();
@@ -1214,7 +1310,7 @@
             }
             document.documentElement.style.setProperty('--font-h', hFont);
 
-            const simVer = 'v72.SB';
+            const simVer = 'v73.SB.UDL';
             if (document.getElementById('splash-version')) document.getElementById('splash-version').innerText = simVer;
 
             const m = window.DATA.metadata || {};
@@ -1223,7 +1319,7 @@
                 s.style.backgroundSize = "cover"; s.style.backgroundPosition = "center";
             }
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v72.SB`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v73.SB.UDL`;
 
             // Populate the outcomes panel (popup) instead of inline text
             populateOutcomes();
@@ -1284,7 +1380,7 @@
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v65.71';
+            const simVersion = 'v73.SB.UDL';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -1854,9 +1950,9 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
                 const sbKey = window.DATA?.metadata?.sb_key;
                 if (sbUrl && sbKey) {
                     SupabaseBridge.init(sbUrl, sbKey);
-                    console.log("[TELEMETRY] Master Spreadsheet Link Operational (via v72.SB Metadata).");
+                    console.log("[TELEMETRY] Master Spreadsheet Link Operational (via v73.SB.UDL Metadata).");
                 } else {
-                    console.warn("[TELEMETRY] Handshake Interrupted: Mission capsule requires v72.SB re-injection in Teacher Mode.");
+                    console.warn("[TELEMETRY] Handshake Interrupted: Mission capsule requires v73.SB.UDL re-injection in Teacher Mode.");
                     return;
                 }
             }
@@ -1960,6 +2056,7 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
             });
         }
         initParticles();
+        loadUDL();
 
         // BLING: Staggered entry for mission list items
         const listObserver = new MutationObserver((mutations) => {

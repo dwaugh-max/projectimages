@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>MISSION CONTROL // SITUATION ROOM (v72.SB)</title>
+    <title>MISSION CONTROL // SITUATION ROOM (v73.SB.UDL)</title>
     <script>
         // --- BOOTSTRAP CONFIGURATION ---
         (function bootstrap() {
@@ -17,7 +17,7 @@
                 localStorage.setItem('TM_BACKEND_PIN', DEFAULT_PIN);
             }
 
-            // V72: Supabase Credentials (Empty by default)
+            // V73.SB.UDL: Supabase Credentials (Empty by default)
             if (!localStorage.getItem('TM_SUPABASE_URL')) localStorage.setItem('TM_SUPABASE_URL', '');
             if (!localStorage.getItem('TM_SUPABASE_KEY')) localStorage.setItem('TM_SUPABASE_KEY', '');
         })();
@@ -112,6 +112,14 @@
             top: 0;
             z-index: 100;
             backdrop-filter: blur(10px);
+        }
+
+        /* v73 UDL: Focus Indicators */
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 4px;
         }
 
         .status-light {
@@ -988,7 +996,7 @@
         <div id="proj-board" class="proj-grid"></div>
     </div>
 
-    <div id="status-bar">
+    <div id="status-bar" role="status" aria-live="polite">
         <div style="display:flex; align-items:center; gap:15px;">
             <span
                 style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:#00ffcc; letter-spacing:3px; text-shadow:0 0 10px rgba(0,255,204,0.3);">SITUATION
@@ -1004,296 +1012,314 @@
         </div>
         <div style="display:flex; gap:15px; align-items:center;">
             <button onclick="toggleProjector()"
-                style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📺
+                style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;"
+                aria-label="Open Projector View">📺
                 PROJECTOR</button>
             <button onclick="toggleForge()"
-                style="background:var(--forge-accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">✨
+                style="background:var(--forge-accent); color:#fff; font-size:0.6rem; border:none; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;"
+                aria-label="Open Mission Forge">✨
                 CREATE</button>
             <button onclick="toggleSettings()"
-                style="background:transparent; border:1px solid #444; color:#666; font-size:0.8rem; padding:5px 8px; cursor:pointer;">⚙️</button>
+                style="background:transparent; border:1px solid #444; color:#666; font-size:0.8rem; padding:5px 8px; cursor:pointer;"
+                aria-label="Open Connection Settings">⚙️</button>
             <button onclick="toggleLibrary()"
-                style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;">📚
+                style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;"
+                aria-label="Open Mission Archive Hub">📚
                 HUB</button>
-            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v72.SB.001</div>
+            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v73.SB.UDL</div>
         </div>
     </div>
-    <div style="display:flex; align-items:center; margin:30px 40px; gap:20px;">
-        <img src="images/logic_gear_logo.png" alt="Logic-Gear"
-            style="height: 50px; filter: drop-shadow(0 0 10px var(--accent));">
-        <h1 style="margin:0; font-size:1.5rem;">COMMAND CENTER // MISSION CONTROL</h1>
-    </div>
-    <div class="grid" style="grid-template-columns: 1fr 1.5fr 1fr; padding: 0 40px;">
-        <div class="panel">
-            <h3
-                style="margin-top:0; letter-spacing:2px; font-size:0.8rem; border-bottom:1px solid #ddd; padding-bottom:10px;">
-                CAPSULE INJECTION</h3>
-            <div id="upload-zone"
-                style="border:2px dashed #ccc; padding:20px; text-align:center; margin-bottom:20px; cursor:pointer;"
-                onclick="document.getElementById('file-input').click()">
-                <div style="font-size:1.5rem; margin-bottom:5px;">📁</div>
-                <div style="font-size:0.5rem; color:#666; font-weight:bold;">LOAD .BLOB CAPSULE</div>
-                <input type="file" id="file-input" accept=".blob" style="display:none"
-                    onchange="handleFile(this.files[0])">
-            </div>
-            <label>Mission ID</label><input id="m-id" placeholder="e.g. CUBA62">
-            <label>Public Name</label><input id="m-name" placeholder="Operation Anadyr">
-            <label>Raw Payload</label><textarea id="json-input" style="height: 60px; font-size:0.6rem;"
-                placeholder="..."></textarea>
-            <button class="btn" style="padding:10px; font-size:0.75rem;" onclick="upload()">INITIALIZE ARCHIVE</button>
+    <main>
+        <div style="display:flex; align-items:center; margin:30px 40px; gap:20px;">
+            <img src="images/logic_gear_logo.png" alt="Logic-Gear"
+                style="height: 50px; filter: drop-shadow(0 0 10px var(--accent));">
+            <h1 style="margin:0; font-size:1.5rem;">COMMAND CENTER // MISSION CONTROL</h1>
         </div>
-
-        <div class="panel">
-            <div
-                style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:20px;">
-                <h3 style="margin:0; letter-spacing:2px; font-size:0.8rem;">STUDENT PROGRESS</h3>
-                <div id="sync-tick" style="font-size:0.55rem; color:#888;">[SYNC_IDLE]</div>
-            </div>
-            <div style="margin-bottom:15px; display:flex; gap:10px;">
-                <select id="class-filter" style="flex:1; padding:8px; font-family:inherit; font-size:0.75rem;"
-                    onchange="renderProgress()">
-                    <option value="ALL">ALL CLASSES</option>
-                </select>
-                <button class="btn" style="width:auto; padding:0 15px; font-size:0.6rem;"
-                    onclick="fetchProgress()">REFRESH</button>
-            </div>
-            <div id="progress-list" style="max-height:500px; overflow-y:auto; border:1px solid #eee;"></div>
-        </div>
-
-        <div style="display:flex; flex-direction:column; gap:20px;">
-            <div class="panel" style="flex:1;">
+        <div class="grid" style="grid-template-columns: 1fr 1.5fr 1fr; padding: 0 40px;">
+            <div class="panel">
                 <h3
                     style="margin-top:0; letter-spacing:2px; font-size:0.8rem; border-bottom:1px solid #ddd; padding-bottom:10px;">
-                    LIVE DIRECTORY</h3>
-                <div id="lib-log" style="font-size: 0.55rem; color: #888; margin-bottom: 10px;">Scanning...</div>
-                <div id="library-list"></div>
+                    CAPSULE INJECTION</h3>
+                <div id="upload-zone"
+                    style="border:2px dashed #ccc; padding:20px; text-align:center; margin-bottom:20px; cursor:pointer;"
+                    onclick="document.getElementById('file-input').click()">
+                    <div style="font-size:1.5rem; margin-bottom:5px;">📁</div>
+                    <div style="font-size:0.5rem; color:#666; font-weight:bold;">LOAD .BLOB CAPSULE</div>
+                    <input type="file" id="file-input" accept=".blob" style="display:none"
+                        onchange="handleFile(this.files[0])">
+                </div>
+                <label>Mission ID</label><input id="m-id" placeholder="e.g. CUBA62">
+                <label>Public Name</label><input id="m-name" placeholder="Operation Anadyr">
+                <label>Raw Payload</label><textarea id="json-input" style="height: 60px; font-size:0.6rem;"
+                    placeholder="..."></textarea>
+                <button class="btn" style="padding:10px; font-size:0.75rem;" onclick="upload()">INITIALIZE
+                    ARCHIVE</button>
             </div>
-            <div class="panel" style="padding:20px; background:var(--terminal); border-top:none;">
-                <h3 style="margin-top:0; color:#fff; font-size:0.6rem; letter-spacing:1px; opacity:0.6;">SYSTEM LOG</h3>
-                <div id="console" style="height:150px; overflow-y:auto; font-size:0.65rem; color:var(--term-txt);">
+
+            <div class="panel">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:20px;">
+                    <h3 style="margin:0; letter-spacing:2px; font-size:0.8rem;">STUDENT PROGRESS</h3>
+                    <div id="sync-tick" style="font-size:0.55rem; color:#888;">[SYNC_IDLE]</div>
+                </div>
+                <div style="margin-bottom:15px; display:flex; gap:10px;">
+                    <select id="class-filter" style="flex:1; padding:8px; font-family:inherit; font-size:0.75rem;"
+                        onchange="renderProgress()">
+                        <option value="ALL">ALL CLASSES</option>
+                    </select>
+                    <button class="btn" style="width:auto; padding:0 15px; font-size:0.6rem;"
+                        onclick="fetchProgress()">REFRESH</button>
+                </div>
+                <div id="progress-list" style="max-height:500px; overflow-y:auto; border:1px solid #eee;"></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                <div class="panel" style="flex:1;">
+                    <h3
+                        style="margin-top:0; letter-spacing:2px; font-size:0.8rem; border-bottom:1px solid #ddd; padding-bottom:10px;">
+                        LIVE DIRECTORY</h3>
+                    <div id="lib-log" style="font-size: 0.55rem; color: #888; margin-bottom: 10px;">Scanning...</div>
+                    <div id="library-list"></div>
+                </div>
+                <div class="panel" style="padding:20px; background:var(--terminal); border-top:none;">
+                    <h3 style="margin-top:0; color:#fff; font-size:0.6rem; letter-spacing:1px; opacity:0.6;">SYSTEM LOG
+                    </h3>
+                    <div id="console" style="height:150px; overflow-y:auto; font-size:0.65rem; color:var(--term-txt);">
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="library-hub"
-        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:3000; padding:60px; overflow-y:auto;">
-        <div
-            style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:20px; margin-bottom:40px;">
-            <h1 style="margin:0; color:var(--accent); letter-spacing:5px; border-bottom:none;">COMMUNITY ARCHIVE HUB
-            </h1>
-            <div style="display:flex; gap:10px;">
-                <button onclick="fetchMissions()"
-                    style="background:none; border:1px solid #00ffcc; color:#00ffcc; padding:10px 20px; cursor:pointer; font-family:inherit;">[
-                    REFRESH ARCHIVE ]</button>
-                <button onclick="toggleLibrary()"
-                    style="background:transparent; border:1px solid #666; color:#666; padding:10px 20px; cursor:pointer; font-family:inherit;">[CLOSE_HUB]</button>
+        <div id="library-hub"
+            style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:3000; padding:60px; overflow-y:auto;">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); padding-bottom:20px; margin-bottom:40px;">
+                <h1 style="margin:0; color:var(--accent); letter-spacing:5px; border-bottom:none;">COMMUNITY ARCHIVE HUB
+                </h1>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="fetchMissions()"
+                        style="background:none; border:1px solid #00ffcc; color:#00ffcc; padding:10px 20px; cursor:pointer; font-family:inherit;">[
+                        REFRESH ARCHIVE ]</button>
+                    <button onclick="toggleLibrary()"
+                        style="background:transparent; border:1px solid #666; color:#666; padding:10px 20px; cursor:pointer; font-family:inherit;">[CLOSE_HUB]</button>
+                </div>
+            </div>
+            <div id="hub-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                <div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5; color:#fff;">LOADING
+                    MISSION
+                    CATALOG...</div>
             </div>
         </div>
-        <div id="hub-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-            <div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5; color:#fff;">LOADING MISSION
-                CATALOG...</div>
-        </div>
-    </div>
 
-    <div id="forge-overlay">
-        <header class="forge-header">
-            <div style="display:flex; align-items:center; gap:20px;">
-                <span
-                    style="font-family:'Oswald',sans-serif; font-size:1rem; color:#00ffcc; letter-spacing:3px; opacity:0.8;">SITUATION
+        <div id="forge-overlay">
+            <header class="forge-header">
+                <div style="display:flex; align-items:center; gap:20px;">
+                    style="font-family:'Oswald',sans-serif; font-size:1rem; color:#00ffcc; letter-spacing:3px;
+                    opacity:0.8;">SITUATION
                     ROOM</span>
-                <span style="color:#333;">|</span>
-                <div
-                    style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
-                    MISSION CREATE</div>
-                <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v72.SB</div>
+                    <span
+                        style="color:#00ffcc; background: #c00; padding: 2px 10px; font-size: 0.6rem; font-weight: bold; border-radius: 3px; animation: blink 1s infinite;">v73
+                        ACTIVE</span>
+                    <span style="color:#333;">|</span>
+                    <div
+                        style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
+                        MISSION CREATE</div>
+                    <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v73.SB.UDL</div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="resetForge()"
+                        style="background:transparent; border:1px solid var(--forge-accent); color:var(--forge-accent); padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem; font-weight:bold;">RESTART</button>
+                    <button onclick="toggleForge()"
+                        style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem;">EXIT</button>
+                </div>
+            </header>
+
+            <!-- V70 MODULAR PIPELINE STEPPER -->
+            <div id="pipeline-stepper">
+                <!-- Rendered dynamically by renderPipelineStepper() -->
             </div>
-            <div style="display:flex; gap:10px;">
-                <button onclick="resetForge()"
-                    style="background:transparent; border:1px solid var(--forge-accent); color:var(--forge-accent); padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem; font-weight:bold;">RESTART</button>
-                <button onclick="toggleForge()"
-                    style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem;">EXIT</button>
+            <div class="pipeline-controls">
+                <button onclick="resetPipeline()">↺ RESET DEFAULT</button>
+                <button onclick="jumpToPhase(forgePipeline.length - 1)"
+                    style="margin-left:auto; border-color:var(--accent); color:var(--accent);">SKIP TO BIRTH →</button>
             </div>
-        </header>
 
-        <!-- V70 MODULAR PIPELINE STEPPER -->
-        <div id="pipeline-stepper">
-            <!-- Rendered dynamically by renderPipelineStepper() -->
-        </div>
-        <div class="pipeline-controls">
-            <button onclick="resetPipeline()">↺ RESET DEFAULT</button>
-            <button onclick="jumpToPhase(forgePipeline.length - 1)"
-                style="margin-left:auto; border-color:var(--accent); color:var(--accent);">SKIP TO BIRTH →</button>
-        </div>
+            <main class="forge-main">
+                <div class="forge-panel">
+                    <div style="margin-bottom:20px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
+                            <label
+                                style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px; margin:0;">CURRENT
+                                PHASE</label>
+                            <div class="settings-toggle" onclick="toggleGenSettings()"
+                                style="margin:0; font-size:1rem; opacity:0.7; cursor:pointer;"
+                                title="Advanced Configuration">⚙️</div>
+                        </div>
+                        <h2 id="forge-title"
+                            style="margin:0; font-family:'Oswald',sans-serif; font-size:1.8rem; text-transform:uppercase; color:#fff; letter-spacing:3px;">
+                            <span style='font-size:1rem; opacity:0.7; letter-spacing:2px; display:block;'>PHASE
+                                1:</span>
+                            BRAINSTORM
+                        </h2>
+                        <p id="forge-desc"
+                            style="font-size:0.7rem; color:#888; margin-top:5px; font-family:'Inter',sans-serif; line-height:1.4;">
+                            Bounce mission ideas off of the AI! Select (or add) your course outcomes to help tell the AI
+                            your class context. Then give the AI general direction in the text box below, and press
+                            submit.<br><br>Don't feel like you have to take its first choices! Spend some time refining
+                            ("a
+                            little more this, a little less that...") until you have a solid concept.</p>
 
-        <main class="forge-main">
-            <div class="forge-panel">
-                <div style="margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
-                        <label
-                            style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px; margin:0;">CURRENT
-                            PHASE</label>
-                        <div class="settings-toggle" onclick="toggleGenSettings()"
-                            style="margin:0; font-size:1rem; opacity:0.7; cursor:pointer;"
-                            title="Advanced Configuration">⚙️</div>
-                    </div>
-                    <h2 id="forge-title"
-                        style="margin:0; font-family:'Oswald',sans-serif; font-size:1.8rem; text-transform:uppercase; color:#fff; letter-spacing:3px;">
-                        <span style='font-size:1rem; opacity:0.7; letter-spacing:2px; display:block;'>PHASE 1:</span>
-                        BRAINSTORM
-                    </h2>
-                    <p id="forge-desc"
-                        style="font-size:0.7rem; color:#888; margin-top:5px; font-family:'Inter',sans-serif; line-height:1.4;">
-                        Bounce mission ideas off of the AI! Select (or add) your course outcomes to help tell the AI
-                        your class context. Then give the AI general direction in the text box below, and press
-                        submit.<br><br>Don't feel like you have to take its first choices! Spend some time refining ("a
-                        little more this, a little less that...") until you have a solid concept.</p>
-
-                    <div id="gen-settings-content"
-                        style="margin-top:10px; border-left:2px solid var(--forge-accent); background:rgba(0,0,0,0.3);">
-                        <div class="forge-settings" style="grid-template-columns:1fr; gap:5px;">
-                            <div style="display:flex; gap:10px;">
-                                <div style="flex:1;">
-                                    <label>Model</label>
-                                    <select id="f-model" class="settings-select">
-                                        <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2</option>
-                                        <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash</option>
-                                        <option value="google/learnlm-1.5-pro-experimental:free">LearnLM 1.5 Pro
-                                        </option>
-                                        <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B</option>
-                                    </select>
-                                </div>
-                                <div style="width:120px;">
-                                    <label>Complexity</label>
-                                    <select id="f-complexity" class="settings-select">
-                                        <option value="Low">Low</option>
-                                        <option value="Medium" selected>Standard</option>
-                                        <option value="High">Elite</option>
-                                    </select>
+                        <div id="gen-settings-content"
+                            style="margin-top:10px; border-left:2px solid var(--forge-accent); background:rgba(0,0,0,0.3);">
+                            <div class="forge-settings" style="grid-template-columns:1fr; gap:5px;">
+                                <div style="display:flex; gap:10px;">
+                                    <div style="flex:1;">
+                                        <label>Model</label>
+                                        <select id="f-model" class="settings-select">
+                                            <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2</option>
+                                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash</option>
+                                            <option value="google/learnlm-1.5-pro-experimental:free">LearnLM 1.5 Pro
+                                            </option>
+                                            <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B</option>
+                                        </select>
+                                    </div>
+                                    <div style="width:120px;">
+                                        <label>Complexity</label>
+                                        <select id="f-complexity" class="settings-select">
+                                            <option value="Low">Low</option>
+                                            <option value="Medium" selected>Standard</option>
+                                            <option value="High">Elite</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div id="curriculum-zone"
-                    style="background:rgba(255,255,255,0.03); padding:15px; border-radius:4px; border:1px solid #222;">
-                    <label
-                        style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">CHOOSE/ADD
-                        COURSE OUTCOMES</label>
-                    <div class="guidance-text" style="color:#888; font-style:italic; font-size:0.7rem; margin-top:3px;">
-                        Look for your class & outcomes here. The list is incomplete! Go ahead and add your own for your
-                        future reference.</div>
-                    <div id="f-favorites-shelf"
-                        style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px; border-bottom:1px solid #222; padding-bottom:10px; display:none;">
-                        <!-- Pinned favorites go here -->
-                    </div>
+                    <div id="curriculum-zone"
+                        style="background:rgba(255,255,255,0.03); padding:15px; border-radius:4px; border:1px solid #222;">
+                        <label
+                            style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">CHOOSE/ADD
+                            COURSE OUTCOMES</label>
+                        <div class="guidance-text"
+                            style="color:#888; font-style:italic; font-size:0.7rem; margin-top:3px;">
+                            Look for your class & outcomes here. The list is incomplete! Go ahead and add your own for
+                            your
+                            future reference.</div>
+                        <div id="f-favorites-shelf"
+                            style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px; border-bottom:1px solid #222; padding-bottom:10px; display:none;">
+                            <!-- Pinned favorites go here -->
+                        </div>
 
-                    <select id="f-country" onchange="updateForgeRegions()"
-                        style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px;">
-                        <option value="">-- SELECT COUNTRY --</option>
-                    </select>
-                    <select id="f-region" onchange="updateForgeCourses()"
-                        style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px; display:none;">
-                    </select>
-                    <div style="display:flex; gap:10px; margin-bottom:10px; width:100%;">
-                        <select id="f-course" onchange="updateForgeOutcomes()"
-                            style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-family:'Inter',sans-serif; font-size:0.7rem; flex:1; min-width:0; display:none;">
+                        <select id="f-country" onchange="updateForgeRegions()"
+                            style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px;">
+                            <option value="">-- SELECT COUNTRY --</option>
                         </select>
-                        <button id="f-fav-btn" onclick="toggleFavorite()"
-                            style="flex:0 0 40px; background:transparent; border:1px solid #333; color:#444; padding:0; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; display:none; transition:all 0.2s;">⭐</button>
-                    </div>
-                    <div id="f-outcomes"
-                        style="max-height:400px; overflow-y:auto; font-size:0.65rem; color:#888; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
-                        <p style="text-align:center; opacity:0.4;">SELECT COURSE TO LOAD OUTCOMES</p>
+                        <select id="f-region" onchange="updateForgeCourses()"
+                            style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-size:0.7rem; width:100%; margin-bottom:10px; display:none;">
+                        </select>
+                        <div style="display:flex; gap:10px; margin-bottom:10px; width:100%;">
+                            <select id="f-course" onchange="updateForgeOutcomes()"
+                                style="background:#000; border:1px solid #333; color:#fff; padding:8px; font-family:'Inter',sans-serif; font-size:0.7rem; flex:1; min-width:0; display:none;">
+                            </select>
+                            <button id="f-fav-btn" onclick="toggleFavorite()"
+                                style="flex:0 0 40px; background:transparent; border:1px solid #333; color:#444; padding:0; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; display:none; transition:all 0.2s;">⭐</button>
+                        </div>
+                        <div id="f-outcomes"
+                            style="max-height:400px; overflow-y:auto; font-size:0.65rem; color:#888; border-top:1px solid #222; padding-top:10px; margin-top:10px;">
+                            <p style="text-align:center; opacity:0.4;">SELECT COURSE TO LOAD OUTCOMES</p>
+                        </div>
+
+                        <div id="custom-add-zone"
+                            style="margin-top:15px; border-top:1px solid #333; padding-top:10px; display:none;">
+                            <input id="custom-country" placeholder="COUNTRY (e.g. Canada)"
+                                style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
+                            <input id="custom-region" placeholder="REGION (e.g. Nova Scotia)"
+                                style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
+                            <input id="custom-course-name" placeholder="COURSE NAME"
+                                style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
+                            <textarea id="custom-outcomes-raw" placeholder="OUTCOMES (ONE PER LINE)"
+                                style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; height:60px; padding:5px;"></textarea>
+                            <button class="btn"
+                                style="background:var(--forge-accent); font-size:0.6rem; padding:5px; width:100%; margin-top:5px;"
+                                onclick="saveCustomCourse()">SAVE TO LOCAL LAB</button>
+                        </div>
+                        <div style="text-align:center; margin-top:10px;">
+                            <button id="custom-toggle-btn" onclick="toggleCustomAdd()"
+                                style="background:transparent; border:none; color:var(--forge-accent); font-size:0.55rem; cursor:pointer; text-decoration:underline;">+
+                                ADD CUSTOM COURSE</button>
+                        </div>
                     </div>
 
-                    <div id="custom-add-zone"
-                        style="margin-top:15px; border-top:1px solid #333; padding-top:10px; display:none;">
-                        <input id="custom-country" placeholder="COUNTRY (e.g. Canada)"
-                            style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
-                        <input id="custom-region" placeholder="REGION (e.g. Nova Scotia)"
-                            style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
-                        <input id="custom-course-name" placeholder="COURSE NAME"
-                            style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; margin-bottom:5px; padding:5px;">
-                        <textarea id="custom-outcomes-raw" placeholder="OUTCOMES (ONE PER LINE)"
-                            style="background:#000; border:1px solid #444; color:#fff; font-size:0.65rem; width:100%; height:60px; padding:5px;"></textarea>
-                        <button class="btn"
-                            style="background:var(--forge-accent); font-size:0.6rem; padding:5px; width:100%; margin-top:5px;"
-                            onclick="saveCustomCourse()">SAVE TO LOCAL LAB</button>
+                    <div style="margin-top:10px;">
+                        <label
+                            style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">IDEA
+                            BOX</label>
+                        <div class="guidance-text" style="color:#666; font-style:italic; font-size:0.65rem;">What are we
+                            making today? Give the AI something to start with.</div>
+                        <textarea id="f-input"
+                            style="height:120px; flex:none; background:#111; border:1px solid #333; color:#fff; font-size:0.85rem; padding:15px; width:100%;"
+                            placeholder="ENTER COMMAND CONTEXT..."></textarea>
                     </div>
-                    <div style="text-align:center; margin-top:10px;">
-                        <button id="custom-toggle-btn" onclick="toggleCustomAdd()"
-                            style="background:transparent; border:none; color:var(--forge-accent); font-size:0.55rem; cursor:pointer; text-decoration:underline;">+
-                            ADD CUSTOM COURSE</button>
+
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn" style="flex:1; background:#333; font-size:0.7rem; padding:12px;"
+                            onclick="forgeBack()">BACK</button>
+                        <button class="btn" id="f-submit"
+                            style="flex:2; background:var(--forge-accent); font-size:0.7rem; padding:12px;"
+                            onclick="processForge()">SUBMIT COMMAND</button>
                     </div>
                 </div>
 
-                <div style="margin-top:10px;">
-                    <label
-                        style="color:#00ffcc; font-family:'Oswald',sans-serif; font-size:0.9rem; letter-spacing:2px;">IDEA
-                        BOX</label>
-                    <div class="guidance-text" style="color:#666; font-style:italic; font-size:0.65rem;">What are we
-                        making today? Give the AI something to start with.</div>
-                    <textarea id="f-input"
-                        style="height:120px; flex:none; background:#111; border:1px solid #333; color:#fff; font-size:0.85rem; padding:15px; width:100%;"
-                        placeholder="ENTER COMMAND CONTEXT..."></textarea>
+                <div class="forge-output">
+                    <div id="forge-chat" style="font-size:0.75rem; line-height:1.6; color:#ccc;">
+                        <strong>CREATE SYSTEM ONLINE.</strong><br>
+                        Welcome to the integrated conceive-birth-finetune machine. Select your curriculum context to
+                        begin.
+                    </div>
                 </div>
 
-                <div style="display:flex; gap:10px;">
-                    <button class="btn" style="flex:1; background:#333; font-size:0.7rem; padding:12px;"
-                        onclick="forgeBack()">BACK</button>
-                    <button class="btn" id="f-submit"
-                        style="flex:2; background:var(--forge-accent); font-size:0.7rem; padding:12px;"
-                        onclick="processForge()">SUBMIT COMMAND</button>
+                <!-- HOSPITAL INTERFACE -->
+                <div id="hospital-view">
+                    <div class="hosp-sidebar" id="hosp-nav">
+                        <div
+                            style="font-size:0.6rem; color:var(--forge-accent); margin-bottom:15px; letter-spacing:1px; font-weight:bold;">
+                            SURGICAL NODES</div>
+                    </div>
+                    <div class="hosp-main">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <div id="hosp-path" style="font-family:var(--font-tech); font-size:0.7rem; color:#00ffcc;">
+                                NODE:
+                                SELECTION_REQUIRED</div>
+                            <button class="btn" onclick="saveHospEdit()"
+                                style="width:auto; padding:5px 15px; font-size:0.65rem; background:#00ffcc; color:#000;">STABILIZE
+                                NODE</button>
+                        </div>
+                        <textarea id="hosp-editor"
+                            style="flex:1; background:#050505; color:#eee; border:1px solid #222; font-family:var(--font-main); font-size:0.85rem; line-height:1.5; padding:20px; resize:none;"></textarea>
+                        <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+                            <button class="btn"
+                                style="width:auto; background:transparent; border:1px solid #444; color:#888; padding:10px 20px; font-size:0.7rem;"
+                                onclick="downloadBirthedBlob()">DOWNLOAD .BLOB SOURCE</button>
+                            <button class="btn"
+                                style="width:auto; background:#ffcc00; color:#000; padding:12px 30px; font-size:0.8rem;"
+                                onclick="finalizeForge()">FINALIZE & PUSH TO COMMAND CENTER</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="forge-output">
-                <div id="forge-chat" style="font-size:0.75rem; line-height:1.6; color:#ccc;">
-                    <strong>CREATE SYSTEM ONLINE.</strong><br>
-                    Welcome to the integrated conceive-birth-finetune machine. Select your curriculum context to begin.
-                </div>
-            </div>
-
-            <!-- HOSPITAL INTERFACE -->
-            <div id="hospital-view">
-                <div class="hosp-sidebar" id="hosp-nav">
+                <div id="forge-loader"
+                    style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.8); flex-direction:column; align-items:center; justify-content:center; z-index:10;">
                     <div
-                        style="font-size:0.6rem; color:var(--forge-accent); margin-bottom:15px; letter-spacing:1px; font-weight:bold;">
-                        SURGICAL NODES</div>
-                </div>
-                <div class="hosp-main">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <div id="hosp-path" style="font-family:var(--font-tech); font-size:0.7rem; color:#00ffcc;">
-                            NODE:
-                            SELECTION_REQUIRED</div>
-                        <button class="btn" onclick="saveHospEdit()"
-                            style="width:auto; padding:5px 15px; font-size:0.65rem; background:#00ffcc; color:#000;">STABILIZE
-                            NODE</button>
+                        style="width:30px; height:30px; border:2px solid var(--forge-accent); border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;">
                     </div>
-                    <textarea id="hosp-editor"
-                        style="flex:1; background:#050505; color:#eee; border:1px solid #222; font-family:var(--font-main); font-size:0.85rem; line-height:1.5; padding:20px; resize:none;"></textarea>
-                    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
-                        <button class="btn"
-                            style="width:auto; background:transparent; border:1px solid #444; color:#888; padding:10px 20px; font-size:0.7rem;"
-                            onclick="downloadBirthedBlob()">DOWNLOAD .BLOB SOURCE</button>
-                        <button class="btn"
-                            style="width:auto; background:#ffcc00; color:#000; padding:12px 30px; font-size:0.8rem;"
-                            onclick="finalizeForge()">FINALIZE & PUSH TO COMMAND CENTER</button>
-                    </div>
+                    <div id="forge-loader-text"
+                        style="font-size:0.6rem; color:var(--forge-accent); margin-top:15px; letter-spacing:2px;">
+                        PROCESSING...</div>
                 </div>
-            </div>
-
-            <div id="forge-loader"
-                style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.8); flex-direction:column; align-items:center; justify-content:center; z-index:10;">
-                <div
-                    style="width:30px; height:30px; border:2px solid var(--forge-accent); border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;">
-                </div>
-                <div id="forge-loader-text"
-                    style="font-size:0.6rem; color:var(--forge-accent); margin-top:15px; letter-spacing:2px;">
-                    PROCESSING...</div>
-            </div>
-    </div>
+        </div>
     </main>
     </div>
     <script>
@@ -1514,7 +1540,7 @@
         }
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v72.SB), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (v73.SB.UDL), the multi-stage mission architect.
 LANGUAGE PROTOCOL: STRICTLY ENGLISH ONLY. Do not use Chinese characters or any non-English script. Translate all internal logic or model defaults to English immediately.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
@@ -1604,17 +1630,17 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 const isLocked = p.locked;
 
                 html += `
-            < div class="pipeline-node ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}"
-        draggable = "${!isLocked}"
-        data - phase="${phaseId}"
-        data - index="${idx}"
-        onclick = "jumpToPhase(${idx})" >
-                        <span class="node-icon">${p.icon}</span>
-                        <span class="node-label">${p.label}</span>
-                        ${!isLocked ? '<span class="node-grip">≡</span>' : '<span class="node-lock">🔒</span>'}
-                    </div >
-            ${idx < forgePipeline.length - 1 ? '<span class="pipeline-arrow">→</span>' : ''}
-        `;
+                <div class="pipeline-node ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}"
+                    draggable="${!isLocked}"
+                    data-phase="${phaseId}"
+                    data-index="${idx}"
+                    onclick="jumpToPhase(${idx})">
+                    <span class="node-icon">${p.icon}</span>
+                    <span class="node-label">${p.label}</span>
+                    ${!isLocked ? '<span class="node-grip">≡</span>' : '<span class="node-lock">🔒</span>'}
+                </div>
+                ${idx < forgePipeline.length - 1 ? '<span class="pipeline-arrow">→</span>' : ''}
+            `;
             });
             container.innerHTML = html;
 
@@ -1643,11 +1669,11 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             accumulatedData = {};
             const chat = document.getElementById('forge-chat');
             chat.innerHTML = `
-            < div style = "font-family:monospace; font-size:0.6rem; color:#888;" >
+                <div style="font-family:monospace; font-size:0.6rem; color:#888;">
                     <strong>CREATE SYSTEM ONLINE (v70).</strong><br>
                     Welcome to the modular mission architect. Configure your pipeline, then begin.
                 </div>
-        `;
+            `;
             document.getElementById('f-input').value = "";
             document.getElementById('hospital-view').style.display = 'none';
             chat.style.display = 'flex';
@@ -1731,7 +1757,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         function addForgeChat(side, msg) {
             const c = document.getElementById('forge-chat');
             const div = document.createElement('div');
-            div.className = `msg msg - ${side} `;
+            div.className = `msg msg-${side}`;
             div.innerHTML = typeof marked !== 'undefined' ? marked.parse(msg) : msg;
             c.appendChild(div);
             c.scrollTop = c.scrollHeight;
@@ -1751,7 +1777,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             if (!isVisible) {
                 document.getElementById('set-url').value = localStorage.getItem('TM_BACKEND_URL') || "";
                 document.getElementById('set-pin').value = localStorage.getItem('TM_BACKEND_PIN') || "";
-                // V72 Supabase
+                // V73.SB.UDL Supabase
                 document.getElementById('set-sb-url').value = localStorage.getItem('TM_SUPABASE_URL') || "";
                 document.getElementById('set-sb-key').value = localStorage.getItem('TM_SUPABASE_KEY') || "";
             }
@@ -1790,23 +1816,23 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                     const j2 = await res2.json();
                     renderLibrary(j2.capsules, false);
                 }
-            } catch (e) { document.getElementById('hub-grid').innerHTML = `< div style = "grid-column:1/-1; text-align:center; color:#888; padding:100px;" > COMMUNITY_CATALOG_OFFLINE < br > <br><span style="font-size:0.5rem; opacity:0.5;">Manual Import Recommended for now.</span></div>`; }
+            } catch (e) { document.getElementById('hub-grid').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:#888; padding:100px;"> COMMUNITY_CATALOG_OFFLINE <br><br><span style="font-size:0.5rem; opacity:0.5;">Manual Import Recommended for now.</span></div>`; }
         }
         function renderLibrary(caps, fromBackend) {
             const isUserAdmin = googleUser && ["dwaugh@gmail.com"].includes(googleUser.email);
             let h = "";
             caps.forEach(c => {
-                const removeBtn = (isUserAdmin && fromBackend) ? `< button onclick = "removeFromHub('${c.id}')" style = "font-size:0.5rem; padding:4px 8px; background:#c00; color:#fff; border:none; cursor:pointer; margin-top:5px; width:100%;" > REMOVE FROM HUB</button > ` : "";
-                const importBtn = c.downloadUrl ? `< button class="btn" onclick = "importMission('${c.downloadUrl}', '${c.id}', '${c.title}')" style = "background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px; font-size:0.6rem; width:100%; margin-top:10px;" > IMPORT TO ARCHIVE</button > ` : "";
+                const removeBtn = (isUserAdmin && fromBackend) ? `<button onclick="removeFromHub('${c.id}')" style="font-size:0.5rem; padding:4px 8px; background:#c00; color:#fff; border:none; cursor:pointer; margin-top:5px; width:100%;"> REMOVE FROM HUB</button>` : "";
+                const importBtn = c.downloadUrl ? `<button class="btn" onclick="importMission('${c.downloadUrl}', '${c.id}', '${c.title}')" style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px; font-size:0.6rem; width:100%; margin-top:10px;"> IMPORT TO ARCHIVE</button>` : "";
 
-                h += `< div class="panel" style = "border-top-color:#666;" >
+                h += `<div class="panel" style="border-top-color:#666;">
                     <div style="height:150px; background-image:url('${c.thumb}'); background-size:cover; background-position:center; margin-bottom:15px; border-radius:4px; border:1px solid #333;"></div>
                     <h4 style="margin:0; letter-spacing:1px; font-size:0.85rem;">${c.title}</h4>
                     <div style="font-size:0.6rem; color:#888; margin-bottom:15px; text-transform:uppercase;">AUTHOR: ${c.author}</div>
                     <p style="font-size:0.7rem; height:45px; overflow:hidden; opacity:0.7; line-height:1.4;">${c.description || 'An interactive educational simulation.'}</p>
                     ${importBtn}
                     ${removeBtn}
-                </div > `;
+                </div> `;
             });
             document.getElementById('hub-grid').innerHTML = h || "<div style='grid-column:1/-1; text-align:center; opacity:0.5; padding:100px; color:#fff;'>NO MISSIONS IN CATALOG.</div>";
         }
@@ -2358,7 +2384,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             log("Pinging Archive Server...");
             const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
 
-            // --- 1. Supabase Check (V72) ---
+            // --- 1. Supabase Check (V73.SB.UDL) ---
             if (SupabaseBridge.client) {
                 try {
                     log("Querying Supabase Archive [High-Performance Mode]...");
@@ -2417,13 +2443,13 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
             const payload = JSON.parse(raw);
 
-            // [Telemetry v72] Inject logging target into mission metadata
+            // [Telemetry v73.SB.UDL] Inject logging target into mission metadata
             if (!payload.metadata) payload.metadata = {};
             payload.metadata.creator_email = teacherId;
             payload.metadata.sb_url = localStorage.getItem('TM_SUPABASE_URL');
             payload.metadata.sb_key = localStorage.getItem('TM_SUPABASE_KEY');
 
-            // --- 1. Supabase First (V72) ---
+            // --- 1. Supabase First (V73.SB.UDL) ---
             if (SupabaseBridge.client) {
                 try {
                     log("Injecting into Supabase Cloud...");
@@ -2483,7 +2509,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         async function fetchProgress() {
             document.getElementById('sync-tick').innerText = "[SYNC_BUSY]";
 
-            // --- 1. Supabase First (Telemetry v72) ---
+            // --- 1. Supabase First (Telemetry v73.SB.UDL) ---
             if (SupabaseBridge.client) {
                 try {
                     const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
@@ -2573,7 +2599,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             if (!confirm(`DELETE STUDENT: ${name}?\n\nThis will permanently remove all progress data. This action cannot be undone.`)) return;
             log(`Purging records for [${name}] class [${classCode}]...`);
 
-            // --- 1. Supabase First (Telemetry v72) ---
+            // --- 1. Supabase First (Telemetry v73.SB.UDL) ---
             if (SupabaseBridge.client) {
                 try {
                     const success = await SupabaseBridge.deleteLogs(name, classCode);
@@ -2654,7 +2680,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 } catch (e) { }
             }
 
-            // --- 1. Supabase First (v72) ---
+            // --- 1. Supabase First (v73.SB.UDL) ---
             if (SupabaseBridge.client) {
                 try {
                     await SupabaseBridge.toggleAI(id, state, teacherId);
@@ -2691,7 +2717,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
             const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
 
-            // --- 1. Supabase First (V72) ---
+            // --- 1. Supabase First (V73.SB.UDL) ---
             if (SupabaseBridge.client) {
                 try {
                     log("Scrubbing from Supabase Cloud...");
@@ -2767,7 +2793,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         window.onload = () => {
             log("BOOT SEQUENCE INITIATED...");
 
-            // V72 Supabase Init
+            // V73.SB.UDL Supabase Init
             if (SB_URL && SB_KEY) {
                 const connected = SupabaseBridge.init(SB_URL, SB_KEY);
                 if (connected) {
@@ -2907,7 +2933,8 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             <input type="text" id="set-pin" class="settings-input" placeholder="8812">
 
             <div style="margin-top:20px; padding-top:15px; border-top:1px dashed #444;">
-                <h4 style="margin:0 0 10px; font-size:0.7rem; color:var(--accent);">v72 SUPABASE CLOUD (OPTIONAL)</h4>
+                <h4 style="margin:0 0 10px; font-size:0.7rem; color:var(--accent);">v73.SB.UDL SUPABASE CLOUD (OPTIONAL)
+                </h4>
                 <label>Supabase Project URL</label>
                 <input type="text" id="set-sb-url" class="settings-input" placeholder="https://xyz.supabase.co">
                 <label>Anon Public Key</label>
