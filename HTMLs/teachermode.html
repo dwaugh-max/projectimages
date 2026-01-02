@@ -1297,15 +1297,38 @@
                     <div class="hosp-main">
                         <div
                             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <div id="hosp-path" style="font-family:var(--font-tech); font-size:0.7rem; color:#00ffcc;">
-                                NODE:
-                                SELECTION_REQUIRED</div>
+                            <div style="display:flex; flex-direction:column;">
+                                <div id="hosp-path"
+                                    style="font-family:var(--font-tech); font-size:0.7rem; color:#00ffcc;">NODE:
+                                    SELECTION_REQUIRED</div>
+                                <div style="display:flex; gap:10px; margin-top:5px;">
+                                    <label
+                                        style="color:#888; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                                        <input type="radio" name="editor-mode" value="visual" checked
+                                            onchange="toggleEditorMode('visual')"> VISUAL FORM
+                                    </label>
+                                    <label
+                                        style="color:#888; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                                        <input type="radio" name="editor-mode" value="code"
+                                            onchange="toggleEditorMode('code')"> RAW JSON
+                                    </label>
+                                </div>
+                            </div>
                             <button class="btn" onclick="saveHospEdit()"
                                 style="width:auto; padding:5px 15px; font-size:0.65rem; background:#00ffcc; color:#000;">STABILIZE
                                 NODE</button>
                         </div>
+
+                        <!-- VISUAL EDITOR CONTAINER -->
+                        <div id="hosp-visual"
+                            style="flex:1; background:#111; border:1px solid #333; overflow-y:auto; padding:20px; display:block;">
+                            <div style="color:#666; font-size:0.8rem; text-align:center; padding-top:20px;">Select a
+                                node to edit.</div>
+                        </div>
+
+                        <!-- CODE EDITOR -->
                         <textarea id="hosp-editor"
-                            style="flex:1; background:#050505; color:#eee; border:1px solid #222; font-family:var(--font-main); font-size:0.85rem; line-height:1.5; padding:20px; resize:none;"></textarea>
+                            style="flex:1; background:#050505; color:#eee; border:1px solid #222; font-family:var(--font-main); font-size:0.85rem; line-height:1.5; padding:20px; resize:none; display:none;"></textarea>
                         <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
                             <button class="btn"
                                 style="width:auto; background:transparent; border:1px solid #444; color:#888; padding:10px 20px; font-size:0.7rem;"
