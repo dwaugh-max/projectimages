@@ -2404,14 +2404,6 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 return;
             }
 
-            // Log structure for debugging
-            console.log("IMPORT DEBUG:", {
-                hasMetadata: !!payload.metadata,
-                hasSlides: !!payload.slides,
-                slideCount: payload.slides ? payload.slides.length : 0,
-                keys: Object.keys(payload)
-            });
-
             accumulatedData = payload;
             log(`DECRYPTED: Mission Capsule loaded from ${sourceLabel}.`, "success");
 
