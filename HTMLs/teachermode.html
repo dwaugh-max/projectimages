@@ -2465,7 +2465,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
         async function fetchMissions() {
             log("Pinging Archive Server...");
-            const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
+            const teacherId = googleUser?.email || 'GUEST';
 
             // --- 1. Supabase Check (V73.SB.UDL) ---
             if (SupabaseBridge.client) {
