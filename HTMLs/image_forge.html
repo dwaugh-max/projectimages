@@ -664,7 +664,16 @@
 
             if (data.error) throw new Error(data.error.message);
 
-            const content = data.choices[0].message.content;
+            const message = data.choices[0].message;
+
+            // Check for new OpenRouter/Flux image object format
+            if (message.images && message.images.length > 0) {
+                const img = message.images[0];
+                if (img.image_url) return img.image_url.url;
+                if (typeof img === 'string') return img;
+            }
+
+            const content = message.content || "";
             const urlMatch = content.match(/https?:\/\/[^\s\)]+/g);
             if (urlMatch) return urlMatch[0];
 
