@@ -593,8 +593,9 @@
             const data = await response.json();
 
             if (data.error) {
-                // Secondary fallback attempt if header auth specifically required
-                if (data.error.code === 401) {
+                log(`GOOGLE REJECTION (${data.error.code}): ${data.error.message}`, 'ERROR');
+                // Try fallback for both 401 (Unauthorized) and 400 (Bad Request - often key related)
+                if (data.error.code === 401 || data.error.code === 400) {
                     log("ATTEMPTING AUTH FALLBACK (HEADER)...", 'OUTBOUND');
                     const urlNoKey = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model_gl}:generateContent`;
                     const res2 = await fetch(urlNoKey, {
@@ -607,7 +608,7 @@
                     });
                     const data2 = await res2.json();
                     if (data2.candidates) return handleGeminiResponse(data2);
-                    throw new Error(data2.error ? data2.error.message : "Auth Failure");
+                    log(`FALLBACK FAILED: ${data2.error ? data2.error.message : 'Unknown'}`, 'ERROR');
                 }
                 throw new Error(data.error.message);
             }
