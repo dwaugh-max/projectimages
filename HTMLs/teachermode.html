@@ -1854,7 +1854,9 @@
             return FORGE_PHASES[forgePipeline[currentPhaseIndex]];
         }
 
-        const FORGE_SYSTEM_CORE = `
+
+        // --- DYNAMIC FORGE CONFIG SYSTEM ---
+        const FORGE_SYSTEM_CORE_FALLBACK = `
 You are the BLOB FACTORY COREGINE (0.50), the multi-stage mission architect.
 LANGUAGE PROTOCOL: STRICTLY ENGLISH ONLY. Do not use Chinese characters or any non-English script. Translate all internal logic or model defaults to English immediately.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
@@ -1891,6 +1893,71 @@ EVERY Exhibit MUST require the student to make a decision and justify it:
 
 Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 `;
+
+        let FORGE_SYSTEM_CORE = FORGE_SYSTEM_CORE_FALLBACK; // Will be updated from DB
+
+        // Fetch Forge config from Supabase with caching
+        async function loadForgeConfig() {
+            const CACHE_KEY = 'TM_FORGE_CONFIG';
+            const CACHE_TIMESTAMP_KEY = 'TM_FORGE_CONFIG_TIMESTAMP';
+            const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+            try {
+                // Check cache first
+                const cachedConfig = localStorage.getItem(CACHE_KEY);
+                const cacheTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+                const now = Date.now();
+
+                if (cachedConfig && cacheTimestamp && (now - parseInt(cacheTimestamp)) < CACHE_DURATION) {
+                    FORGE_SYSTEM_CORE = cachedConfig;
+                    console.log('[FORGE CONFIG] Using cached version (age: ' + Math.round((now - parseInt(cacheTimestamp)) / 3600000) + 'h)');
+                    return;
+                }
+
+                // Fetch from Supabase
+                if (!window.supabase) {
+                    console.warn('[FORGE CONFIG] Supabase not initialized, using fallback');
+                    return;
+                }
+
+                const { data, error } = await window.supabase
+                    .from('forge_config')
+                    .select('content, version, updated_at')
+                    .eq('config_type', 'system_prompt')
+                    .eq('active', true)
+                    .order('version', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (error) {
+                    console.warn('[FORGE CONFIG] Database fetch failed, using fallback:', error.message);
+                    return;
+                }
+
+                if (data && data.content) {
+                    FORGE_SYSTEM_CORE = data.content;
+                    localStorage.setItem(CACHE_KEY, data.content);
+                    localStorage.setItem(CACHE_TIMESTAMP_KEY, now.toString());
+                    console.log(`[FORGE CONFIG] Loaded version ${data.version} from database (updated: ${data.updated_at})`);
+                } else {
+                    console.warn('[FORGE CONFIG] No active config found, using fallback');
+                }
+            } catch (err) {
+                console.error('[FORGE CONFIG] Error loading config:', err);
+                console.log('[FORGE CONFIG] Using fallback version');
+            }
+        }
+
+        // Force refresh config (for admin panel later)
+        function refreshForgeConfig() {
+            localStorage.removeItem('TM_FORGE_CONFIG');
+            localStorage.removeItem('TM_FORGE_CONFIG_TIMESTAMP');
+            return loadForgeConfig();
+        }
+
+        // Load config on page load
+        loadForgeConfig();
+
         // --- END FORGE CONFIG ---
         const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
             const controller = new AbortController();
