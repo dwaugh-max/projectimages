@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>SITUATION ROOM</title>
     <link rel="icon" type="image/png" href="images/logic_gear_logo.png">
-    <script>const API_URL = "https://script.google.com/macros/s/AKfycbzO2zyVLbC6ZCUEFTnhzkmV7ogDOyowZFRR7ZPwcidIPkSPDDX5mQaeuChCL7DiNwvo/exec";</script>
+    <!-- Legacy Google Sheets API removed -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -814,6 +814,94 @@
             text-shadow: 0 0 30px var(--accent-dim);
             font-size: clamp(3rem, 6vw, 6.5rem);
         }
+
+        /* DEVIL'S ADVOCATE DRAWER */
+        .debate-drawer {
+            position: fixed;
+            right: -550px;
+            top: 0;
+            width: 550px;
+            height: 100vh;
+            background: rgba(2, 2, 2, 0.98);
+            border-left: 2px solid var(--accent);
+            z-index: 10001;
+            transition: right 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -20px 0 80px rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(30px);
+            padding: 50px 40px;
+        }
+
+        .debate-drawer.open {
+            right: 0;
+        }
+
+        .debate-timer {
+            font-family: var(--font-tech);
+            font-size: 1.5rem;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 8px;
+            text-shadow: 0 0 10px var(--accent-dim);
+        }
+
+        .debate-chat {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            padding-right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .debate-msg {
+            font-family: var(--font-p);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-width: 90%;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .debate-msg.bot {
+            align-self: flex-start;
+            background: rgba(0, 255, 234, 0.05);
+            border-left: 3px solid var(--accent);
+            color: #fff;
+        }
+
+        .debate-msg.user {
+            align-self: flex-end;
+            background: rgba(255, 255, 255, 0.03);
+            border-right: 3px solid #555;
+            color: #ccc;
+            text-align: right;
+        }
+
+        .debate-input-area {
+            display: flex;
+            gap: 15px;
+        }
+
+        .debate-input {
+            flex: 1;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            resize: none;
+            height: 60px;
+            font-size: 0.9rem;
+        }
+
+        .debate-input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
     </style>
 </head>
 
@@ -1110,7 +1198,7 @@
             // RATE LIMIT CHECK
             const lastAttempt = localStorage.getItem('RATE_LIMIT_TIMESTAMP');
             const now = Date.now();
-            if (lastAttempt && (now - parseInt(lastAttempt) < 3000)) { // 3 seconds cooldown
+            if (lastAttempt && (now - parseInt(lastAttempt) < 3000)) {
                 return alert("SECURITY ALERT: WAIT 3 SECONDS BEFORE RETRYING.");
             }
             localStorage.setItem('RATE_LIMIT_TIMESTAMP', now.toString());
@@ -1120,32 +1208,33 @@
             try {
                 const cleanName = name.replace(/\s+/g, '');
 
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'fetch_user', name: cleanName, pin: pin, classCode: classCode })
-                });
-                const j = await res.json();
+                // [Migration v73] Initialize Supabase if provided in URL
+                const params = new URLSearchParams(window.location.search);
+                const sbUrl = params.get('sb_url') || localStorage.getItem('ST_SB_URL');
+                const sbKey = params.get('sb_key') || localStorage.getItem('ST_SB_KEY');
+                const teacherId = params.get('teacher') || localStorage.getItem('ST_TEACHER_ID') || 'GUEST';
 
-                if (j.status === "success") {
-                    user = { id: j.id, name: cleanName, pin: pin, missions: j.missions, class: classCode };
-
-                    // [E2EE v65.67] Derive encryption key from CLASS CODE only (master key approach)
-                    // We use classCode as both password and salt for deterministic derivation across devices
-                    user.encryptionKey = await CriticalCrypto.deriveKey(classCode, classCode);
-
-                    // Cinematic Entry v65.41
-                    gsap.to("#login-step", {
-                        opacity: 0, y: -20, duration: 0.5, onComplete: () => {
-                            showLobby();
-                            gsap.from("#lobby-step", { opacity: 0, y: 20, duration: 0.5 });
-                        }
-                    });
-                } else {
-                    alert(j.message);
+                if (sbUrl && sbKey) {
+                    SupabaseBridge.init(sbUrl, sbKey);
+                    localStorage.setItem('ST_SB_URL', sbUrl);
+                    localStorage.setItem('ST_SB_KEY', sbKey);
+                    localStorage.setItem('ST_TEACHER_ID', teacherId);
                 }
+
+                // Temporary: Simulate successful login for Supabase-only mode
+                // In a full implementation, we'd verify the student or just create a session
+                user = { id: 'ST_' + Date.now(), name: cleanName, pin: pin, missions: {}, class: classCode, teacherId: teacherId };
+                user.encryptionKey = await CriticalCrypto.deriveKey(classCode, classCode);
+
+                gsap.to("#login-step", {
+                    opacity: 0, y: -20, duration: 0.5, onComplete: () => {
+                        showLobby();
+                        gsap.from("#lobby-step", { opacity: 0, y: 20, duration: 0.5 });
+                    }
+                });
             } catch (e) {
                 console.error("LOGIN_ERROR:", e);
-                alert("COMMUNICATION FAILURE: Check network or API configuration.");
+                alert("COMMUNICATION FAILURE: Check network or backend configuration.");
             } finally {
                 document.getElementById('loading-screen').style.display = 'none';
             }
@@ -1159,17 +1248,23 @@
             gsap.from("#lobby-step h3", { opacity: 0, x: -50, duration: 1, ease: "power4.out" });
             gsap.from("#lobby-step div:last-child", { opacity: 0, y: 50, duration: 1.2, delay: 0.3, ease: "power3.out" });
 
-            // Fetch available missions from backend
-            const mRes = await fetch(API_URL + "?action=list_missions");
-            const mData = await mRes.json();
-            missionsAvailable = mData.missions || [];
-
-            // [Fix v65.71] Only show missions the user has actually joined
-            const activeMissions = missionsAvailable.filter(m => user.missions && user.missions[m.id]);
+            // Fetch available missions from Supabase
+            if (SupabaseBridge.client) {
+                try {
+                    const teacherId = user.teacherId || 'GUEST';
+                    missionsAvailable = await SupabaseBridge.fetchMissions(teacherId);
+                } catch (e) {
+                    console.error("Supabase Mission Fetch Failed:", e);
+                    missionsAvailable = [];
+                }
+            } else {
+                console.warn("Supabase not configured. Lobby empty.");
+                missionsAvailable = [];
+            }
 
             // Populate mission list
             let h = "";
-            activeMissions.forEach(m => {
+            missionsAvailable.forEach(m => {
                 const thumb = m.thumb || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop";
                 h += `<div class="mission-item" onclick="launch('${m.id}')">
                     <div class="mission-thumb" style="background-image:url('${thumb}')"></div>
@@ -1280,9 +1375,21 @@
         async function launch(id) {
             document.getElementById('loading-screen').style.display = 'flex';
             try {
-                const r = await fetch(API_URL + "?action=fetch_content&id=" + id); const j = await r.json();
-                if (j.status === "error") throw new Error(j.message);
-                await processData(j, id);
+                // [Migration v73] Fetch content from Supabase
+                const mission = missionsAvailable.find(m => m.id === id);
+                let payload = mission ? mission.payload : null;
+
+                if (!payload && SupabaseBridge.client) {
+                    // Deep fetch if not in cached list
+                    const teacherId = user.teacherId || 'GUEST';
+                    const missions = await SupabaseBridge.fetchMissions(teacherId);
+                    const m = missions.find(x => x.id === id);
+                    if (m) payload = m.payload;
+                }
+
+                if (!payload) throw new Error("MISSION_NOT_FOUND");
+
+                await processData(payload, id);
 
                 // [Telemetry v72] Initialize Supabase Bridge from Mission Metadata
                 const sbUrl = window.DATA.metadata.sb_url;
@@ -1934,23 +2041,158 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
             }
         }
 
-        function decide(i, l) {
+        // --- [DEVIL'S ADVOCATE // CHALLENGE PROTOCOLS] ---
+        let debateActive = false;
+        let debateTimerRemaining = 90;
+        let debateInterval = null;
+        let debateSlideIndex = -1;
+        let debateChoice = null;
+        let debateLog = [];
+
+        async function decide(i, l) {
             const r = document.getElementById('rat-i')?.value;
             if (!r || r.trim().split(/\s+/).length < 50) return alert("Formal analysis (min 50 words) required before decision.");
-            user.state.rat[i] = r; user.state.dec[i] = l;
+
+            // Trigger optional Devil's Advocate Challenge
+            const enabled = (window.DATA.metadata && window.DATA.metadata.enableDevilsAdvocate !== false);
+            if (enabled) {
+                user.state.rat[i] = r; // Store temporarily
+                startDebate(i, l, r);
+            } else {
+                finalizeDecision(i, l, r);
+            }
+        }
+
+        async function startDebate(i, l, rationale) {
+            if (debateActive) return;
+
+            debateActive = true;
+            debateSlideIndex = i;
+            debateChoice = l;
+            debateTimerRemaining = 90;
+            debateLog = [];
+
+            document.getElementById('debate-chat').innerHTML = "";
+            document.getElementById('debate-drawer').classList.add('open');
+            startDebateTimer();
+
+            const s = window.DATA.slides[i];
+            const options = s.options || [];
+            const chosenIdx = options.indexOf(l);
+            const ignoredIdx = (chosenIdx === 0) ? 1 : 0;
+
+            const keys = Object.keys(s.tabs || {});
+            const ignoredPerspective = s.tabs && keys[ignoredIdx] ? (s.tabs[keys[ignoredIdx]].body || s.tabs[keys[ignoredIdx]].content) : "No alternative evidence specified.";
+            const currentContext = s.tabs && s.tabs.intel ? (s.tabs.intel.body || s.tabs.intel.content) : "";
+
+            const systemPrompt = `You are the 'Devil's Advocate' in a high-stakes historical simulation. 
+A student has just made a choice: "${l}".
+Their rationale: "${rationale}".
+
+Your goal is to adopt an aggressive, in-character persona representing the specific perspective that the student likely ignored. 
+Use the following evidence to challenge their decision:
+${ignoredPerspective}
+
+ADDITIONAL CONTEXT: ${currentContext}
+
+RULES:
+1. Be punchy, provocative, and in-character. 
+2. Challenge them strictly on the evidence they ignored.
+3. Keep responses under 65 words. 
+4. If they defend well, acknowledge it grudgingly and pivot to another flaw.`;
+
+            addDebateMessage("bot", "INITIALIZING OPPOSITION CONTEXT...");
+
+            try {
+                const challenge = await callOpenRouterProxy(systemPrompt, "The student has committed to their choice. Challenge them based on the evidence they ignored.");
+                addDebateMessage("bot", challenge);
+            } catch (e) {
+                addDebateMessage("bot", "COMMUNICATION INTERRUPTED. Proceed when ready.");
+            }
+        }
+
+        function addDebateMessage(role, text) {
+            const chat = document.getElementById('debate-chat');
+            const div = document.createElement('div');
+            div.className = `debate-msg ${role}`;
+            div.innerHTML = (role === 'bot') ? parseMD(text) : text;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            debateLog.push({ role, text, time: debateTimerRemaining });
+        }
+
+        async function sendDebateMessage() {
+            const inp = document.getElementById('debate-input');
+            const text = inp.value.trim();
+            if (!text || !debateActive) return;
+
+            inp.value = "";
+            addDebateMessage("user", text);
+            document.getElementById('debate-loading').style.display = 'block';
+
+            try {
+                const history = debateLog.slice(-4).map(m => `${m.role.toUpperCase()}: ${m.text}`).join("\n");
+                const res = await callOpenRouterProxy("Continue the 'Devil's Advocate' challenge. Be aggressive and stay in character. Under 50 words.", `DEBATE SO FAR:\n${history}\n\nSTUDENT'S DEFENSE: ${text}`);
+                addDebateMessage("bot", res);
+            } catch (e) {
+                addDebateMessage("bot", "CONNECTION INSTABILITY.");
+            } finally {
+                document.getElementById('debate-loading').style.display = 'none';
+            }
+        }
+
+        function startDebateTimer() {
+            if (debateInterval) clearInterval(debateInterval);
+            debateInterval = setInterval(() => {
+                debateTimerRemaining--;
+                const m = Math.floor(debateTimerRemaining / 60);
+                const s = debateTimerRemaining % 60;
+                document.getElementById('debate-timer').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+                if (debateTimerRemaining <= 0) {
+                    closeDebate();
+                }
+            }, 1000);
+        }
+
+        function closeDebate() {
+            if (!debateActive) return;
+            clearInterval(debateInterval);
+            debateActive = false;
+            document.getElementById('debate-drawer').classList.remove('open');
+
+            if (!user.state.debateLogs) user.state.debateLogs = {};
+            user.state.debateLogs[debateSlideIndex] = debateLog;
+
+            finalizeDecision(debateSlideIndex, debateChoice, user.state.rat[debateSlideIndex]);
+        }
+
+        function finalizeDecision(i, l, rationale) {
+            user.state.rat[i] = rationale;
+            user.state.dec[i] = l;
             save(); renderNav(); go(i);
+            transmitTelemetry(i, rationale);
 
-            // [Telemetry v72] Log to Master Spreadsheet (Supabase)
-            transmitTelemetry(i, r);
-
-            // HISTORICAL REVEAL LOGIC
             const s = window.DATA.slides[i];
             if (s.historicalOutcome) {
                 toggleHistoricalPanel(true, parseMD(s.historicalOutcome));
             }
-
-            if (i === window.DATA.slides.length - 1 && !s.historicalOutcome) setTimeout(() => startRef("post"), 1000);
+            if (i === window.DATA.slides.length - 1 && !s.historicalOutcome) {
+                setTimeout(() => startRef("post"), 1000);
+            }
         }
+
+        async function callOpenRouterProxy(system, message) {
+            const TARGET_URL = 'https://nextjs-basic-lemon-one.vercel.app/api/chat';
+            const res = await fetch(TARGET_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ system: system, message: message })
+            });
+            const data = await res.json();
+            return data.reply || data.choices[0].message.content;
+        }
+
 
         async function transmitTelemetry(slideIndex, rationale) {
             // [Telemetry v72] Dynamic Handshake
@@ -2033,17 +2275,16 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
 
         async function save() {
             if (user.id && currentMission) {
-                // [E2EE v65.67] Encrypt state before sending to backend
                 const encryptedState = await CriticalCrypto.encrypt(JSON.stringify(user.state), user.encryptionKey);
-                await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'save_state',
-                        id: user.id,
-                        missionId: currentMission,
-                        state: encryptedState  // Send encrypted blob instead of plaintext
-                    })
-                });
+
+                if (SupabaseBridge.client) {
+                    try {
+                        const teacherId = user.teacherId || (window.DATA && window.DATA.metadata ? window.DATA.metadata.teacherId : 'GUEST');
+                        await SupabaseBridge.saveStudentState(user.id, currentMission, encryptedState, teacherId);
+                    } catch (e) {
+                        console.error("SUPABASE_SAVE_ERROR:", e);
+                    }
+                }
             }
         }
         async function initParticles() {
@@ -2095,6 +2336,33 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
             location.reload();
         }
     </script>
+
+    <!-- DEVIL'S ADVOCATE DRAWER -->
+    <div id="debate-drawer" class="debate-drawer">
+        <div class="debate-timer" id="debate-timer">01:30</div>
+        <div style="border-bottom:1px solid var(--accent-dim); padding-bottom:15px; margin-bottom:20px;">
+            <h3
+                style="color:var(--accent); font-family:var(--font-h); font-size:1rem; letter-spacing:3px; text-transform:uppercase; margin:0;">
+                PROTOCOL: DEVIL'S ADVOCATE</h3>
+            <div
+                style="font-size:0.6rem; color:#666; font-family:var(--font-tech); text-transform:uppercase; margin-top:5px;">
+                OPPOSITION CHALLENGE Active</div>
+        </div>
+        <div id="debate-chat" class="debate-chat"></div>
+        <div id="debate-loading"
+            style="display:none; text-align:center; font-size:0.7rem; color:var(--accent); margin-bottom:10px;"
+            class="neon-pulse">
+            ANALYZING RATIONALE...
+        </div>
+        <div class="debate-input-area">
+            <textarea id="debate-input" class="debate-input" placeholder="Defense your position..."></textarea>
+            <button class="btn" style="padding:0 20px; font-size:0.7rem;" onclick="sendDebateMessage()">SEND</button>
+        </div>
+        <div style="margin-top:20px;">
+            <button class="btn" style="width:100%; border-color:#333; color:#666; font-size:0.6rem; letter-spacing:2px;"
+                onclick="closeDebate()">SKIP / CONCLUDE CHALLENGE</button>
+        </div>
+    </div>
 
     <!-- DEBUG MODAL (DEPRECATED) -->
     <div id="debug-modal" class="modal" style="display:none;"></div>

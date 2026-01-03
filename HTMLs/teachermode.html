@@ -1365,7 +1365,7 @@
                         style="font-family:'Oswald',sans-serif; font-size:1rem; color:#00ffcc; letter-spacing:3px; opacity:0.8;">SITUATION
                         ROOM</span>
                     <span
-                        style="color:#00ffcc; background: #c00; padding: 2px 10px; font-size: 0.6rem; font-weight: bold; border-radius: 3px; animation: blink 1s infinite;">v73
+                        style="color:#00ffcc; background: #c00; padding: 2px 10px; font-size: 0.6rem; font-weight: bold; border-radius: 3px; animation: blink 1s infinite;">v74
                         ACTIVE</span>
                     <span style="color:#333;">|</span>
                     <div
@@ -1428,11 +1428,13 @@
                                     <div style="flex:1;">
                                         <label>Model</label>
                                         <select id="f-model" class="settings-select">
-                                            <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2</option>
-                                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash</option>
-                                            <option value="google/learnlm-1.5-pro-experimental:free">LearnLM 1.5 Pro
+                                            <option value="xiaomi/mimo-v2-flash:free">Xiaomi MiMo V2 (China)</option>
+                                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (US)
                                             </option>
-                                            <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B</option>
+                                            <option value="mistralai/devstral-2512:free">Mistral 2512 (France)</option>
+                                            <option value="nvidia/nemotron-nano-9b-v2:free">Nemotron Nano (US)</option>
+                                            <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B (US)
+                                            </option>
                                         </select>
                                     </div>
                                     <div style="width:120px;">
@@ -1522,7 +1524,7 @@
                             onclick="processForge()">SUBMIT COMMAND</button>
                         <button class="btn" id="f-next-phase"
                             style="flex:1; background:#060; font-size:0.65rem; padding:12px; border:1px solid #0a0;"
-                            onclick="advancePhase()">NEXT PHASE →</button>
+                            onclick="advancePhase()">AUTHORIZE NEXT PHASE →</button>
                     </div>
                 </div>
 
@@ -1701,76 +1703,9 @@
         }
 
         // --- SYNC MANAGER ---
+        // Sync Manager removed as part of Supabase migration.
         const syncManager = {
-            url: localStorage.getItem('TM_BACKEND_URL'),
-            pin: localStorage.getItem('TM_BACKEND_PIN'),
-
-            async toggle() {
-                if (!this.url) return alert("CONFIGURATION REQUIRED: Please set the Backend URL in Settings (⚙️).");
-                const mode = confirm("SYNC MANAGER\n\n[OK] = Upload Local Data to Cloud\n[CANCEL] = Download Cloud Data to Local") ? "UP" : "DOWN";
-                if (mode === "UP") await this.upload();
-                else await this.download();
-            },
-
-            async upload() {
-                log("SYNC_UP: Bundling local data...", "info");
-                const payload = {
-                    customCurriculum: getCustomOutcomes(),
-                    favorites: localStorage.getItem('TM_CURRICULUM_FAVORITES'),
-                    history: localStorage.getItem('TM_FORGE_HISTORY')
-                };
-
-                try {
-                    const res = await fetch(this.url, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'sync_user_data',
-                            subAction: 'put',
-                            pin: this.pin,
-                            uid: googleUser ? googleUser.email : "guest",
-                            payload: payload
-                        })
-                    });
-                    const j = await res.json();
-                    if (j.status === "success") {
-                        log("CLOUD SYNC COMPLETE: Data securely archived.", "success");
-                        localStorage.setItem('TM_LAST_SYNC', new Date().toISOString());
-                        document.getElementById('sync-btn').innerText = "[ ☁️ SYNCED ]";
-                    } else throw new Error(j.message);
-                } catch (e) { log("SYNC FAILED: " + e.message, "error"); }
-            },
-
-            async download() {
-                log("SYNC_DOWN: Fetching cloud profile...", "info");
-                try {
-                    const res = await fetch(this.url, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'sync_user_data',
-                            subAction: 'get',
-                            pin: this.pin,
-                            uid: googleUser ? googleUser.email : "guest"
-                        })
-                    });
-                    const j = await res.json();
-                    if (j.status === "success" && j.data) {
-                        if (j.data.customCurriculum) {
-                            localStorage.setItem('blob_custom_curriculum', JSON.stringify(j.data.customCurriculum));
-                        }
-                        if (j.data.favorites) {
-                            localStorage.setItem('TM_CURRICULUM_FAVORITES', j.data.favorites);
-                        }
-                        if (j.data.history) {
-                            // Optional: Merge history or overwrite? Overwrite for now.
-                            localStorage.setItem('TM_FORGE_HISTORY', j.data.history);
-                        }
-
-                        log("Cloud profile restored to local lab.", "success");
-                        fetchCurriculum(); // Reload UI
-                        updateForgeRegions(); // Refresh dropdowns
-                    } else throw new Error("No data found or sync error.");
-                } catch (e) { log("DOWNLOAD FAILED: " + e.message, "error"); }
-            }
+            async toggle() { alert("Legacy Sync is disabled. Supabase is now active."); }
         };
         const FORGE_PROXY = "https://nextjs-basic-lemon-one.vercel.app/api/chat";
         let forgeHistory = [];
@@ -1786,7 +1721,7 @@
                 icon: '💡',
                 title: "<span style='font-size:1rem; opacity:0.7; letter-spacing:2px; display:block;'>PHASE:</span> BRAINSTORM",
                 desc: "Bounce mission ideas off of the AI! Select (or add) your course outcomes to help tell the AI your class context. Then give the AI general direction in the text box below, and press submit.<br><br>Don't feel like you have to take its first choices! Spend some time refining (\"a little more this, a little less that...\") until you have a solid concept.",
-                prompt: "PHASE: CONCEPT ARRIVE. Identify SCO + Ethical Audit. Propose 3 detailed Scenario Concepts. Include 'THEMES TARGETING SELECTED OUTCOMES'. End with: 'WHICH CONCEPT SHALL WE CREATE?'",
+                prompt: "PHASE: CONCEPT ARRIVE. Identify SCO + Ethical Audit. Propose 3 detailed Scenario Concepts. Include 'THEMES TARGETING SELECTED OUTCOMES'. End with: 'Review these concepts. Request changes or authorize next phase.'",
                 showCurriculum: true,
                 skippable: true
             },
@@ -1796,7 +1731,7 @@
                 icon: '🔍',
                 title: "Intelligence Framework",
                 desc: "Establish the 10-slide architecture and technical data.",
-                prompt: "PHASE: DEEP SEARCH. Expand chosen concept into 10 Slide Titles and Intel data strategy. End with: 'SHALL WE PROCEED TO FULL STORY DRAFTING?'",
+                prompt: "PHASE: DEEP SEARCH. Expand chosen concept into 10 Slide Titles and Intel data strategy. End with: 'Awaiting review of architecture.'",
                 showCurriculum: false,
                 skippable: true
             },
@@ -1806,7 +1741,7 @@
                 icon: '📝',
                 title: "Narrative Drafting",
                 desc: "Generating full immersive prose and intelligence files.",
-                prompt: "PHASE: STORY CONFIRM. Draft FULL immersive prose. REQUIRED: 200-400 words MINIMUM per slide section (Combined Slide Text + Intel data). Do not summarize; expand. End with: 'READY TO SECURE ASSETS?'",
+                prompt: "PHASE: STORY CONFIRM. Draft FULL immersive prose. REQUIRED: 200-400 words MINIMUM per slide section (Combined Slide Text + Intel data). Do not summarize; expand. End with: 'Narrative draft complete. Awaiting asset authorization.'",
                 showCurriculum: false,
                 skippable: true
             },
@@ -1816,7 +1751,7 @@
                 icon: '🖼️',
                 title: "Asset Procurement",
                 desc: "Mapping visual keywords (Unsplash) for all nodes.",
-                prompt: "PHASE: ASSET SECURE. Propose Visual Strategy. MANDATORY: You MUST provide a 6-column Markdown table [ID | Item Name | Context/Description | Visual Style | AI Prompt | Source (URL)]. INVENTORY: You MUST list exactly 19 images (1 Hero/Splash + 18 Exhibits for the 10 slides). End with: 'SHALL WE COMMENCE BLOB BIRTH CONTENTION?'",
+                prompt: "PHASE: ASSET SECURE. Propose Visual Strategy. MANDATORY: You MUST provide a 6-column Markdown table [ID | Item Name | Context/Description | Visual Style | AI Prompt | Source (URL)]. INVENTORY: You MUST list exactly 19 images (1 Hero/Splash + 18 exhibits for the 10 slides). End with: 'Awaiting final birth command.'",
                 showCurriculum: false,
                 skippable: true
             },
@@ -1861,8 +1796,10 @@ CALIBRATION RULES:
 PEDAGOGICAL DEPTH:
 Word count targets (e.g., 200-400 words) are NON-NEGOTIABLE pedagogical requirements for mission immersion. You MUST meet or exceed these targets for every section. "Per section" means the combined prose of the Slide Content and its associated Intelligence Tabs. Failure to meet volume targets is a failure of the architecture.
 
-STATE CONTINUITY:
 You MUST maintain strict continuity between phases. Use the provided ARCHIVE HISTORY to anchor your next steps. For example, if Concept C was chosen in Phase 1, Phase 2 MUST expand ONLY that concept. Do not invent new topics or switch contexts.
+
+PHASE TRANSITION PROTOCOL:
+You are an architect, not a conductor. DO NOT suggest moving to the next phase. DO NOT say "Shall we proceed?". Present your work for the current phase and wait for the user to explicitly Authorize the next stage via the UI controls. Stay in the current phase until the context variable changes.
 
 TAB STRUCTURE (CRITICAL):
 EVERY Exhibit MUST have exactly 3 intelligence tabs with topic-appropriate labels:
@@ -1896,37 +1833,26 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 const cacheTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
                 const now = Date.now();
 
+                const ageH = cacheTimestamp ? Math.round((now - parseInt(cacheTimestamp)) / 3600000) : 0;
                 if (cachedConfig && cacheTimestamp && (now - parseInt(cacheTimestamp)) < CACHE_DURATION) {
                     FORGE_SYSTEM_CORE = cachedConfig;
-                    console.log('[FORGE CONFIG] Using cached version (age: ' + Math.round((now - parseInt(cacheTimestamp)) / 3600000) + 'h)');
+                    console.log('[FORGE CONFIG] Using cached version (age: ' + ageH + 'h)');
                     return;
                 }
 
                 // Fetch from Supabase
-                if (!window.supabase) {
-                    console.warn('[FORGE CONFIG] Supabase not initialized, using fallback');
+                if (!SupabaseBridge || !SupabaseBridge.client) {
                     return;
                 }
 
-                const { data, error } = await window.supabase
-                    .from('forge_config')
-                    .select('content, version, updated_at')
-                    .eq('config_type', 'system_prompt')
-                    .eq('active', true)
-                    .order('version', { ascending: false })
-                    .limit(1)
-                    .single();
-
-                if (error) {
-                    console.warn('[FORGE CONFIG] Database fetch failed, using fallback:', error.message);
-                    return;
-                }
+                const data = await SupabaseBridge.fetchForgeConfig();
+                if (!data) return;
 
                 if (data && data.content) {
                     FORGE_SYSTEM_CORE = data.content;
                     localStorage.setItem(CACHE_KEY, data.content);
                     localStorage.setItem(CACHE_TIMESTAMP_KEY, now.toString());
-                    console.log(`[FORGE CONFIG] Loaded version ${data.version} from database (updated: ${data.updated_at})`);
+                    console.log(`[FORGE CONFIG] Updated from cloud (v${data.version})`);
                 } else {
                     console.warn('[FORGE CONFIG] No active config found, using fallback');
                 }
@@ -2179,24 +2105,16 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             overlay.style.display = isVisible ? 'none' : 'flex';
 
             if (!isVisible) {
-                document.getElementById('set-url').value = localStorage.getItem('TM_BACKEND_URL') || "";
-                document.getElementById('set-pin').value = localStorage.getItem('TM_BACKEND_PIN') || "";
-                // V73.SB.UDL Supabase
+                // Supabase
                 document.getElementById('set-sb-url').value = localStorage.getItem('TM_SUPABASE_URL') || "";
                 document.getElementById('set-sb-key').value = localStorage.getItem('TM_SUPABASE_KEY') || "";
             }
         }
 
         function saveSettings() {
-            const newUrl = document.getElementById('set-url').value.trim();
-            const newPin = document.getElementById('set-pin').value.trim();
             const sbUrl = document.getElementById('set-sb-url').value.trim();
             const sbKey = document.getElementById('set-sb-key').value.trim();
 
-            if (!newUrl || !newPin) return alert("Legacy URL and PIN are mandatory for mission sync fallback.");
-
-            localStorage.setItem('TM_BACKEND_URL', newUrl);
-            localStorage.setItem('TM_BACKEND_PIN', newPin);
             localStorage.setItem('TM_SUPABASE_URL', sbUrl);
             localStorage.setItem('TM_SUPABASE_KEY', sbKey);
 
@@ -2208,18 +2126,11 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
         async function fetchLibrary() {
             try {
-                // Try backend first, fall back to static GitHub
-                const res = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'list_hub', pin: TM_PIN }) });
+                // Use static GitHub library by default
+                const res = await fetch(LIB_URL);
+                if (!res.ok) throw new Error("No capsules found.");
                 const j = await res.json();
-                if (j.status === "success" && j.capsules && j.capsules.length > 0) {
-                    renderLibrary(j.capsules, true);
-                } else {
-                    // Fallback to GitHub static file
-                    const res2 = await fetch(LIB_URL);
-                    if (!res2.ok) throw new Error("No capsules found.");
-                    const j2 = await res2.json();
-                    renderLibrary(j2.capsules, false);
-                }
+                renderLibrary(j.capsules, false);
             } catch (e) { document.getElementById('hub-grid').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:#888; padding:100px;"> COMMUNITY_CATALOG_OFFLINE <br><br><span style="font-size:0.5rem; opacity:0.5;">Manual Import Recommended for now.</span></div>`; }
         }
         function renderLibrary(caps, fromBackend) {
@@ -2241,61 +2152,26 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             document.getElementById('hub-grid').innerHTML = h || "<div style='grid-column:1/-1; text-align:center; opacity:0.5; padding:100px; color:#fff;'>NO MISSIONS IN CATALOG.</div>";
         }
         async function publishToHub(id, title, thumb, description) {
-            if (!confirm(`Publish "${title}" to Community Hub ? `)) return;
-            log(`Publishing[${id}] to Community Hub...`);
-            try {
-                const res = await fetch(TM_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'publish_to_hub',
-                        pin: TM_PIN,
-                        email: googleUser ? googleUser.email : "",
-                        id: id,
-                        title: title,
-                        author: googleUser ? googleUser.name : "Unknown",
-                        thumb: thumb,
-                        description: description || "An interactive educational simulation."
-                    })
-                });
-                const j = await res.json();
-                if (j.status === "success") {
-                    log(`[${id}] published to Community Hub!`, "success");
-                    alert(`${title} is now in the Community Hub!`);
-                } else {
-                    log(`Publish failed: ${j.message} `, "error");
-                }
-            } catch (e) { log(`Publish error: ${e.message} `, "error"); }
+            alert("Community Hub publishing is disabled.");
         }
         async function removeFromHub(id) {
-            if (!confirm(`Remove "${id}" from Community Hub ? `)) return;
-            log(`Removing[${id}] from Community Hub...`);
-            try {
-                const res = await fetch(TM_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'remove_from_hub',
-                        pin: TM_PIN,
-                        email: googleUser ? googleUser.email : "",
-                        id: id
-                    })
-                });
-                const j = await res.json();
-                if (j.status === "success") {
-                    log(`[${id}] removed from Community Hub.`, "success");
-                    fetchLibrary();
-                } else {
-                    log(`Remove failed: ${j.message} `, "error");
-                }
-            } catch (e) { log(`Remove error: ${e.message} `, "error"); }
+            alert("Community Hub management is disabled.");
         }
         async function importMission(url, id, name) {
             log(`Syncing Remote Capsule[${id}]...`);
             try {
-                const res = await fetch(url); const payload = await res.json();
-                const res2 = await fetch(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'update_content', pin: TM_PIN, id: id, name: name, payload: payload }) });
-                const j = await res2.json();
-                if (j.status === "success") { log(`Remote Capsule[${id}] committed to local record.`, "success"); fetchMissions(); alert(`Mission[${name}] successfully imported!`); }
-                else log(j.message, "error");
+                const res = await fetch(url);
+                const payload = await res.json();
+                const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
+
+                if (SupabaseBridge.client) {
+                    await SupabaseBridge.saveMission(id, name, payload, teacherId);
+                    log(`Remote Capsule[${id}] committed to cloud record.`, "success");
+                    fetchMissions();
+                    alert(`Mission[${name}] successfully imported!`);
+                } else {
+                    log("Supabase not configured. Cannot import.", "error");
+                }
             } catch (e) { log(`Import failed: ${e.message} `, "error"); }
         }
 
@@ -2972,6 +2848,39 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 syncMetadataToCode();
             };
             container.appendChild(addBtn);
+
+            // Advanced Settings
+            const advHeader = document.createElement('h4');
+            advHeader.style.cssText = 'color:var(--forge-accent); margin-top:30px; margin-bottom:10px;';
+            advHeader.innerText = 'SIMULATION PROTOCOLS';
+            container.appendChild(advHeader);
+
+            const advDesc = document.createElement('div');
+            advDesc.style.cssText = 'color:#666; font-size:0.65rem; margin-bottom:15px; font-style:italic;';
+            advDesc.innerText = "Configure intelligent layers for the student's console.";
+            container.appendChild(advDesc);
+
+            const checkRow = document.createElement('div');
+            checkRow.style.cssText = 'display:flex; align-items:center; gap:10px; margin-bottom:10px;';
+
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.checked = data.enableDevilsAdvocate !== false;
+            check.onchange = () => {
+                data.enableDevilsAdvocate = check.checked;
+                syncMetadataToCode();
+            };
+
+            const label = document.createElement('label');
+            label.style.cssText = 'color:#eee; font-size:0.8rem; cursor:pointer;';
+            label.innerText = "Enable AI 'Devil's Advocate' (Challenge Rationales)";
+
+            checkRow.onclick = () => { check.checked = !check.checked; check.onchange(); };
+            checkRow.style.cursor = 'pointer';
+
+            checkRow.appendChild(check);
+            checkRow.appendChild(label);
+            container.appendChild(checkRow);
         }
 
         function syncMetadataToCode() {
@@ -3334,51 +3243,27 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             const id = accumulatedData.metadata.id.toUpperCase().replace(/\s/g, '');
             const name = accumulatedData.metadata.title;
 
+            const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
+
             log(`Injecting Birthed Capsule [${id}]...`);
-            try {
-                const res = await fetch(TM_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'update_content',
-                        pin: TM_PIN,
-                        id: id,
-                        name: name,
-                        payload: accumulatedData
-                    })
-                });
-                const j = await res.json();
-                if (j.status === "success") {
+            if (SupabaseBridge.client) {
+                try {
+                    await SupabaseBridge.saveMission(id, name, accumulatedData, teacherId);
                     log("INTEGRATED INJECTION SUCCESSFUL.", "success");
                     toggleForge();
                     fetchMissions();
                     alert(`Mission [${name}] is now LIVE.`);
-                } else log(j.message, "error");
-            } catch (e) { log(e.message, "error"); }
+                } catch (e) { log("Deployment Failed: " + e.message, "error"); }
+            } else {
+                log("Supabase not configured. Cannot deploy.", "error");
+            }
         }
         // --- END HOSPITAL ---
 
         async function fetchMissions() {
-            log("Pinging Archive Server...");
+            log("Querying Supabase Archive...");
             const teacherId = googleUser?.email || 'GUEST';
 
-            // --- 1. Supabase Check (V73.SB.UDL) ---
-            if (SupabaseBridge.client) {
-                try {
-                    log("Querying Supabase Archive [High-Performance Mode]...");
-                    const missions = await SupabaseBridge.fetchMissions(teacherId);
-                    if (missions.length > 0) {
-                        log(`Supabase Handshake Successful. Found ${missions.length} mission(s).`, "success");
-                        localStorage.setItem('TM_MISSION_CACHE', JSON.stringify(missions));
-                        renderMissions(missions);
-                        return; // Exit early if Supabase provides data
-                    }
-                } catch (e) {
-                    log(`Supabase Query Failed: ${e.message}`, "error");
-                    // Continue to legacy fallback
-                }
-            }
-
-            // --- 2. Google Sheets Fallback (Legacy) ---
             // CACHE LOAD (Interim)
             const cachedMissions = localStorage.getItem('TM_MISSION_CACHE');
             if (cachedMissions) {
@@ -3387,25 +3272,21 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 } catch (e) { }
             }
 
-            try {
-                const bustUrl = TM_URL + (TM_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
-                const res = await fetchWithTimeout(bustUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'list_missions', pin: TM_PIN })
-                });
-                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-                const j = await res.json();
-
-                if (j.status === "success") {
-                    setStatus("online", "ENCRYPTED_LINK_ACTIVE");
-                    log(`Legacy Handshake successful. Found ${j.missions ? j.missions.length : 0} mission(s).`, "success");
-                    localStorage.setItem('TM_MISSION_CACHE', JSON.stringify(j.missions));
-                    renderMissions(j.missions);
-                    fetchProgress();
-                } else { throw new Error(j.message || "Unknown server error"); }
-            } catch (e) {
-                setStatus("offline", "CONNECTION_FAILURE");
-                log(`Legacy Fail: ${e.message}`, "error");
+            if (SupabaseBridge.client) {
+                try {
+                    log("Querying Supabase Archive...");
+                    const missions = await SupabaseBridge.fetchMissions(teacherId);
+                    log(`Supabase Handshake Successful. Found ${missions.length} mission(s).`, "success");
+                    localStorage.setItem('TM_MISSION_CACHE', JSON.stringify(missions));
+                    renderMissions(missions);
+                    setStatus("online", "SUPABASE_CONNECTED");
+                } catch (e) {
+                    log(`Supabase Query Failed: ${e.message}`, "error");
+                    setStatus("offline", "CONNECTION_FAILURE");
+                }
+            } else {
+                log("Supabase not configured. Missions cannot be synced.", "error");
+                setStatus("offline", "SUPABASE_NOT_CONFIGURED");
             }
         }
 
@@ -3426,40 +3307,19 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             payload.metadata.sb_url = localStorage.getItem('TM_SUPABASE_URL');
             payload.metadata.sb_key = localStorage.getItem('TM_SUPABASE_KEY');
 
-            // --- 1. Supabase First (V73.SB.UDL) ---
+            // --- Supabase Injection ---
             if (SupabaseBridge.client) {
                 try {
                     log("Injecting into Supabase Cloud...");
                     await SupabaseBridge.saveMission(id, name, payload, teacherId);
                     log(`Supabase Injection Successful [${id}]`, "success");
-                    // We don't return here if we want to also sync to Sheets for redundancy, 
-                    // but for performance, we might want to skip the slow Sheets write.
-                    // For now, let's also write to Sheets for legacy fallback redundancy.
+                    fetchMissions();
                 } catch (e) {
                     log(`Supabase Injection Failed: ${e.message}`, "error");
                 }
+            } else {
+                log("Supabase not configured. Cannot save mission.", "error");
             }
-
-            // --- 2. Google Sheets Fallback/Redundancy ---
-            try {
-                const res = await fetch(TM_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'update_content',
-                        pin: TM_PIN,
-                        id: id,
-                        name: name,
-                        payload: payload
-                    })
-                });
-                const j = await res.json();
-                if (j.status === "success") {
-                    log(`Legacy Registry Updated: ${name}`, "success");
-                } else { throw new Error(j.message); }
-            } catch (e) {
-                log(`Legacy Injection Error: ${e.message}`, "error");
-            }
-            fetchMissions();
         }
 
         function handleFile(file) {
@@ -3486,7 +3346,6 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         async function fetchProgress() {
             document.getElementById('sync-tick').innerText = "[SYNC_BUSY]";
 
-            // --- 1. Supabase First (Telemetry v0.50) ---
             if (SupabaseBridge.client) {
                 try {
                     const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
@@ -3516,26 +3375,15 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                         updateClassFilter(); renderProgress();
                         document.getElementById('sync-tick').innerText = "[SYNC_SB_OK]";
                         setTimeout(() => document.getElementById('sync-tick').innerText = "[SYNC_IDLE]", 3000);
-                        return; // Successfully used Supabase, skip legacy
+                    } else {
+                        document.getElementById('sync-tick').innerText = "[SYNC_IDLE]";
                     }
                 } catch (e) {
                     log("Supabase Progress Fetch Failed: " + e.message, "error");
+                    document.getElementById('sync-tick').innerText = "[SYNC_FAIL]";
                 }
-            }
-
-            // --- 2. Google Sheets Fallback ---
-            try {
-                const res = await fetchWithTimeout(TM_URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_progress', pin: TM_PIN }) });
-                const j = await res.json();
-                if (j.status === "success") {
-                    allProgress = j.progress;
-                    updateClassFilter(); renderProgress();
-                    document.getElementById('sync-tick').innerText = "[SYNC_LEGACY_OK]";
-                    setTimeout(() => document.getElementById('sync-tick').innerText = "[SYNC_IDLE]", 3000);
-                }
-            } catch (e) {
-                log("Legacy progress sync failed: " + e.message, "error");
-                document.getElementById('sync-tick').innerText = "[SYNC_FAIL]";
+            } else {
+                document.getElementById('sync-tick').innerText = "[SYNC_ERR]";
             }
         }
 
@@ -3576,78 +3424,30 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             if (!confirm(`DELETE STUDENT: ${name}?\n\nThis will permanently remove all progress data. This action cannot be undone.`)) return;
             log(`Purging records for [${name}] class [${classCode}]...`);
 
-            // --- 1. Supabase First (Telemetry v0.50) ---
             if (SupabaseBridge.client) {
                 try {
                     const success = await SupabaseBridge.deleteLogs(name, classCode);
-                    if (success) log(`Supabase records purged for ${name}.`, "success");
+                    if (success) {
+                        log(`Supabase records purged for ${name}.`, "success");
+                        setTimeout(fetchProgress, 500);
+                    }
                 } catch (e) {
-                    console.warn("Supabase Delete Failed:", e);
+                    log("Supabase Delete Failed: " + e.message, "error");
                 }
+            } else {
+                log("Supabase not configured. Cannot delete record.", "error");
             }
-
-            // --- 2. Google Sheets Fallback ---
-            try {
-                // NOTE: Legacy backend action might be 'delete_user' or 'delete_progress' 
-                // but we keep 'delete_student' and add a safety check
-                const res = await fetch(TM_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'delete_student', pin: TM_PIN, id: id, name: name, class: classCode })
-                });
-                const j = await res.json();
-                if (j.status === "success") {
-                    log(`Legacy records purged for ${name}.`, "success");
-                } else {
-                    log(`Legacy Removal: ${j.message || 'Action restricted.'}`, "info");
-                }
-            } catch (e) {
-                log("Legacy Cleanup Skipped: Network restriction or expired endpoint.", "info");
-            }
-
-            setTimeout(fetchProgress, 500);
         }
 
         async function runAI(uid, mid) {
-            log(`Initiating AI Analysis for Archive [${uid}]...`);
-            // Find student data
-            const student = allProgress.find(p => p.id === uid); if (!student) return log("User not found", "error");
-            const mData = student.missionData[mid]; if (!mData) return log("Mission data not found", "error");
-
-            try {
-                const res = await fetch(TM_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'generate_ai_feedback',
-                        pin: TM_PIN,
-                        rationales: mData.rat,
-                        context: { title: mid }
-                    })
-                });
-                const j = await res.json();
-                if (j.status === "success") {
-                    log("AI Feedback generated successfully.", "success");
-                    // Save feedback back to student state
-                    mData.aiFeedback = j.feedback;
-                    await fetch(TM_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'save_state',
-                            id: uid,
-                            missionId: mid,
-                            state: mData
-                        })
-                    });
-                    log("Feedback committed to student record.", "success");
-                    fetchProgress();
-                } else log(j.message, "error");
-            } catch (e) { log(e.message, "error"); }
+            alert("Student AI Analysis is currently offline during backend migration.");
         }
 
         async function toggleAI(id, state) {
             log(`Updating AI Protocols for [${id}]...`);
             const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
 
-            // OPTIMISTIC CACHE UPDATE: Prevent UI from "snapping back" if DB is slow
+            // OPTIMISTIC CACHE UPDATE
             const cached = localStorage.getItem('TM_MISSION_CACHE');
             if (cached) {
                 try {
@@ -3657,34 +3457,15 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 } catch (e) { }
             }
 
-            // --- 1. Supabase First (v0.50) ---
             if (SupabaseBridge.client) {
                 try {
                     await SupabaseBridge.toggleAI(id, state, teacherId);
                     log(`Supabase AI Protocol Updated [${id}]: ${state ? 'ENABLED' : 'DISABLED'}`, "success");
-                    // We don't fetchMissions() immediately to avoid race conditions with optimistic cache
-                    return;
                 } catch (e) {
                     log(`Supabase Toggle Failed: ${e.message}`, "error");
                 }
-            }
-
-            // --- 2. Legacy Fallback ---
-            try {
-                const res = await fetch(TM_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'toggle_ai', pin: TM_PIN, id: id, state: state })
-                });
-                const j = await res.json();
-                if (j.status === "success") {
-                    log(`Legacy AI Protocol Updated [${id}]`, "success");
-                } else {
-                    log(`Legacy Removal: ${j.message || 'Action restricted.'}`, "info");
-                    fetchMissions(); // Force revert UI
-                }
-            } catch (e) {
-                log("Legacy Toggle Skipped.", "info");
-                fetchMissions(); // Force revert UI
+            } else {
+                log("Supabase not configured. Cannot toggle AI.", "error");
             }
         }
 
@@ -3694,31 +3475,18 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
             const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
 
-            // --- 1. Supabase First (V73.SB.UDL) ---
             if (SupabaseBridge.client) {
                 try {
                     log("Scrubbing from Supabase Cloud...");
                     await SupabaseBridge.deleteMission(id, teacherId);
                     log(`Supabase Delete Successful [${id}]`, "success");
+                    fetchMissions();
                 } catch (e) {
                     log(`Supabase Delete Failed: ${e.message}`, "error");
                 }
+            } else {
+                log("Supabase not configured. Cannot delete from cloud.", "error");
             }
-
-            // --- 2. Google Sheets Fallback ---
-            try {
-                const res = await fetch(TM_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'delete_content', pin: TM_PIN, id: id })
-                });
-                const j = await res.json();
-                if (j.status === "success") {
-                    log("Legacy Registry Scrubbed.", "success");
-                } else { throw new Error(j.message); }
-            } catch (e) {
-                log(`Legacy Delete Error: ${e.message}`, "error");
-            }
-            fetchMissions();
         }
 
         function renderMissions(missions) {
@@ -3744,7 +3512,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             missions.forEach(m => {
                 const thumb = m.thumb || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=200&auto=format&fit=crop";
                 const desc = (m.description || "").replace(/'/g, "\\'").substring(0, 200);
-                const publishBtn = isUserAdmin ? `<button onclick="publishToHub('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${thumb}', '${desc}')" style="font-size:0.5rem; padding:3px 6px; background:#00ffcc; color:#000; border:none; cursor:pointer; margin-right:4px;">PUB</button>` : "";
+                const publishBtn = "";
 
                 h += `<tr style="border-bottom:1px solid #eee;">
                     <td style="padding:8px;">
@@ -3900,20 +3668,8 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
     <!-- SETTINGS OVERLAY -->
     <div id="settings-overlay">
         <div class="settings-card">
-            <h3
-                style="color:#fff; font-family:var(--font-main); font-weight:700; font-size:0.9rem; margin-top:0; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:20px;">
-                CONNECTION SETTINGS</h3>
-
-            <label>Google Apps Script URL (Macro)</label>
-            <input type="text" id="set-url" class="settings-input"
-                placeholder="https://script.google.com/macros/s/.../exec">
-
-            <label>Security PIN</label>
-            <input type="text" id="set-pin" class="settings-input" placeholder="8812">
-
             <div style="margin-top:20px; padding-top:15px; border-top:1px dashed #444;">
-                <h4 style="margin:0 0 10px; font-size:0.7rem; color:var(--accent);">v0.50 SUPABASE CLOUD (OPTIONAL)
-                </h4>
+                <h4 style="margin:0 0 10px; font-size:0.7rem; color:var(--accent);">SUPABASE CLOUD</h4>
                 <label>Supabase Project URL</label>
                 <input type="text" id="set-sb-url" class="settings-input" placeholder="https://xyz.supabase.co">
                 <label>Anon Public Key</label>

@@ -197,11 +197,41 @@ const SupabaseBridge = {
         return data;
     },
 
-    // --- LEGACY FALLBACK ---
+    async fetchForgeConfig(configType = 'system_prompt') {
+        if (!this.client) return null;
+        const { data, error } = await this.client
+            .from('forge_config')
+            .select('content, version, updated_at')
+            .eq('config_type', configType)
+            .eq('active', true)
+            .order('version', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async saveStudentState(studentId, missionId, state, teacherId) {
+        if (!this.client) return false;
+        const { data, error } = await this.client
+            .from('student_progress')
+            .upsert({
+                student_id: studentId,
+                mission_id: missionId,
+                teacher_id: teacherId,
+                state_json: state,
+                updated_at: new Date().toISOString()
+            })
+            .select();
+
+        if (error) throw error;
+        return data;
+    },
+
+    // --- LEGACY FALLBACK (DEPRECATING) ---
     saveToLegacy(title, blobData) {
-        console.log("SUPABASE_BRIDGE: Saving to localStorage fallback.");
-        const legacyKey = `TM_MISSION_${Date.now()}`;
-        localStorage.setItem(legacyKey, JSON.stringify({ title, blob_data: blobData }));
-        return { id: legacyKey, status: 'local_cached' };
+        console.warn("SUPABASE_BRIDGE: Legacy storage is deprecated.");
+        return { id: null, status: 'deprecated' };
     }
 };
