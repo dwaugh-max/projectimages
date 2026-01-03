@@ -1,5 +1,5 @@
 /**
- * SITUATION ROOM // SUPABASE BRIDGE (v74)
+ * SITUATION ROOM // SUPABASE BRIDGE (v0.50)
  * Abstracted data layer for missions and curriculums.
  */
 

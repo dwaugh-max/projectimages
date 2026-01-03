@@ -970,7 +970,7 @@
     </main>
     <footer class="footer">
         <div id="f-left" style="cursor:pointer; pointer-events:auto; font-family:var(--font-tech);"
-            onclick="showVersionInfo()">SITUATION ROOM PROTOCOL | v74 [STABLE]</div>
+            onclick="showVersionInfo()">SITUATION ROOM PROTOCOL | v0.50 [BETA]</div>
         <div id="f-outcomes-btn"
             style="cursor:pointer; pointer-events:auto; color:var(--accent); text-shadow: 0 0 10px var(--accent-dim);"
             onclick="toggleOutcomes()">[ACCESS COGNITIVE OUTCOMES]</div>
@@ -1318,7 +1318,7 @@
             }
             document.documentElement.style.setProperty('--font-h', hFont);
 
-            const simVer = 'v74';
+            const simVer = 'v0.50';
             if (document.getElementById('splash-version')) document.getElementById('splash-version').innerText = simVer;
 
             const m = window.DATA.metadata || {};
@@ -1327,7 +1327,7 @@
                 s.style.backgroundSize = "cover"; s.style.backgroundPosition = "center";
             }
             document.getElementById('m-header').innerText = m.title || "ARCHIVE LOG";
-            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v74`;
+            document.getElementById('f-left').innerHTML = `${m.title || currentMission} | SITUATION ROOM PROTOCOL v0.50`;
 
             // Populate the outcomes panel (popup) instead of inline text
             populateOutcomes();
@@ -1388,7 +1388,7 @@
             const m = window.DATA ? window.DATA.metadata : {};
             const blobVersion = m.version || 'Unknown';
             const blobAuthor = m.author || 'Unknown';
-            const simVersion = 'v74';
+            const simVersion = 'v0.50';
             let h = `
                 <div><strong style="color:var(--accent);">SIM ENGINE:</strong> ${simVersion}</div>
                 <div><strong style="color:var(--accent);">CAPSULE VERSION:</strong> ${blobVersion}</div>
@@ -1958,9 +1958,9 @@ CRITICAL: At the end of your analysis, write exactly "[QUESTIONS]" and then gene
                 const sbKey = window.DATA?.metadata?.sb_key;
                 if (sbUrl && sbKey) {
                     SupabaseBridge.init(sbUrl, sbKey);
-                    console.log("[TELEMETRY] Master Spreadsheet Link Operational (via v74 Metadata).");
+                    console.log("[TELEMETRY] Master Spreadsheet Link Operational (via v0.50 Metadata).");
                 } else {
-                    console.warn("[TELEMETRY] Handshake Interrupted: Mission capsule requires v74 re-injection in Teacher Mode.");
+                    console.warn("[TELEMETRY] Handshake Interrupted: Mission capsule requires v0.50 re-injection in Teacher Mode.");
                     return;
                 }
             }

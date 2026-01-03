@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>MISSION CONTROL // SITUATION ROOM (v74)</title>
+    <title>MISSION CONTROL // SITUATION ROOM (0.50)</title>
     <script>
         // --- BOOTSTRAP CONFIGURATION ---
         (function bootstrap() {
@@ -59,7 +59,7 @@
             --forge-accent: #0088ff;
         }
 
-        /* --- BLOB HOSPITAL SURGICAL STYLES (PORTED v74) --- */
+        /* --- BLOB HOSPITAL SURGICAL STYLES (PORTED v0.50) --- */
         .surgical-theater {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1142,7 +1142,7 @@
                 style="background:none; color:#00ffcc; font-size:0.6rem; border:1px solid #00ffcc; padding:6px 15px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:1px;"
                 aria-label="Open Mission Archive Hub">📚
                 HUB</button>
-            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">v74</div>
+            <div style="font-size:0.6rem; opacity:0.5; letter-spacing:1px;">0.50</div>
         </div>
     </div>
     <main>
@@ -1240,7 +1240,7 @@
                     <div
                         style="font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--forge-accent); letter-spacing:4px;">
                         MISSION CREATE</div>
-                    <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">v74</div>
+                    <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">0.50</div>
                 </div>
                 <div style="display:flex; gap:10px;">
                     <button onclick="resetForge()"
@@ -1707,7 +1707,7 @@
         }
 
         const FORGE_SYSTEM_CORE = `
-You are the BLOB FACTORY COREGINE (v74), the multi-stage mission architect.
+You are the BLOB FACTORY COREGINE (0.50), the multi-stage mission architect.
 LANGUAGE PROTOCOL: STRICTLY ENGLISH ONLY. Do not use Chinese characters or any non-English script. Translate all internal logic or model defaults to English immediately.
 GOAL: Guide the user from a seed context to a fully realized educational .blob mission.
 STYLE: Punchy, active journalism. Short paragraphs (MAX 3-4 sentences).
@@ -3202,7 +3202,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
             const payload = JSON.parse(raw);
 
-            // [Telemetry v74] Inject logging target into mission metadata
+            // [Telemetry v0.50] Inject logging target into mission metadata
             if (!payload.metadata) payload.metadata = {};
             payload.metadata.creator_email = teacherId;
             payload.metadata.sb_url = localStorage.getItem('TM_SUPABASE_URL');
@@ -3268,7 +3268,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         async function fetchProgress() {
             document.getElementById('sync-tick').innerText = "[SYNC_BUSY]";
 
-            // --- 1. Supabase First (Telemetry v74) ---
+            // --- 1. Supabase First (Telemetry v0.50) ---
             if (SupabaseBridge.client) {
                 try {
                     const teacherId = (typeof googleUser !== 'undefined') ? googleUser.email : 'GUEST';
@@ -3358,7 +3358,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             if (!confirm(`DELETE STUDENT: ${name}?\n\nThis will permanently remove all progress data. This action cannot be undone.`)) return;
             log(`Purging records for [${name}] class [${classCode}]...`);
 
-            // --- 1. Supabase First (Telemetry v74) ---
+            // --- 1. Supabase First (Telemetry v0.50) ---
             if (SupabaseBridge.client) {
                 try {
                     const success = await SupabaseBridge.deleteLogs(name, classCode);
@@ -3439,7 +3439,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 } catch (e) { }
             }
 
-            // --- 1. Supabase First (v74) ---
+            // --- 1. Supabase First (v0.50) ---
             if (SupabaseBridge.client) {
                 try {
                     await SupabaseBridge.toggleAI(id, state, teacherId);
@@ -3694,7 +3694,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
             <input type="text" id="set-pin" class="settings-input" placeholder="8812">
 
             <div style="margin-top:20px; padding-top:15px; border-top:1px dashed #444;">
-                <h4 style="margin:0 0 10px; font-size:0.7rem; color:var(--accent);">v74 SUPABASE CLOUD (OPTIONAL)
+                <h4 style="margin:0 0 10px; font-size:0.7rem; color:var(--accent);">v0.50 SUPABASE CLOUD (OPTIONAL)
                 </h4>
                 <label>Supabase Project URL</label>
                 <input type="text" id="set-sb-url" class="settings-input" placeholder="https://xyz.supabase.co">
