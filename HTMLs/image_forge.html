@@ -558,90 +558,73 @@
         function listModels() {
             saveConfig();
             if (!CONFIG.key_gl) { showToast("NEED API KEY"); return; }
-            log("DIAGNOSTIC: SCANNING ALL GOOGLE API TIERS...", 'OUTBOUND');
+            log("DIAGNOSTIC: PROBING GOOGLE AI STUDIO...", 'OUTBOUND');
 
-            // Tier 1: v1 with Query Param
-            fetch(`https://generativelanguage.googleapis.com/v1/models?key=${CONFIG.key_gl}`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data.models) log(`V1 (QUERY) SUCCESS: ${data.models.length} entries found.`, 'RESPONSE');
-                    else log(`V1 (QUERY) REJECTED: ${data.error ? data.error.message : 'Unknown'}`, 'ERROR');
-                });
-
-            // Tier 2: v1beta with Header
-            fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
-                headers: { 'x-goog-api-key': CONFIG.key_gl }
-            })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.models) log(`V1BETA (HEADER) SUCCESS: ${data.models.length} entries found.`, 'RESPONSE');
-                    else log(`V1BETA (HEADER) REJECTED: ${data.error ? data.error.message : 'Unknown'}`, 'ERROR');
-                });
-
-            // Tier 3: v1beta with Query Param
             fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${CONFIG.key_gl}`)
                 .then(r => r.json())
                 .then(data => {
-                    if (data.models) log(`V1BETA (QUERY) SUCCESS: ${data.models.length} entries found.`, 'RESPONSE');
-                    else log(`V1BETA (QUERY) REJECTED: ${data.error ? data.error.message : 'Unknown'}`, 'ERROR');
+                    if (data.models) log(`AI STUDIO SUCCESS: Found ${data.models.length} entries.`, 'RESPONSE');
+                    else log(`AI STUDIO REJECTED: ${JSON.stringify(data.error)}`, 'ERROR');
                 });
         }
 
         async function callGoogleAPI(prompt, slotId) {
             if (!CONFIG.key_gl) throw new Error("MISSING API KEY");
 
-            // Try multiple URL/Header combos to find a valid principal assertion
-            const endpoints = [
-                { url: `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model_gl}:generateContent`, useHeader: true },
-                { url: `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model_gl}:generateContent?key=${CONFIG.key_gl}`, useHeader: false },
-                { url: `https://generativelanguage.googleapis.com/v1/models/${CONFIG.model_gl}:generateContent?key=${CONFIG.key_gl}`, useHeader: false }
-            ];
+            // AI Studio / Gemini 2.5 Protocol
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model_gl}:generateContent?key=${CONFIG.key_gl}`;
 
-            let lastError = "";
+            log(`OUTBOUND (GOOGLE): ${CONFIG.model_gl} // "${prompt.substring(0, 40)}..."`, 'OUTBOUND');
 
-            for (let ep of endpoints) {
-                try {
-                    const headers = { 'Content-Type': 'application/json' };
-                    if (ep.useHeader) headers['x-goog-api-key'] = CONFIG.key_gl;
-
-                    log(`ATTEMPTING GOOGLE AUTH: ${ep.url.includes('?') ? 'Query Param' : 'Header'} (${ep.url.includes('beta') ? 'v1beta' : 'v1'})`, 'OUTBOUND');
-
-                    const response = await fetch(ep.url, {
-                        method: 'POST',
-                        headers: headers,
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                            generationConfig: {
-                                responseModalities: ["TEXT", "IMAGE"],
-                                candidateCount: 1
-                            }
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.error) {
-                        lastError = data.error.message;
-                        log(`EP FAILED: ${lastError}`, 'ERROR');
-                        if (data.error.code === 401) continue;
-                        throw new Error(lastError);
-                    }
-
-                    if (data.candidates && data.candidates[0].content.parts) {
-                        const parts = data.candidates[0].content.parts;
-                        const imgPart = parts.find(p => p.inlineData);
-                        if (imgPart) return `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
-
-                        const textPart = parts.find(p => p.text);
-                        if (textPart) throw new Error("REFUSAL: " + textPart.text);
-                    }
-                } catch (e) {
-                    lastError = e.message;
-                    if (lastError.includes('401')) continue;
-                    throw e;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseModalities: ["TEXT", "IMAGE"],
+                    candidateCount: 1
                 }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                // Secondary fallback attempt if header auth specifically required
+                if (data.error.code === 401) {
+                    log("ATTEMPTING AUTH FALLBACK (HEADER)...", 'OUTBOUND');
+                    const urlNoKey = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model_gl}:generateContent`;
+                    const res2 = await fetch(urlNoKey, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-goog-api-key': CONFIG.key_gl
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const data2 = await res2.json();
+                    if (data2.candidates) return handleGeminiResponse(data2);
+                    throw new Error(data2.error ? data2.error.message : "Auth Failure");
+                }
+                throw new Error(data.error.message);
             }
-            throw new Error("ALL GOOGLE AUTH PATTERNS REJECTED: " + lastError);
+
+            return handleGeminiResponse(data);
+        }
+
+        function handleGeminiResponse(data) {
+            if (data.candidates && data.candidates[0].content.parts) {
+                const parts = data.candidates[0].content.parts;
+                const imgPart = parts.find(p => p.inlineData);
+                if (imgPart) return `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+
+                const textPart = parts.find(p => p.text);
+                if (textPart) throw new Error("REFUSAL: " + textPart.text);
+            }
+            throw new Error("NO IMAGE DATA IN RESPONSE");
         }
 
         async function callOpenRouterAPI(prompt, slotId) {
