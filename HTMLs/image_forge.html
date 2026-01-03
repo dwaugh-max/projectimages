@@ -616,10 +616,17 @@
         }
 
         function handleGeminiResponse(data) {
-            if (data.candidates && data.candidates[0].content.parts) {
+            if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
                 const parts = data.candidates[0].content.parts;
-                const imgPart = parts.find(p => p.inlineData);
-                if (imgPart) return `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+
+                // Flexible search for image data (handling potential API variations)
+                const imgPart = parts.find(p => p.inlineData || p.inline_data);
+                if (imgPart) {
+                    const dataObj = imgPart.inlineData || imgPart.inline_data;
+                    const mime = dataObj.mimeType || dataObj.mime_type || 'image/png';
+                    const base64 = dataObj.data;
+                    if (base64) return `data:${mime};base64,${base64}`;
+                }
 
                 const textPart = parts.find(p => p.text);
                 if (textPart) throw new Error("REFUSAL: " + textPart.text);
