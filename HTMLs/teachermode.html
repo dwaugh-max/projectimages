@@ -2679,13 +2679,73 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
         function renderMetadataEditor(data) {
             const container = document.getElementById('hosp-visual');
-            container.innerHTML = `<h3 style="color:var(--forge-accent); margin-top:0;">PATIENT DOSSIER</h3>`;
+            container.innerHTML = ''; // Clear
+
+            const header = document.createElement('h3');
+            header.style.cssText = 'color:var(--forge-accent); margin-top:0;';
+            header.innerText = 'PATIENT DOSSIER';
+            container.appendChild(header);
 
             createSharedInput("Mission ID", data.id || "", "id", data, container);
             createSharedInput("Title", data.title || "", "title", data, container);
             createSharedInput("Description", data.description || "", "description", data, container);
             createSharedInput("Author", data.author || "", "author", data, container);
             createSharedInput("Version", data.version || "", "version", data, container);
+
+            // Learning Outcomes Section
+            const outcomesHeader = document.createElement('h4');
+            outcomesHeader.style.cssText = 'color:var(--forge-accent); margin-top:20px; margin-bottom:10px;';
+            outcomesHeader.innerText = 'LEARNING OUTCOMES';
+            container.appendChild(outcomesHeader);
+
+            // Ensure learningOutcomes array exists
+            if (!data.learningOutcomes) data.learningOutcomes = [];
+
+            data.learningOutcomes.forEach((outcome, i) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; gap:10px; margin-bottom:8px; align-items:center;';
+
+                const input = document.createElement('input');
+                input.className = 'med-input';
+                input.style.flex = '1';
+                input.value = outcome;
+                input.placeholder = 'Learning Outcome';
+                input.onchange = () => {
+                    data.learningOutcomes[i] = input.value;
+                    syncMetadataToCode();
+                };
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn';
+                delBtn.style.cssText = 'padding:5px 10px; font-size:0.7rem; background:#600;';
+                delBtn.innerText = 'X';
+                delBtn.onclick = () => {
+                    data.learningOutcomes.splice(i, 1);
+                    renderMetadataEditor(data);
+                    syncMetadataToCode();
+                };
+
+                row.appendChild(input);
+                row.appendChild(delBtn);
+                container.appendChild(row);
+            });
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'btn';
+            addBtn.style.cssText = 'margin-top:5px; font-size:0.7rem;';
+            addBtn.innerText = '+ ADD OUTCOME';
+            addBtn.onclick = () => {
+                data.learningOutcomes.push('');
+                renderMetadataEditor(data);
+                syncMetadataToCode();
+            };
+            container.appendChild(addBtn);
+        }
+
+        function syncMetadataToCode() {
+            document.getElementById('hosp-editor').value = JSON.stringify(
+                accumulatedData.metadata, null, 2
+            );
         }
 
         function renderGlossaryEditor(data) {
