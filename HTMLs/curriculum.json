@@ -312,7 +312,64 @@
         },
         "New Brunswick": {
             "Social Studies 10": [
-                "Outcome 1: Placeholder for New Brunswick Outcome"
+                "Geography: Places and Regions – Investigate basic features of Canada's landscape and climate. Indicators: Interpret 3 types of maps; Explain physical variations; Investigate impact of climate change.",
+                "Geography: Human Systems – Analyze effect of human settlement on place over time. Indicators: Discuss events shaping human landscape; Assess resource regional prosperity/depletion; Define regionalism.",
+                "History: Events and Peoples – Analyze various perceptions of identities in Canada. Indicators: Describe personal/national identity; Debate identity in diverse society; Analyze identity through art/media.",
+                "History: Migration – Analyze impact of migration and immigration on identities. Indicators: Explain push/pull factors; Describe patterns of enslaved person trafficking; Explain discriminatory laws.",
+                "Civics: Civic Engagement – Take age-appropriate actions that demonstrate rights/responsibilities. Indicators: Defining citizenship; Analyze how history shaped concepts of citizenship; Discuss UN/Charter human rights.",
+                "Civics: Power/Governance – Explain structures and operations of governance in Canada. Indicators: Describe democracy and levels of govt (Fed/Prov/Mun/FN); Explain executive/legislative/judicial branches.",
+                "Civics: Rights/Responsibilities – Investigate persistent issues involving status of groups in Canada. Indicators: Discuss law as tool for oppression/equity; Discuss WWII, First Nations self-governance, minority rights.",
+                "Wabanaki: Treaty Education – Examine key issues involving treaty relationships in Canada. Indicators: Analyze why Western perspectives are privileged; Outline contemporary issues (statues, names); Contrast treaties.",
+                "Economics: Sustainability – Investigate living conditions for groups in Canada. Indicators: Compare minimum wage with cost of living; Outline solutions for food security; Identify ways to address inequality."
+            ],
+            "Civics 10": [
+                "Decision-Making – Influence of Values. Indicators: Explore how worldviews (including Wabanaki) inform decision-making; Describe responsibilities of a \"treaty person\".",
+                "Representation – Systems of Representation. Indicators: Investigate Parliament, Senate, House of Commons; Compare with global democracies; Explain Indigenous sovereignty.",
+                "Digital Literacy – Digital and Data Literacy. Indicators: Use media literacy to identify reliable sources; Analyze data (census) to respond to issues of civic importance.",
+                "Citizenship – Concepts of Inclusion. Indicators: Differentiate between equality, equity, fairness, and justice; Identify rights/responsibilities of residents.",
+                "Belonging – Community and Online Spaces. Indicators: Investigate physical/virtual spaces that promote belonging; Examine how commemorative spaces address past injustices.",
+                "Intersectionality – Power and Intersectionality. Indicators: Describe conditions that limit/grant power; Examine intersectionality in social, economic, and political issues.",
+                "Human Rights – Legislation. Indicators: Research Universal Declaration of Human Rights, Charter of Rights, and UNDRIP; Study Marshall and Persons cases.",
+                "Rights – Genocide and Accountability. Indicators: Identify the 10 stages of genocide; Assess shortcomings of Aboriginal Rights in the Constitution Act of 1982.",
+                "Engagement – Domains of Engagement. Indicators: Define \"civic agency\"; Identify motivations for common good; Research how individuals have engaged to initiate change.",
+                "Action – Practical Application. Indicators: Investigate current community needs; Select and civically engage with a cause in the community."
+            ],
+            "Canadian History 122": [
+                "Historical Thinking – Employ processes of critical historical inquiry to reconstruct and interpret the past. Indicators: (Outcome focus on critical inquiry and primary source interpretation).",
+                "Historical Thinking – Apply key concepts such as chronology and causality to explain continuity and change. Indicators: (Outcome focus on continuity and change).",
+                "Geography – Understand how geographic forces have shaped our history. Indicators: (Focus on physical and human geography).",
+                "Society – Understand the evolving face of Canada as cultural groups become part of multicultural reality. Indicators: (Focus on social history and diversity).",
+                "Economics – Explain the significance of the global economy on economic renewal and development. Indicators: (Focus on global trade patterns and the Internet).",
+                "Human Rights – Examine human rights issues and recognize forms of discrimination. Indicators: (Focus on discriminatory policies and social justice).",
+                "Nationhood – Determine the principles and actions of just, pluralistic, and democratic societies. Indicators: (Focus on political structures and democratic values)."
+            ],
+            "World Issues 120": [
+                "Geopolitics – Identify own worldview and personal bias in how one consumes messaging. Indicators: Prioritize issues; articulate own position; consider perspectives of others on geopolitical issues.",
+                "Geopolitics – Articulate own position on geopolitical issues; Make reasoned, ethical judgements. Indicators: Construct own sense of global citizenship; assess own vision for civic participation.",
+                "Interdependence – Explain how needs and wants in one region are often dependent upon other societies. Indicators: Research the history of contemporary global institutions and organisations.",
+                "Human Rights – Discuss the importance of global citizenship and sustainability; Promote initiatives for peace. Indicators: Investigate movements seeking peace; promote initiatives for sustainability.",
+                "Human Rights – Discuss the role of colonialism in local, regional, national, and global conflicts. Indicators: Analyze strategies used to attempt to diffuse conflict."
+            ],
+            "Indigenous Studies 120": [
+                "Citizenship – Demonstrate an understanding of rights and responsibilities and origins of authority. Indicators: (Outcome focus on governance and sources of power).",
+                "Economics – Demonstrate the ability to make responsible economic decisions. Indicators: (Outcome focus on individual and societal economic responsibility).",
+                "Environment – Demonstrate an understanding of interactions among people, places and the environment. Indicators: (Outcome focus on spatial and environmental awareness).",
+                "Culture – Demonstrate an understanding of worldview and cultural perspectives. Indicators: (Outcome focus on recognizing cultural similarities and differences).",
+                "Interdependence – Demonstrate understanding of interdependent relationships and sustainability. Indicators: (Outcome focus on local, national, and global implications).",
+                "Time – Demonstrate an understanding of the past and how it affects the present and future. Indicators: (Outcome focus on time, continuity, and change)."
+            ],
+            "Francophone (K-12)": [
+                "Communication – Communiquer clairement dans une langue juste et appropriée selon le contexte. Indicators: (Transdisciplinary outcome across all cycles).",
+                "Pensée critique – Manifester des capacités d'analyse critique et de pensée créative dans la résolution de problèmes. Indicators: (Transdisciplinary outcome applied to decision-making).",
+                "Technologies TIC – Utiliser judicieusement les technologies de l'information et de la communication (TIC). Indicators: (Transdisciplinary outcome applied to various situations).",
+                "Culture/Patrimoine – Apprécier la richesse de son patrimoine culturel, affirmer son appartenance à la francophonie. Indicators: (Outcome focus on cultural awareness and identity)."
+            ],
+            "Francophone (Secondary)": [
+                "Histoire du Canada – Établir l'importance historique; Utiliser des preuves de sources primaires., Indicators: Dégager la continuité et le changement; Analyser les causes et les conséquences.",
+                "Géographie 41111 – Analyser l'organisation de l'espace canadien et les enjeux liés au territoire. Indicators: Utiliser le langage cartographique; Interpréter un enjeu territorial; Développer une conscience planétaire."
+            ],
+            "Francophone (9e)": [
+                "Sciences Humaines – Examiner et expliquer l'apport des secteurs primaire, secondaire, et tertiaire. Indicators: (Outcome focus on economic structures and sectors)."
             ]
         },
         "Prince Edward Island": {

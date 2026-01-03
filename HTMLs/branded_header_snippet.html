@@ -1,0 +1,44 @@
+<body>
+    <!-- BRANDED HEADER -->
+    <div class="branded-header" onclick="toggleAboutModal()">
+        <img src="images/logic_gear_logo.png" alt="Logo">
+        <div class="title">SITUATION ROOM</div>
+    </div>
+
+    <!-- ABOUT MODAL -->
+    <div class="about-modal-overlay" id="about-modal" onclick="if(event.target === this) toggleAboutModal()">
+        <div class="about-modal">
+            <h2>SITUATION ROOM</h2>
+            <div class="version">VERSION 0.50 (BETA)</div>
+
+            <div class="section">
+                <div class="section-title">Project Repository</div>
+                <div class="section-content">
+                    <a href="https://github.com/yourusername/projectimages" target="_blank" rel="noopener noreferrer">
+                        github.com/yourusername/projectimages
+                    </a>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Open Source & Free Software</div>
+                <div class="section-content">
+                    This project is open source and free software. You are free to use, modify, and distribute it under
+                    the terms of the applicable license. We believe in the power of open collaboration and transparent
+                    education technology.
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Credits</div>
+                <div class="section-content">
+                    Created and developed by <strong>David Waugh</strong>.<br>
+                    Contact: <a href="mailto:hellosituationroom@gmail.com">hellosituationroom@gmail.com</a>
+                </div>
+            </div>
+
+            <button class="close-btn" onclick="toggleAboutModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- AUTHENTICATION OVERLAY -->
