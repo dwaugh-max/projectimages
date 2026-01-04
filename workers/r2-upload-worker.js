@@ -59,7 +59,7 @@ export default {
             }
 
             // Return public URL
-            const publicUrl = `https://pub-${R2_ACCOUNT_ID}.r2.dev/${filename}`;
+            const publicUrl = `https://pub-292f442cf18e4af8987995ef35671754.r2.dev/${filename}`;
 
             return new Response(JSON.stringify({
                 success: true,
