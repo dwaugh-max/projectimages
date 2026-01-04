@@ -2244,7 +2244,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                         onchange="updateAssetUrl('hero', this.value)">
                     <div style="display:flex; gap:5px;">
                         <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px;" onclick="generateAsset('hero')">⚡ GENERATE</button>
-                        <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px; background:#234;" onclick="saveAssetToGit('hero')">GIT</button>
+                        <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px; background:#234;" onclick="saveAssetToGit('hero')">R2</button>
                     </div>
                 </div>
             `;
@@ -2273,7 +2273,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                             onchange="updateAssetUrl('${i}-a', this.value)">
                         <div style="display:flex; gap:5px;">
                             <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px;" onclick="generateAsset('${i}-a')">⚡ GEN</button>
-                            <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px; background:#234;" onclick="saveAssetToGit('${i}-a')">GIT</button>
+                            <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px; background:#234;" onclick="saveAssetToGit('${i}-a')">R2</button>
                         </div>
                     </div>
                 `;
@@ -2294,7 +2294,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                             onchange="updateAssetUrl('${i}-b', this.value)">
                         <div style="display:flex; gap:5px;">
                             <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px;" onclick="generateAsset('${i}-b')">⚡ GEN</button>
-                            <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px; background:#234;" onclick="saveAssetToGit('${i}-b')">GIT</button>
+                            <button class="btn secondary" style="flex:1; font-size:0.6rem; padding:6px; background:#234;" onclick="saveAssetToGit('${i}-b')">R2</button>
                         </div>
                     </div>
                 `;
@@ -2455,7 +2455,9 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         }
 
         async function saveAssetToGit(slotId) {
+            // Now uses Cloudflare R2 via worker (renamed from Git for backwards compat)
             const urlEl = document.getElementById(slotId === 'hero' ? 'asset-hero-url' : `asset-${slotId}-url`);
+            const previewEl = document.getElementById(slotId === 'hero' ? 'asset-hero-preview' : `asset-${slotId}-preview`);
             const url = urlEl?.value;
 
             if (!url) {
@@ -2463,21 +2465,13 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 return;
             }
 
-            // Get GitHub token
-            let ghToken = localStorage.getItem('GITHUB_TOKEN');
-            if (!ghToken) {
-                ghToken = window.prompt("Enter your GitHub Personal Access Token (needs 'repo' scope):");
-                if (!ghToken) return;
-                localStorage.setItem('GITHUB_TOKEN', ghToken.trim());
-            }
-
-            const repo = 'dwaugh-edsim/projectimages';
+            const R2_WORKER_URL = 'https://proud-tooth-42cf.icumusicvideo.workers.dev';
             const missionId = accumulatedData?.metadata?.id || 'unnamed';
             const filename = `${missionId}_${slotId}_${Date.now()}.jpg`;
-            const path = `generated/${filename}`;
 
             try {
-                log(`Git Save [${slotId}]: Converting to JPG...`, 'OUTBOUND');
+                log(`R2 Save [${slotId}]: Converting to JPG...`, 'OUTBOUND');
+                previewEl.innerHTML = '<span style="color:#0af; font-size:0.6rem;">⏳ UPLOADING TO R2...</span>';
 
                 // Convert to JPG via canvas
                 const img = new Image();
@@ -2485,7 +2479,7 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
 
                 await new Promise((resolve, reject) => {
                     img.onload = resolve;
-                    img.onerror = () => reject(new Error("Failed to load image"));
+                    img.onerror = () => reject(new Error("Failed to load image - may be CORS blocked"));
                     img.src = url;
                 });
 
@@ -2498,45 +2492,35 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
                 ctx.drawImage(img, 0, 0);
 
                 const jpgDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                const base64Content = jpgDataUrl.split(',')[1];
 
-                log(`Git Save [${slotId}]: Uploading ${filename}...`, 'OUTBOUND');
+                log(`R2 Save [${slotId}]: Uploading ${filename}...`, 'OUTBOUND');
 
-                const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-                    method: 'PUT',
+                const res = await fetch(`${R2_WORKER_URL}?filename=${encodeURIComponent(filename)}`, {
+                    method: 'POST',
                     headers: {
-                        'Authorization': `token ${ghToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        message: `[TeacherMode] Asset ${slotId} for ${missionId}`,
-                        content: base64Content,
-                        branch: 'main'
-                    })
+                    body: JSON.stringify({ image: jpgDataUrl })
                 });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    if (err.message?.includes('401') || err.message?.includes('Bad credentials')) {
-                        localStorage.removeItem('GITHUB_TOKEN');
-                    }
-                    throw new Error(err.message || `HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Upload failed');
                 }
 
-                const data = await res.json();
-                const gitUrl = data.content.download_url;
+                // Update URL field with R2 public URL
+                urlEl.value = data.url;
+                updateAssetUrl(slotId, data.url);
+                previewEl.innerHTML = `<img src="${data.url}" style="max-width:100%;">`;
 
-                // Update URL field with GitHub raw URL
-                urlEl.value = gitUrl;
-                updateAssetUrl(slotId, gitUrl);
-
-                log(`Git Save [${slotId}]: SUCCESS - ${gitUrl}`, 'success');
-                alert(`Saved to GitHub as JPG!\n${filename}`);
+                log(`R2 Save [${slotId}]: SUCCESS - ${data.url}`, 'success');
+                alert(`Saved to R2 as JPG!\n${data.filename}`);
 
             } catch (e) {
-                log(`Git Save [${slotId}] FAILED: ${e.message}`, 'error');
-                alert(`Git save failed: ${e.message}`);
+                log(`R2 Save [${slotId}] FAILED: ${e.message}`, 'error');
+                previewEl.innerHTML = `<span style="color:#f44; font-size:0.55rem;">ERROR: ${e.message}</span>`;
+                alert(`R2 save failed: ${e.message}`);
             }
         }
 
