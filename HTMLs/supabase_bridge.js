@@ -233,5 +233,99 @@ const SupabaseBridge = {
     saveToLegacy(title, blobData) {
         console.warn("SUPABASE_BRIDGE: Legacy storage is deprecated.");
         return { id: null, status: 'deprecated' };
+    },
+
+    // --- IDEA (WIP SESSION) OPERATIONS ---
+    async saveIdea(ideaId, teacherId, ideaData) {
+        // ideaData contains: {name, forgeHistory, currentPhaseIndex, accumulatedData, curriculum, settings}
+        if (!this.client) {
+            // Local fallback
+            localStorage.setItem(`TM_IDEA_${ideaId}`, JSON.stringify(ideaData));
+            console.log("SUPABASE_BRIDGE: Idea saved to localStorage (offline mode)");
+            return { id: ideaId, status: 'local' };
+        }
+
+        const { data, error } = await this.client
+            .from('forge_ideas')
+            .upsert({
+                idea_id: ideaId,
+                teacher_id: teacherId,
+                name: ideaData.name || 'Untitled Idea',
+                idea_data: ideaData,
+                updated_at: new Date().toISOString()
+            })
+            .select();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async fetchIdeas(teacherId) {
+        if (!this.client) {
+            // Local fallback - scan localStorage
+            const ideas = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('TM_IDEA_')) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        ideas.push({
+                            id: key.replace('TM_IDEA_', ''),
+                            name: data.name || 'Untitled',
+                            updated: data.savedAt || 'Unknown',
+                            data: data
+                        });
+                    } catch (e) { }
+                }
+            }
+            return ideas;
+        }
+
+        const { data, error } = await this.client
+            .from('forge_ideas')
+            .select('idea_id, name, updated_at')
+            .eq('teacher_id', teacherId)
+            .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+        return data.map(i => ({
+            id: i.idea_id,
+            name: i.name,
+            updated: i.updated_at
+        }));
+    },
+
+    async loadIdea(ideaId, teacherId) {
+        if (!this.client) {
+            // Local fallback
+            const raw = localStorage.getItem(`TM_IDEA_${ideaId}`);
+            return raw ? JSON.parse(raw) : null;
+        }
+
+        const { data, error } = await this.client
+            .from('forge_ideas')
+            .select('idea_data')
+            .eq('idea_id', ideaId)
+            .eq('teacher_id', teacherId)
+            .single();
+
+        if (error) throw error;
+        return data?.idea_data || null;
+    },
+
+    async deleteIdea(ideaId, teacherId) {
+        if (!this.client) {
+            localStorage.removeItem(`TM_IDEA_${ideaId}`);
+            return true;
+        }
+
+        const { error } = await this.client
+            .from('forge_ideas')
+            .delete()
+            .eq('idea_id', ideaId)
+            .eq('teacher_id', teacherId);
+
+        if (error) throw error;
+        return true;
     }
 };

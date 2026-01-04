@@ -1374,6 +1374,12 @@
                     <div style="font-size:0.5rem; opacity:0.5; letter-spacing:2px; margin-top:5px;">0.50</div>
                 </div>
                 <div style="display:flex; gap:10px;">
+                    <button onclick="saveIdea()"
+                        style="background:#234; border:1px solid #0af; color:#0af; padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem; font-weight:bold;">💾
+                        SAVE IDEA</button>
+                    <button onclick="openIdeaLoader()"
+                        style="background:transparent; border:1px solid #f80; color:#f80; padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem;">📂
+                        LOAD IDEA</button>
                     <button onclick="resetForge()"
                         style="background:transparent; border:1px solid var(--forge-accent); color:var(--forge-accent); padding:8px 15px; cursor:pointer; font-family:inherit; font-size:0.7rem; font-weight:bold;">RESTART</button>
                     <button onclick="toggleForge()"
@@ -1975,6 +1981,139 @@ Rules: Standard Sentence Case. No All-Caps sections. Use Markdown.
         function toggleGenSettings() {
             const content = document.getElementById('gen-settings-content');
             content.classList.toggle('active');
+        }
+
+        // --- IDEA SAVE/LOAD SYSTEM ---
+        async function saveIdea() {
+            const teacherId = googleUser?.email || 'GUEST';
+
+            // Prompt for idea name
+            const defaultName = accumulatedData?.metadata?.title || `Idea_${Date.now()}`;
+            const ideaName = window.prompt("Name this idea (for later reference):", defaultName);
+            if (!ideaName) return;
+
+            const ideaId = `IDEA_${Date.now()}`;
+
+            // Capture full forge state
+            const ideaData = {
+                name: ideaName,
+                savedAt: new Date().toISOString(),
+                forgeHistory: forgeHistory,
+                currentPhaseIndex: currentPhaseIndex,
+                accumulatedData: accumulatedData,
+                curriculum: {
+                    country: document.getElementById('f-country')?.value || '',
+                    region: document.getElementById('f-region')?.value || '',
+                    course: document.getElementById('f-course')?.value || '',
+                    selectedOutcomes: Array.from(document.querySelectorAll('#f-outcomes input:checked')).map(c => c.value)
+                },
+                settings: {
+                    model: document.getElementById('f-model')?.value || '',
+                    complexity: document.getElementById('f-complexity')?.value || 'Medium'
+                }
+            };
+
+            try {
+                await SupabaseBridge.saveIdea(ideaId, teacherId, ideaData);
+                log(`IDEA SAVED: "${ideaName}" [${ideaId}]`, 'success');
+                addForgeChat('ai', `💾 **Idea Saved!** You can close this session and resume later via "LOAD IDEA".`);
+            } catch (e) {
+                log(`IDEA SAVE FAILED: ${e.message}`, 'error');
+                alert(`Failed to save idea: ${e.message}`);
+            }
+        }
+
+        async function openIdeaLoader() {
+            const teacherId = googleUser?.email || 'GUEST';
+
+            try {
+                const ideas = await SupabaseBridge.fetchIdeas(teacherId);
+
+                if (!ideas || ideas.length === 0) {
+                    alert("No saved ideas found. Start creating and use SAVE IDEA to preserve your progress.");
+                    return;
+                }
+
+                // Build selection list
+                let msg = "SAVED IDEAS:\\n\\n";
+                ideas.forEach((idea, i) => {
+                    const date = new Date(idea.updated).toLocaleDateString();
+                    msg += `${i + 1}. ${idea.name} (${date})\\n`;
+                });
+                msg += "\\nEnter the number to load, or 0 to cancel:";
+
+                const selection = window.prompt(msg);
+                if (!selection || selection === '0') return;
+
+                const idx = parseInt(selection) - 1;
+                if (idx < 0 || idx >= ideas.length) {
+                    alert("Invalid selection.");
+                    return;
+                }
+
+                await loadIdea(ideas[idx].id, teacherId);
+            } catch (e) {
+                log(`IDEA LOAD FAILED: ${e.message}`, 'error');
+                alert(`Failed to load ideas: ${e.message}`);
+            }
+        }
+
+        async function loadIdea(ideaId, teacherId) {
+            try {
+                const ideaData = await SupabaseBridge.loadIdea(ideaId, teacherId);
+
+                if (!ideaData) {
+                    alert("Idea data not found.");
+                    return;
+                }
+
+                // Restore forge state
+                forgeHistory = ideaData.forgeHistory || [];
+                currentPhaseIndex = ideaData.currentPhaseIndex || 0;
+                accumulatedData = ideaData.accumulatedData || {};
+
+                // Restore curriculum selections (if curriculum is loaded)
+                if (ideaData.curriculum) {
+                    const c = ideaData.curriculum;
+                    if (c.country && document.getElementById('f-country')) {
+                        document.getElementById('f-country').value = c.country;
+                        updateForgeRegions();
+                        setTimeout(() => {
+                            if (c.region) {
+                                document.getElementById('f-region').value = c.region;
+                                updateForgeCourses();
+                                setTimeout(() => {
+                                    if (c.course) {
+                                        document.getElementById('f-course').value = c.course;
+                                        updateForgeOutcomes();
+                                    }
+                                }, 100);
+                            }
+                        }, 100);
+                    }
+                }
+
+                // Restore settings
+                if (ideaData.settings) {
+                    if (ideaData.settings.model) document.getElementById('f-model').value = ideaData.settings.model;
+                    if (ideaData.settings.complexity) document.getElementById('f-complexity').value = ideaData.settings.complexity;
+                }
+
+                // Rebuild chat from history
+                const chat = document.getElementById('forge-chat');
+                chat.innerHTML = `<div style="font-family:monospace; font-size:0.6rem; color:#888;"><strong>SESSION RESTORED</strong><br>Loaded idea: ${ideaData.name}</div>`;
+
+                forgeHistory.forEach(msg => {
+                    addForgeChat(msg.role === 'assistant' ? 'ai' : 'user', msg.content);
+                });
+
+                updateForgeUI();
+                log(`IDEA LOADED: "${ideaData.name}" at Phase ${currentPhaseIndex + 1}`, 'success');
+                addForgeChat('ai', `✓ **Session Restored!** You are at Phase ${currentPhaseIndex + 1}: ${getCurrentPhase().label}. Continue where you left off.`);
+            } catch (e) {
+                log(`IDEA RESTORE FAILED: ${e.message}`, 'error');
+                alert(`Failed to restore idea: ${e.message}`);
+            }
         }
 
         function resetForge() {
