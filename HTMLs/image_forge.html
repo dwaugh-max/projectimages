@@ -715,16 +715,37 @@
                 } catch (e) { log(`TIER 1 ERROR: ${e.message}`, 'ERROR'); }
             }
 
-            // Attempt 3: Vertex AI (if project provided)
+            // Attempt 2: Vertex AI with OAuth (if project provided)
+            if (CONFIG.gl_project && CONFIG.gl_token) {
+                try {
+                    const url = `https://${CONFIG.gl_location}-aiplatform.googleapis.com/v1/projects/${CONFIG.gl_project}/locations/${CONFIG.gl_location}/publishers/google/models/${CONFIG.model_gl}:generateContent`;
+                    log(`OUTBOUND (GOOGLE): ${CONFIG.model_gl} // Vertex AI + OAuth Tier`, 'OUTBOUND');
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${CONFIG.gl_token}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0 && data[0].candidates) return handleGeminiResponse(data[0]);
+                    if (data.candidates) return handleGeminiResponse(data);
+                    if (data.error) log(`VERTEX OAUTH FAILED: ${data.error.message}`, 'ERROR');
+                } catch (e) { log(`VERTEX OAUTH ERROR: ${e.message}`, 'ERROR'); }
+            }
+
+            // Attempt 3: Vertex AI with API Key (if project and key provided)
             if (CONFIG.gl_project && CONFIG.key_gl) {
                 try {
-                    const url = `https://${CONFIG.gl_location}-aiplatform.googleapis.com/v1/projects/${CONFIG.gl_project}/locations/${CONFIG.gl_location}/publishers/google/models/${CONFIG.model_gl}:streamGenerateContent?key=${CONFIG.key_gl}`;
-                    log(`OUTBOUND (GOOGLE): ${CONFIG.model_gl} // Vertex AI Tier`, 'OUTBOUND');
+                    const url = `https://${CONFIG.gl_location}-aiplatform.googleapis.com/v1/projects/${CONFIG.gl_project}/locations/${CONFIG.gl_location}/publishers/google/models/${CONFIG.model_gl}:generateContent?key=${CONFIG.key_gl}`;
+                    log(`OUTBOUND (GOOGLE): ${CONFIG.model_gl} // Vertex AI + API Key Tier`, 'OUTBOUND');
                     const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     const data = await res.json();
                     if (Array.isArray(data) && data.length > 0 && data[0].candidates) return handleGeminiResponse(data[0]);
                     if (data.candidates) return handleGeminiResponse(data);
-                } catch (e) { log(`TIER 3 ERROR: ${e.message}`, 'ERROR'); }
+                    if (data.error) log(`VERTEX KEY FAILED: ${data.error.message}`, 'ERROR');
+                } catch (e) { log(`VERTEX KEY ERROR: ${e.message}`, 'ERROR'); }
             }
 
             throw new Error("ALL GOOGLE TIERS EXHAUSTED. Please use 'LOGIN WITH GOOGLE'.");
